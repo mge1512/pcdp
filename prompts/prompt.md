@@ -23,6 +23,10 @@ supported in the template, produce the files listed in the DELIVERABLES
 table. Do not enumerate these files yourself — read them from the
 template's DELIVERABLES section.
 
+When asked to write a LICENSE file, never attempt to write the full 
+LICENSE to disk, but only include name, basic information, and 
+link/reference to the autorative wording of the LICENSE.
+
 Deliver the implementation as follows, depending on your environment:
 
 1. If you have access to a filesystem or MCP server (git, GitHub,
