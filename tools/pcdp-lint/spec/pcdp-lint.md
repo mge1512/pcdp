@@ -582,14 +582,16 @@ THEN:
 
 EXAMPLE: empty_given_block_permissive
 GIVEN:
-  file is structurally valid, but EXAMPLES contains:
-    EXAMPLE: foo
-    GIVEN:
-    WHEN:
-      result = foo()
-    THEN:
-      result = Ok
-  GIVEN block contains no lines
+  file is structurally valid, but EXAMPLES contains a block with an empty GIVEN section:
+  ```markdown
+  EXAMPLE: foo
+  GIVEN:
+
+  WHEN:
+    result = foo()
+  THEN:
+    result = Ok
+  ```
   invocation: pcdp-lint spec.md
 WHEN:
   result = lint(file, strict=false)
@@ -638,11 +640,12 @@ THEN:
 
 EXAMPLE: behavior_internal_recognised
 GIVEN:
-  file contains all required sections
-  file contains:
-    ## BEHAVIOR: lint
-    ## BEHAVIOR/INTERNAL: precedence-resolution
-  no plain "## BEHAVIOR" section without a name suffix
+  file contains all required sections, including these BEHAVIOR variants:
+  ```markdown
+  ## BEHAVIOR: lint
+  ## BEHAVIOR/INTERNAL: precedence-resolution
+  ```
+  no plain "## BEHAVIOR" section without a name suffix is present.
   invocation: pcdp-lint spec.md
 WHEN:
   result = lint(file, strict=false)
