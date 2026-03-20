@@ -1,24 +1,14 @@
 #!/usr/bin/make -f
 
 export CGO_ENABLED=0
-export GOOS=linux
-export GOARCH=amd64
+export DH_GOLANG_GO_GENERATE=1
 
 %:
-	dh $@
+	dh $@ --buildsystem=golang --with=golang
 
 override_dh_auto_build:
-	go build -a -ldflags '-extldflags "-static" -X main.TemplateDir=/usr/share/pcdp/templates/' -o pcdp-lint .
+	make build
 
 override_dh_auto_install:
-	dh_auto_install
 	mkdir -p debian/pcdp-lint/usr/bin
-	install -m 755 pcdp-lint debian/pcdp-lint/usr/bin/pcdp-lint
-	mkdir -p debian/pcdp-lint/usr/share/pcdp/templates
-
-override_dh_auto_test:
-	# Skip tests for now
-
-override_dh_auto_clean:
-	dh_auto_clean
-	rm -f pcdp-lint
+	install -m 755 build/pcdp-lint debian/pcdp-lint/usr/bin/pcdp-lint

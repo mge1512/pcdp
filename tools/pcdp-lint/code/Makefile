@@ -1,24 +1,39 @@
-.PHONY: build clean test install
+.PHONY: build test install clean
 
-BINARY_NAME=pcdp-lint
-TEMPLATE_DIR=/usr/share/pcdp/templates/
+# Build configuration
+BINARY_NAME = pcdp-lint
+BUILD_DIR = build
+CGO_ENABLED = 0
+LDFLAGS = -s -w
 
+# Default target
+all: build
+
+# Build the binary
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-extldflags "-static" -X main.TemplateDir=$(TEMPLATE_DIR)' -o $(BINARY_NAME) .
+	@mkdir -p $(BUILD_DIR)
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) .
 
-clean:
-	rm -f $(BINARY_NAME)
-
+# Run tests
 test:
-	go test ./...
+	go test -v ./...
 
+# Install the binary to system
 install: build
-	mkdir -p $(DESTDIR)/usr/bin
-	install -m 755 $(BINARY_NAME) $(DESTDIR)/usr/bin/$(BINARY_NAME)
-	mkdir -p $(DESTDIR)/usr/share/pcdp/templates
+	install -m 755 $(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
 
-rpm: build
-	rpmbuild -ba pcdp-lint.spec
+# Clean build artifacts
+clean:
+	rm -rf $(BUILD_DIR)
+	go clean
 
-deb: 
-	debuild -us -uc
+# Development targets
+fmt:
+	go fmt ./...
+
+vet:
+	go vet ./...
+
+# Static analysis
+lint: fmt vet
+	@echo "Static analysis complete"

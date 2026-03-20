@@ -1,3 +1,5 @@
 module pcdp-lint
 
-go 1.19
+go 1.21
+
+// No external dependencies required for this implementation

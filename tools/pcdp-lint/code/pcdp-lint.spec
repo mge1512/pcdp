@@ -1,41 +1,35 @@
 Name:           pcdp-lint
-Version:        0.3.2
+Version:        0.3.7
 Release:        1%{?dist}
 Summary:        Post-Coding Development Paradigm specification linter
-
-License:        Apache-2.0
-URL:            https://github.com/mge1512/pcdp
+License:        GPL-2.0-only
+URL:            https://github.com/pcdp/pcdp-lint
 Source0:        %{name}-%{version}.tar.gz
 
-BuildRequires:  golang >= 1.19
-Requires:       /usr/bin/sh
+BuildRequires:  golang >= 1.21
+BuildRequires:  make
 
 %description
-pcdp-lint is a command-line tool for validating specification files written
-in the Post-Coding Development Paradigm format. It checks structural rules,
-validates metadata fields, and ensures compliance with deployment templates.
+pcdp-lint is a command-line tool for validating Post-Coding Development
+Paradigm specification files. It validates structural requirements,
+META field formats, deployment template compatibility, and example
+block completeness.
 
 %prep
 %setup -q
 
 %build
-export CGO_ENABLED=0
-export GOOS=linux
-export GOARCH=amd64
-go build -a -ldflags '-extldflags "-static" -X main.TemplateDir=/usr/share/pcdp/templates/' -o %{name} .
+CGO_ENABLED=0 make build
 
 %install
 mkdir -p %{buildroot}%{_bindir}
-install -m 755 %{name} %{buildroot}%{_bindir}/%{name}
-
-mkdir -p %{buildroot}%{_datadir}/post-coding/templates
-# Template files would be installed here in a complete package
+install -m 755 build/pcdp-lint %{buildroot}%{_bindir}/pcdp-lint
 
 %files
-%{_bindir}/%{name}
-%dir %{_datadir}/pcdp
-%dir %{_datadir}/pcdp/templates
+%license LICENSE
+%doc README.md
+%{_bindir}/pcdp-lint
 
 %changelog
-* Wed Mar 18 2026 Matthias G. Eckermann <pcdp@mailbox.org>
-- Initial package for pcdp-lint 0.3.2
+* Thu Jan 01 2024 Matthias G. Eckermann <pcdp@mailbox.org> - 0.3.7-1
+- Initial package
