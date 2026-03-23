@@ -16,9 +16,9 @@ This is not "AI-assisted coding" where developers write code with AI suggestions
 flowchart TB
     subgraph human[" HUMAN INPUT"]
         spec["Constrained Markdown Specification
-        • Required sections (TYPES, BEHAVIOR, INVARIANTS, EXAMPLES)
+        • Required sections 
         • Formal notation for pre/postconditions
-        • Executable GIVEN/WHEN/THEN examples"]
+        • Executable examples"]
     end
 
     subgraph validation[" VALIDATION"]
