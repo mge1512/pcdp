@@ -14,11 +14,11 @@ This is not "AI-assisted coding" where developers write code with AI suggestions
 
 ```mermaid
 flowchart TB
-    subgraph human[" HUMAN INPUT"]
-        spec["Constrained Markdown Specification
+    subgraph human["<div style='text-align:left'>"HUMAN INPUT"]</div>
+        spec["<div style='text-align:left'>Constrained Markdown Specification
         • Required sections 
         • Formal notation for pre/postconditions
-        • Executable examples"]
+        • Executable examples</div>"]
     end
 
     subgraph validation[" VALIDATION"]
