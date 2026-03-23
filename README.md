@@ -124,12 +124,16 @@ pcdp/
 ├── CONTRIBUTING.md
 │
 ├── whitepaper/
+│   ├── document-template.tex          ← for translating markdown to pdf via pandoc
+│   ├── executive-brief.md             ← business / non-technical summary
 │   └── whitepaper.md                  ← canonical whitepaper
 │
 ├── templates/
 │   ├── cli-tool.template.md           ← CLI tool deployment template
-│   ├── verified-library.template.md   ← safety/security-critical C-ABI libraries
 │   ├── library-c-abi.template.md      ← general-purpose C-ABI libraries
+│   ├── verified-library.template.md   ← safety/security-critical C-ABI libraries
+│   ├── mcp-server.template.md         ← creating MCP servers directly
+│   ├── project-manifest.template.md   ← template for larger projects
 │   └── python-tool.template.md        ← Python tooling (QM only)
 │
 ├── tools/
@@ -143,6 +147,7 @@ pcdp/
 │       └── account-transfer.md        ← worked example from whitepaper
 │
 └── prompts/
+│   ├── README-small-models.md         ← Optimization for smaller LLMs
     └── prompt.md                      ← standard translator prompt (A.13)
 ```
 
@@ -150,29 +155,7 @@ pcdp/
 
 ## Quick Start
 
-### 1. Validate a specification
-
-```bash
-# Install pcdp-lint (openSUSE / SLES)
-zypper install pcdp-lint
-
-# Install pcdp-lint (Debian / Ubuntu)
-apt install pcdp-lint
-
-# Install pcdp-lint (Fedora)
-dnf install pcdp-lint
-
-# Validate a specification file
-pcdp-lint myspec.md
-
-# Strict mode (warnings treated as errors)
-pcdp-lint strict=true myspec.md
-
-# List available deployment templates
-pcdp-lint list-templates
-```
-
-### 2. Write a specification
+### 1. Write a specification
 
 Every specification follows this structure:
 
@@ -214,6 +197,28 @@ WHEN:
   ...
 THEN:
   ...
+```
+
+### 2. Validate a specification (assuming the tool is already available as a package)
+
+```bash
+# Install pcdp-lint (openSUSE / SLES)
+zypper install pcdp-lint
+
+# Install pcdp-lint (Debian / Ubuntu)
+apt install pcdp-lint
+
+# Install pcdp-lint (Fedora)
+dnf install pcdp-lint
+
+# Validate a specification file
+pcdp-lint myspec.md
+
+# Strict mode (warnings treated as errors)
+pcdp-lint strict=true myspec.md
+
+# List available deployment templates
+pcdp-lint list-templates
 ```
 
 ### 3. Translate a specification to code
