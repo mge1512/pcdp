@@ -29,7 +29,7 @@ flowchart TB
     end
 
     subgraph template[" DEPLOYMENT TEMPLATE"]
-        tmpl[pre-defined templates
+        tmpl["pre-defined templates
         Resolves: target language, binary type,
         packaging formats, ..."]
     end
