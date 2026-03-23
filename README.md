@@ -14,7 +14,7 @@ This is not "AI-assisted coding" where developers write code with AI suggestions
 
 ```mermaid
 flowchart TB
-    subgraph human["<div style='text-align:left'>"HUMAN INPUT"]</div>
+    subgraph human["<div style='text-align:left'>HUMAN INPUT"]</div>
         spec["<div style='text-align:left'>Constrained Markdown Specification
         • Required sections 
         • Formal notation for pre/postconditions
