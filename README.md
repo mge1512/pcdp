@@ -1,3 +1,4 @@
+
 # PCDP — Post-Coding Development Paradigm
 
 **Human Intent, Machine Implementation.**
@@ -123,32 +124,32 @@ pcdp/
 ├── LICENSE-tools                      ← GPL-2.0-only (tools/)
 ├── CONTRIBUTING.md
 │
-├── whitepaper/
-│   ├── document-template.tex          ← for translating markdown to pdf via pandoc
+├── doc/
+│   ├── whitepaper.md                  ← canonical whitepaper
 │   ├── executive-brief.md             ← business / non-technical summary
-│   └── whitepaper.md                  ← canonical whitepaper
+│   └── document-template.tex          ← pandoc template for PDF generation
 │
 ├── templates/
 │   ├── cli-tool.template.md           ← CLI tool deployment template
-│   ├── cloud-native.template.md       ← Deployment template for cloud-native assets
+│   ├── cloud-native.template.md       ← cloud-native deployment template
 │   ├── library-c-abi.template.md      ← general-purpose C-ABI libraries
 │   ├── verified-library.template.md   ← safety/security-critical C-ABI libraries
-│   ├── mcp-server.template.md         ← creating MCP servers directly
-│   ├── project-manifest.template.md   ← template for larger projects
+│   ├── mcp-server.template.md         ← MCP server components
+│   ├── project-manifest.template.md   ← multi-component projects
 │   └── python-tool.template.md        ← Python tooling (QM only)
 │
 ├── tools/
 │   └── pcdp-lint/                     ← GPL-2.0-only
 │       ├── spec/
-│       │   └── pcdp-lint.md           ← specification for pcdp-lint
+│       │   ├── pcdp-lint.md           ← specification for pcdp-lint
+│       │   └── prompt.md              ← component-specific translator prompt
 │       └── code/                      ← generated implementation
 │
 ├── examples/
-│   └── account-transfer/
-│       └── account-transfer.md        ← worked example from whitepaper
+│   └── account-transfer.md            ← worked example (canonical spec)
 │
 └── prompts/
-    ├── README-small-models.md         ← Optimization for smaller LLMs
+    ├── README-small-models.md         ← guidance for smaller LLMs
     └── prompt.md                      ← standard translator prompt (A.13)
 ```
 
@@ -166,7 +167,7 @@ Every specification follows this structure:
 ## META
 Deployment:  cli-tool
 Version:     0.1.0
-Spec-Schema: 0.3.7
+Spec-Schema: 0.3.13
 Author:      Your Name <you@example.org>
 License:     Apache-2.0
 Verification: none
@@ -176,8 +177,12 @@ Safety-Level: QM
 ...
 
 ## BEHAVIOR: my-function
+Constraint: required
 INPUTS: ...
 PRECONDITIONS: ...
+STEPS:
+  1. [first action]; on failure → [error action].
+  2. [next action].
 POSTCONDITIONS: ...
 
 ## PRECONDITIONS
@@ -187,7 +192,8 @@ POSTCONDITIONS: ...
 ...
 
 ## INVARIANTS
-...
+- [observable]  ...
+- [implementation]  ...
 
 ## EXAMPLES
 
@@ -198,6 +204,14 @@ WHEN:
   ...
 THEN:
   ...
+
+EXAMPLE: error_case
+GIVEN:
+  ...
+WHEN:
+  ...
+THEN:
+  result = Err(...)  // negative-path example required when STEPS have error exits
 ```
 
 ### 2. Validate a specification (assuming the tool is already available as a package)
@@ -280,7 +294,7 @@ The CC-BY-4.0 license on specifications and templates means anyone may implement
 
 ## Status
 
-Current version: **0.3.9** (draft)
+Current version: **0.3.13** (draft)
 
 This project is in active development. The specification format, deployment templates, and tooling are stabilising toward a v1.0 release. Feedback, issue reports, and contributions are welcome.
 
@@ -289,3 +303,4 @@ This project is in active development. The specification format, deployment temp
 ## Author
 
 Matthias G. Eckermann — [pcdp@mailbox.org](mailto:pcdp@mailbox.org)
+

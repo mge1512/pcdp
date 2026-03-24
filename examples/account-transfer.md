@@ -1,9 +1,10 @@
+
 # Account Transfer
 
 ## META
 Deployment:  backend-service
-Version:     0.3.7
-Spec-Schema: 0.3.7
+Version:     0.3.8
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: lean4
@@ -33,6 +34,7 @@ TransferResult := Ok | Err(ErrorCode)
 ---
 
 ## BEHAVIOR: transfer
+Constraint: required
 
 INPUTS:
 ```
@@ -51,6 +53,17 @@ PRECONDITIONS:
 - from.id ≠ to.id
 - amount > 0
 
+STEPS:
+1. Validate preconditions; on failure → return Err(appropriate ErrorCode) immediately.
+2. Begin atomic SERIALIZABLE database transaction.
+3. Lock from and to accounts in consistent ascending-id order.
+   MECHANISM: always lock lower id first to prevent deadlock.
+4. Debit from.balance by amount.
+5. Credit to.balance by amount.
+6. Create transfer_log entry with timestamp, from.id, to.id, amount, result=Ok.
+7. Commit transaction; on failure → rollback, return Err(TRANSACTION_FAILED).
+8. Return Ok.
+
 POSTCONDITIONS:
 - result = Ok ⟹ from.balance' = from.balance - amount
 - result = Ok ⟹ to.balance' = to.balance + amount
@@ -59,6 +72,11 @@ POSTCONDITIONS:
 
 SIDE-EFFECTS:
 - Creates transfer_log entry with timestamp, from.id, to.id, amount, result
+
+ERRORS:
+- INSUFFICIENT_FUNDS when from.balance < amount
+- SAME_ACCOUNT when from.id = to.id
+- INVALID_AMOUNT when amount ≤ 0
 
 ---
 
@@ -82,11 +100,12 @@ SIDE-EFFECTS:
 
 ## INVARIANTS
 
-- GLOBAL: ∀ a: Account. a.balance >= 0
-- GLOBAL: Σ(all_balances) is constant across all transfer operations
-- GLOBAL: result = Ok ⟹ from.balance' = from.balance - amount
-- GLOBAL: result = Err(_) ⟹ from.balance' = from.balance ∧ to.balance' = to.balance
-- GLOBAL: transfer is idempotent when combined with a unique transfer_id
+- [observable]      ∀ a: Account. a.balance >= 0
+- [observable]      Σ(all_balances) is constant across all transfer operations
+- [observable]      result = Ok ⟹ from.balance' = from.balance - amount
+- [observable]      result = Err(_) ⟹ from.balance' = from.balance ∧ to.balance' = to.balance
+- [observable]      transfer is idempotent when combined with a unique transfer_id
+- [implementation]  account locks always acquired in ascending-id order
 
 ---
 
