@@ -149,6 +149,22 @@ SIDE-EFFECTS:
 
 ---
 
+## BEHAVIOR/INTERNAL: code-fence-tracking
+Constraint: required
+
+Tracks whether the parser is currently inside a code-fenced block
+and suppresses all structural detection while inside one.
+
+STEPS:
+1. Initialise inFence = false.
+2. For each line L in the file:
+   a. If L begins with ``` or ~~~:
+      toggle inFence (false→true or true→false); skip to next line.
+   b. If inFence = true: skip L entirely — no pattern matching.
+   c. If inFence = false: pass L to all structural detection rules.
+
+---
+
 ## BEHAVIOR: list-templates
 Constraint: required
 
@@ -1010,7 +1026,35 @@ THEN:
   exit_code = 0
   // Absent Constraint: defaults to required; no diagnostic emitted
 
+EXAMPLE: fenced_block_markers_ignored
+GIVEN:
+  file contains all required sections and is structurally valid
+  the EXAMPLES section contains a block with fenced content:
+  ```markdown
+  EXAMPLE: outer
+  GIVEN:
+    some condition
+  WHEN:
+    ```
+    EXAMPLE: fake
+    WHEN: something
+    THEN: something
+    ```
+  THEN:
+    result = Ok
+  ```
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr = (empty)
+  stdout = "✓ spec.md: valid"
+  exit_code = 0
+  // markers inside fenced blocks are not parsed as real structure
+
 ---
+
+## DEPLOYMENT
 
 Runtime: command-line tool, single static binary, no runtime dependencies
 
@@ -1025,6 +1069,15 @@ Parsing approach:
   - Markdown AST parser: more robust for edge cases, higher complexity
   Translators should document their parsing approach in the translation
   report.
+
+  Code-fence exclusion: all content between opening and closing
+  code-fence markers (lines beginning with ``` or ~~~) is excluded
+  from all structural parsing. No PCDP markers, section headers,
+  EXAMPLE:, GIVEN:, WHEN:, THEN:, BEHAVIOR patterns, STEPS:,
+  Constraint:, or INVARIANTS entries are recognised inside fenced
+  blocks. Translators must implement this as a boolean fence-tracking
+  guard in the main parsing loop, toggled at fence boundary lines,
+  applied before every structural pattern check.
 
 Template search path (compile-time variable TEMPLATE_DIR):
   Default (Linux): /usr/share/pcdp/templates/
