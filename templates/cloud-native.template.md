@@ -1,9 +1,10 @@
+
 # cloud-native.template
 
 ## META
 Deployment:  template
-Version:     0.3.11
-Spec-Schema: 0.3.11
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -71,6 +72,20 @@ PRECONDITIONS:
 - template is the cloud-native template (Template-For = "cloud-native")
 - spec_meta contains at least Deployment, Verification, Safety-Level
 
+STEPS:
+1. Verify Template-For = "cloud-native"; on mismatch → error, halt.
+2. Merge preset layers in order: vendor → system → user → project (last writer wins).
+3. For each constraint=required key K: if not resolved → errors += violation.
+4. For each constraint=default key K: apply preset value if present, else template default.
+5. For each constraint=forbidden key K: if present in spec_meta or any preset → errors += violation.
+6. For each constraint=supported key K: apply if declared in spec_meta or preset; skip silently if absent.
+7. Apply LANGUAGE precedence: project preset > user preset > system preset > template default.
+8. Validate cross-key constraints (e.g. BASE-IMAGE=Scratch requires LANGUAGE ∈ {Go, Rust};
+   OUTPUT-FORMAT=OPERATOR requires CRDs declared in spec).
+   On violation → errors += constraint description.
+9. If errors non-empty → return errors (reject, do not return resolved).
+   Else → return resolved.
+
 POSTCONDITIONS:
 - resolved contains an effective value for every required key
 - for each key K with constraint=required: resolved[K] is set, else errors += violation
@@ -88,6 +103,17 @@ POSTCONDITIONS:
 ## BEHAVIOR/INTERNAL: precedence-resolution
 
 Defines how conflicting values across layers are resolved for any key.
+
+STEPS:
+1. Start with template defaults as the base map.
+2. Merge /usr/share/pcdp/presets/ values (vendor defaults); later entries override earlier.
+3. Merge /etc/pcdp/presets/ values (system admin); overrides vendor defaults.
+4. Merge ~/.config/pcdp/presets/ values (user); overrides system.
+5. Merge <project-dir>/.pcdp/ values (project-local); overrides user.
+6. For each key in spec META: if constraint=supported → apply; if constraint=required or default →
+   emit Warning: "Spec overrides template default for <K>. Ensure this is intentional."
+7. If spec META declares a constraint=forbidden key → emit Error: "Key <K> is forbidden in cloud-native specs."
+8. Return merged result.
 
 Resolution order (last writer wins):
   1. template default
@@ -185,21 +211,26 @@ emit Error: "Key <K> is forbidden in cloud-native specs."
 
 ## INVARIANTS
 
-- GLOBAL: constraint=forbidden rows cannot be overridden at any preset layer
-- GLOBAL: constraint=required rows must resolve to a value; missing value is an error
-- GLOBAL: LANGUAGE resolution always produces exactly one value
-- GLOBAL: OUTPUT-FORMAT required rows must appear in every build configuration
-- GLOBAL: a spec declaring Deployment: cloud-native inherits all required constraints
+- [observable]      constraint=forbidden rows cannot be overridden at any preset layer
+- [observable]      constraint=required rows must resolve to a value; missing value is an error
+- [observable]      LANGUAGE resolution always produces exactly one value
+- [observable]      OUTPUT-FORMAT required rows must appear in every build configuration
+- [observable]      a spec declaring Deployment: cloud-native inherits all required constraints
   whether or not the spec author is aware of them
-- GLOBAL: template version is recorded in every audit bundle that references it
-- GLOBAL: BASE-IMAGE=Scratch is only valid when LANGUAGE ∈ {Go, Rust}
-- GLOBAL: containers must always run as non-root user
-- GLOBAL: health checks are mandatory for all cloud-native applications
-- GLOBAL: deploy/ directory must contain all required Kubernetes manifests
+- [observable]      template version is recorded in every audit bundle that references it
+- [observable]      BASE-IMAGE=Scratch is only valid when LANGUAGE ∈ {Go, Rust}
+- [observable]      containers must always run as non-root user
+- [observable]      health checks are mandatory for all cloud-native applications
+- [observable]      deploy/ directory must contain all required Kubernetes manifests
 
 ---
 
 ## EXAMPLES
+
+*Note: specs using Deployment: cloud-native frequently target Kubernetes reconcilers.
+EXAMPLES in such specs may use multiple WHEN/THEN pairs to express multi-pass
+reconciliation behaviour. Each WHEN/THEN pair represents one reconciler invocation.
+Single-pass EXAMPLES remain valid for non-reconciler operations.*
 
 EXAMPLE: minimal_cloud_native_spec
 GIVEN:
@@ -398,4 +429,4 @@ Versioning:
   Breaking changes to a template increment the minor version.
   Additions of supported rows are non-breaking.
   Changes to required or forbidden rows are breaking.
-  Current version: 0.3.11
+  Current version: 0.3.12

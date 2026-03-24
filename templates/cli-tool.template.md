@@ -1,9 +1,10 @@
+
 # cli-tool.template
 
 ## META
 Deployment:  template
-Version:     0.3.7
-Spec-Schema: 0.3.7
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -62,6 +63,19 @@ PRECONDITIONS:
 - template is the cli-tool template (Template-For = "cli-tool")
 - spec_meta contains at least Deployment, Verification, Safety-Level
 
+STEPS:
+1. Verify Template-For = "cli-tool"; on mismatch → error, halt.
+2. Merge preset layers in order: vendor → system → user → project (last writer wins).
+3. For each constraint=required key K: if not resolved → errors += violation.
+4. For each constraint=default key K: apply preset value if present, else template default.
+5. For each constraint=forbidden key K: if present in spec_meta or any preset → errors += violation.
+6. For each constraint=supported key K: apply if declared in spec_meta or preset; skip silently if absent.
+7. Apply LANGUAGE precedence: project preset > user preset > system preset > template default.
+8. Validate cross-key constraints (e.g. BINARY-TYPE vs LANGUAGE, PLATFORM vs OUTPUT-FORMAT).
+   On violation → errors += constraint description.
+9. If errors non-empty → return errors (reject, do not return resolved).
+   Else → return resolved.
+
 POSTCONDITIONS:
 - resolved contains an effective value for every required key
 - for each key K with constraint=required: resolved[K] is set, else errors += violation
@@ -79,6 +93,17 @@ POSTCONDITIONS:
 ## BEHAVIOR/INTERNAL: precedence-resolution
 
 Defines how conflicting values across layers are resolved for any key.
+
+STEPS:
+1. Start with template defaults as the base map.
+2. Merge /usr/share/pcdp/presets/ values (vendor defaults); later entries override earlier.
+3. Merge /etc/pcdp/presets/ values (system admin); overrides vendor defaults.
+4. Merge ~/.config/pcdp/presets/ values (user); overrides system.
+5. Merge <project-dir>/.pcdp/ values (project-local); overrides user.
+6. For each key in spec META: if constraint=supported → apply; if constraint=required or default →
+   emit Warning: "Spec overrides template default for <K>. Ensure this is intentional."
+7. If spec META declares a constraint=forbidden key → emit Error: "Key <K> is forbidden in cli-tool specs."
+8. Return merged result.
 
 Resolution order (last writer wins):
   1. template default
@@ -164,15 +189,15 @@ emit Error: "Key <K> is forbidden in cli-tool specs."
 
 ## INVARIANTS
 
-- GLOBAL: constraint=forbidden rows cannot be overridden at any preset layer
-- GLOBAL: constraint=required rows must resolve to a value; missing value is an error
-- GLOBAL: LANGUAGE resolution always produces exactly one value
-- GLOBAL: OUTPUT-FORMAT required rows must appear in every build configuration
-- GLOBAL: a spec declaring Deployment: cli-tool inherits all required constraints
+- [observable]  constraint=forbidden rows cannot be overridden at any preset layer
+- [observable]  constraint=required rows must resolve to a value; missing value is an error
+- [observable]  LANGUAGE resolution always produces exactly one value
+- [observable]  OUTPUT-FORMAT required rows must appear in every build configuration
+- [observable]  a spec declaring Deployment: cli-tool inherits all required constraints
   whether or not the spec author is aware of them
-- GLOBAL: template version is recorded in every audit bundle that references it
-- GLOBAL: BINARY-TYPE=dynamic is only valid when LANGUAGE ∈ {C, C++, C#}
-- GLOBAL: BINARY-TYPE=static is the only valid value when LANGUAGE ∈ {Go, Rust}
+- [observable]  template version is recorded in every audit bundle that references it
+- [observable]  BINARY-TYPE=dynamic is only valid when LANGUAGE ∈ {C, C++, C#}
+- [observable]  BINARY-TYPE=static is the only valid value when LANGUAGE ∈ {Go, Rust}
 
 ---
 
@@ -338,4 +363,5 @@ Versioning:
   Breaking changes to a template increment the minor version.
   Additions of supported rows are non-breaking.
   Changes to required or forbidden rows are breaking.
-  Current version: 0.3.7
+  Current version: 0.3.12
+

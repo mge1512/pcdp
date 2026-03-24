@@ -1,9 +1,10 @@
+
 # verified-library.template
 
 ## META
 Deployment:  template
-Version:     0.3.7
-Spec-Schema: 0.3.7
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -106,11 +107,11 @@ Required deliverables will include:
 
 ## INVARIANTS
 
-- GLOBAL: Safety-Level QM is rejected at spec-lint time
-- GLOBAL: Verification: none is rejected at spec-lint time
-- GLOBAL: verified-library inherits all library-c-abi constraints
+- [observable]      Safety-Level QM is rejected at spec-lint time
+- [observable]      Verification: none is rejected at spec-lint time
+- [observable]      verified-library inherits all library-c-abi constraints
   and adds security/safety constraints on top
-- GLOBAL: template version is recorded in every audit bundle
+- [observable]      template version is recorded in every audit bundle
 
 ---
 
@@ -127,3 +128,4 @@ Runtime: this file is a template specification, not executable code.
 Location: /usr/share/pcdp/templates/verified-library.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Supersedes: crypto-library template (retired in v0.3.6).
+

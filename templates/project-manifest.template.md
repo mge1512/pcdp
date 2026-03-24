@@ -1,9 +1,10 @@
+
 # project-manifest.template
 
 ## META
 Deployment:  template
-Version:     0.3.8
-Spec-Schema: 0.3.8
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -87,7 +88,7 @@ are documentation and build orchestration artifacts.
 
 ## BEHAVIOR: validate-project
 
-*(Full BEHAVIOR specification pending — v0.3.9 target)*
+*(Full BEHAVIOR specification pending — v0.3.13 target)*
 
 Validates the project manifest and all referenced component specs:
 - All component specs pass pcdp-lint individually
@@ -101,6 +102,17 @@ INPUTS:
 manifest: path    // pcdp-project.md
 strict:   bool
 ```
+
+STEPS:
+*(Full STEPS specification pending — v0.3.13 target)*
+1. Load and parse manifest file; on error → exit 2.
+2. For each referenced component spec: run pcdp-lint; collect errors.
+3. Resolve all Imports; report unresolvable references.
+4. Check dependency graph for cycles; report any found.
+5. Compute topological build order; verify consistency.
+6. Check system invariants reference only exported types.
+7. If strict=true: treat warnings as errors.
+8. If any errors → exit 1 with diagnostics. Else → exit 0.
 
 POSTCONDITIONS:
 - exit_code = 0 iff all checks pass
@@ -132,14 +144,14 @@ POSTCONDITIONS:
 
 ## INVARIANTS
 
-- GLOBAL: no circular dependencies permitted
-- GLOBAL: build order must be a valid topological sort of the dependency graph
-- GLOBAL: every component referenced in a Dependency must appear in Components
-- GLOBAL: interface versions must be explicitly declared
-- GLOBAL: a breaking interface change (major version bump) requires all importers
+- [observable]      no circular dependencies permitted
+- [observable]      build order must be a valid topological sort of the dependency graph
+- [observable]      every component referenced in a Dependency must appear in Components
+- [observable]      interface versions must be explicitly declared
+- [observable]      a breaking interface change (major version bump) requires all importers
   to explicitly update their minimum version requirement
-- GLOBAL: project Safety-Level = max(Safety-Level of all components)
-- GLOBAL: template version is recorded in the project audit bundle
+- [observable]      project Safety-Level = max(Safety-Level of all components)
+- [observable]      template version is recorded in the project audit bundle
 
 ---
 
@@ -233,3 +245,4 @@ account-service:
 transfer-service: account-service
 	pcdp-translate components/transfer-service.md
 ```
+

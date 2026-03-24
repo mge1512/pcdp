@@ -1,9 +1,10 @@
+
 # mcp-server.template
 
 ## META
 Deployment:  template
-Version:     0.3.8
-Spec-Schema: 0.3.8
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -212,6 +213,17 @@ PRECONDITIONS:
 - stdin is connected to an MCP-compatible host
 - Server capabilities are declared in spec BEHAVIOR sections
 
+STEPS:
+1. Register all tools declared in spec BEHAVIOR sections.
+2. Enter read loop: read one JSON-RPC 2.0 message from stdin.
+3. On parse error → write JSON-RPC error response to stdout; continue loop.
+4. Dispatch message to registered handler.
+   MECHANISM: handle each request in its own goroutine so slow handlers
+   do not block stdin reads.
+5. Write JSON-RPC response to stdout (synchronise writes; no interleaving).
+6. On EOF from stdin → drain in-flight goroutines, exit 0.
+7. On SIGTERM/SIGINT → drain in-flight goroutines, exit 0.
+
 POSTCONDITIONS:
 - Server responds to all MCP protocol messages
 - Errors are returned as JSON-RPC error responses, never as panics
@@ -236,6 +248,19 @@ OUTPUTS:
 PRECONDITIONS:
 - listen address is available and bindable
 - Server capabilities declared in spec BEHAVIOR sections
+
+STEPS:
+1. Register all tools declared in spec BEHAVIOR sections.
+2. Bind HTTP listener on listen address; on bind error → exit 1 with diagnostic.
+3. Register POST /mcp handler (JSON-RPC 2.0 request/response).
+4. Register GET /mcp handler (Server-Sent Events for streaming responses).
+5. Accept connections.
+   On POST /mcp: parse JSON-RPC body; on parse error → HTTP 400 + JSON-RPC error body.
+   Dispatch to handler; return HTTP 200 + JSON-RPC response body (errors included in body per spec).
+   On GET /mcp: upgrade to SSE; stream responses until handler completes or client disconnects.
+6. On SIGTERM/SIGINT → stop accepting new connections, drain in-flight requests,
+   close listener, exit 0.
+   MECHANISM: use context cancellation propagated from signal handler.
 
 POSTCONDITIONS:
 - Server accepts connections on listen address
@@ -269,13 +294,13 @@ POSTCONDITIONS:
 
 ## INVARIANTS
 
-- GLOBAL: both transports always implemented — never one without the other
-- GLOBAL: tool names are lowercase and match ^[a-z][a-z0-9_-]*$
-- GLOBAL: all errors are JSON-RPC 2.0 formatted — no panics reach the client
-- GLOBAL: CGO_ENABLED=0 for Go — static binary, no libc dependency
-- GLOBAL: configuration via key=value only — no environment variables
-- GLOBAL: TRANSLATION_REPORT.md documents the Go framework choice
-- GLOBAL: template version recorded in every audit bundle
+- [observable]      both transports always implemented — never one without the other
+- [observable]      tool names are lowercase and match ^[a-z][a-z0-9_-]*$
+- [observable]      all errors are JSON-RPC 2.0 formatted — no panics reach the client
+- [implementation]  CGO_ENABLED=0 for Go — static binary, no libc dependency
+- [observable]      configuration via key=value only — no environment variables
+- [observable]      TRANSLATION_REPORT.md documents the Go framework choice
+- [observable]      template version recorded in every audit bundle
 
 ---
 
@@ -403,3 +428,4 @@ Go Framework Selection Guide:
                      before selecting for production http use
 
 Location: /usr/share/pcdp/templates/mcp-server.template.md
+

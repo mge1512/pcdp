@@ -1,9 +1,10 @@
+
 # library-c-abi.template
 
 ## META
 Deployment:  template
-Version:     0.3.7
-Spec-Schema: 0.3.7
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -98,10 +99,10 @@ components. Reference: https://cps-org.github.io/cps/
 
 ## INVARIANTS
 
-- GLOBAL: library-c-abi is for general-purpose C-ABI libraries
-- GLOBAL: for safety/security-critical libraries use verified-library
-- GLOBAL: CPS file is always a required deliverable
-- GLOBAL: template version is recorded in every audit bundle
+- [observable]      library-c-abi is for general-purpose C-ABI libraries
+- [observable]      for safety/security-critical libraries use verified-library
+- [observable]      CPS file is always a required deliverable
+- [observable]      template version is recorded in every audit bundle
 
 ---
 
@@ -118,3 +119,4 @@ Runtime: this file is a template specification, not executable code.
 Location: /usr/share/pcdp/templates/library-c-abi.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Note: For safety/security-critical C libraries, use verified-library instead.
+

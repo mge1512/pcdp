@@ -1,9 +1,10 @@
+
 # python-tool.template
 
 ## META
 Deployment:  template
-Version:     0.3.7
-Spec-Schema: 0.3.7
+Version:     0.3.12
+Spec-Schema: 0.3.12
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -118,10 +119,10 @@ Required deliverables will include:
 
 ## INVARIANTS
 
-- GLOBAL: Safety-Level anything other than QM is rejected at pcdp-lint time
-- GLOBAL: Verification anything other than none is rejected at pcdp-lint time
-- GLOBAL: python-tool components may not be used in safety-critical systems
-- GLOBAL: template version is recorded in every audit bundle
+- [observable]      Safety-Level anything other than QM is rejected at pcdp-lint time
+- [observable]      Verification anything other than none is rejected at pcdp-lint time
+- [observable]      python-tool components may not be used in safety-critical systems
+- [observable]      template version is recorded in every audit bundle
 
 ---
 
@@ -139,3 +140,4 @@ Runtime: this file is a template specification, not executable code.
 Location: /usr/share/pcdp/templates/python-tool.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Note: python-tool is QM only. Not suitable for safety-critical components.
+

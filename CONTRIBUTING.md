@@ -1,3 +1,4 @@
+
 # Contributing to PCDP
 
 Thank you for your interest in contributing to the Post-Coding Development Paradigm (PCDP) project!
@@ -75,22 +76,101 @@ Use these section types:
 - `## BEHAVIOR: {n}` — user-facing operation
 - `## BEHAVIOR/INTERNAL: {n}` — internal implementation logic
 
+Every BEHAVIOR block **must** include `PRECONDITIONS:`, `STEPS:`, and `POSTCONDITIONS:`.
+`STEPS:` are numbered, imperative, and include explicit error exits. They describe the
+algorithm — not just the contract. A `MECHANISM:` annotation may follow any step where
+the implementation pattern matters for correctness beyond what postconditions capture.
+
+```markdown
+## BEHAVIOR: {name}
+
+INPUTS:
+  ...
+
+PRECONDITIONS:
+  - [condition]
+
+STEPS:
+  1. [first action]; on failure → [error action].
+  2. [next action].
+     MECHANISM: [how, when the how matters for correctness]
+
+POSTCONDITIONS:
+  - [outcome]
+
+ERRORS:
+  - ERR_X if [condition]
+```
+
 #### Examples Section
 
-Must include at least one complete test case:
+Must include at least one complete test case. EXAMPLES may use multiple WHEN/THEN pairs
+to express multi-pass or multi-step behaviour (e.g. Kubernetes reconcilers). Each
+WHEN/THEN pair represents one invocation. Single-pass EXAMPLES remain valid.
+
 ```markdown
 ## EXAMPLES
 
-### EXAMPLE: {descriptive_name}
+EXAMPLE: {descriptive_name}
+GIVEN:
+  [Initial conditions]
 
-#### GIVEN:
-[Initial conditions]
+WHEN:  [Action — optionally labelled, e.g. "reconcile runs (pass 1)"]
+THEN:
+  [Expected outcome]
 
-#### WHEN:
-[Action performed]
+WHEN:  [Action — next pass or step, if multi-pass]
+THEN:
+  [Expected outcome]
+```
 
-#### THEN:
-[Expected outcome]
+#### Interfaces Section (optional, recommended for complex components)
+
+Declare module boundary contracts and required test doubles. This section prevents
+translator discretion on abstraction layer decisions and makes independent tests
+infrastructure-free.
+
+```markdown
+## INTERFACES
+
+AdapterName {
+  required-methods:
+    MethodName(ctx, InputType) → (OutputType, error)
+  implementations-required:
+    production:  RealAdapter
+    test-double: FakeAdapter {
+      configurable fields: ...
+      state machine: ...
+    }
+}
+```
+
+#### Dependencies Section (optional)
+
+Declare external library requirements. Translators are bound by these rules and
+must not fabricate dependency versions.
+
+```markdown
+## DEPENDENCIES
+
+module/path:
+  minimum-version: vX.Y.Z
+  rationale: [why this version]
+  do-not-fabricate: true     # translator must not invent commit hashes
+  hints-file: template.language.library.hints.md
+```
+
+#### Invariants Section
+
+Tag each invariant with `[observable]` (verifiable by external observation or the
+independent test suite) or `[implementation]` (verifiable by code review or static
+analysis only). Untagged invariants are a `pcdp-lint` warning.
+
+```markdown
+## INVARIANTS
+
+- [observable]      [externally verifiable property]
+- [implementation]  [code-review-only property]
 ```
 
 ### 2. Template Development
@@ -102,12 +182,13 @@ Deployment templates define how specifications are translated to code.
 - Include a DELIVERABLES section listing all files to generate
 - Specify constraints and requirements clearly
 
-#### Available Templates (v0.3.8)
+#### Available Templates (v0.3.12)
 
 | Template | Status | Default Lang | Notes |
 |---|---|---|---|
 | `cli-tool` | Complete | Go | Production-ready |
 | `mcp-server` | Complete | Go | Production-ready |
+| `cloud-native` | Complete | Go | Production-ready |
 | `verified-library` | Stub | C | Safety/security-critical C-ABI |
 | `library-c-abi` | Stub | C | General-purpose C-ABI |
 | `python-tool` | Stub | Python | QM only, no formal verification |
@@ -119,13 +200,15 @@ Deployment templates define how specifications are translated to code.
 
 The `pcdp-lint` tool validates specifications against these rules:
 
-- **RULE-01**: Required sections present
+- **RULE-01**: Required sections present (META, TYPES, BEHAVIOR, PRECONDITIONS, POSTCONDITIONS, INVARIANTS, EXAMPLES)
 - **RULE-02**: META fields validation
 - **RULE-03**: Deployment template resolution
 - **RULE-04**: Deprecated META fields detection
 - **RULE-05**: Verification field validation
-- **RULE-06**: EXAMPLES structure validation
+- **RULE-06**: EXAMPLES structure validation (GIVEN/WHEN/THEN; multi-pass permitted)
 - **RULE-07**: EXAMPLES content validation
+- **RULE-08**: BEHAVIOR blocks must contain STEPS (v0.3.12+)
+- **RULE-09**: INVARIANTS entries must carry `[observable]` or `[implementation]` tag (v0.3.12+, warning)
 
 #### CLI Conventions
 
@@ -181,21 +264,22 @@ Reference any relevant issues.
 - For Go code: ensure `go build ./...` succeeds
 - Test templates with example specifications
 
-## Development Priorities (v0.3.9)
+## Development Priorities (v0.3.13)
 
-### Must Fix
-1. Fix pcdp-lint self-validation errors
-2. Add compilation gate (`go build ./...` must succeed)
-3. Implement atomic delivery sentinel
+### Schema Changes (deferred from v0.3.12)
+1. TYPE-BINDINGS table in deployment templates (Finding 1 from kvm-operator exercise)
+2. Component-based DELIVERABLES in specs; filename mapping in templates (Finding 7)
+3. Verification-method column in TRANSLATION_REPORT confidence table (Finding 8)
+4. Formal one-test-per-example rule for independent tests (Finding 10)
 
 ### Template Completion
-4. Complete `verified-library.template.md`
-5. Complete `library-c-abi.template.md`
-6. Complete `python-tool.template.md`
-7. Complete `project-manifest.template.md`
+5. Complete `verified-library.template.md`
+6. Complete `library-c-abi.template.md`
+7. Complete `python-tool.template.md`
+8. Complete `project-manifest.template.md` (full BEHAVIOR STEPS)
 
-### New Specifications
-8. Add SCA CI step for REUSE compliance
+### Tooling
+9. Add RULE-08 and RULE-09 enforcement to `pcdp-lint`
 
 ## Communication
 
@@ -215,3 +299,4 @@ If you have questions about contributing, please:
 3. Contact us at pcdp@mailbox.org
 
 Thank you for contributing to PCDP!
+

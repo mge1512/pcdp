@@ -1,3 +1,4 @@
+
 # PCDP: Lessons Learned from the remote-kvm-operator Exercise
 
 **Source material:**
@@ -484,22 +485,30 @@ These have different verification strategies, different enforcement points, and
 different relevance for safety assessments. Mixing them makes the section harder
 to use as an audit artefact.
 
-**OPEN question — worth splitting or sufficient to annotate?**
+**RESOLVED — annotate within a single INVARIANTS section (Option B):**
 
-Two options:
+Add a `[observable]` or `[implementation]` tag to each invariant entry.
+This preserves the current single-section structure and keeps spec-author
+friction low. Audit consumers and `pcdp-lint` can filter by tag.
 
-**Option A — Split into two sections:**
-`OBSERVABLE-INVARIANTS` (verifiable by external observation or by the
-independent test suite) and `IMPLEMENTATION-INVARIANTS` (verifiable by
-code review or static analysis only).
+Example:
 
-**Option B — Annotate within a single INVARIANTS section:**
-Add a `[observable]` or `[implementation]` tag to each invariant.
-Lower friction for spec authors; preserves the current structure.
+```
+## INVARIANTS
 
-Both options are valid. Option B is lower-cost. Option A produces a cleaner
-audit artefact for QM/EAL assessments. This is left OPEN for the PCDP design
-to decide.
+- [observable]      No QEMU process remains after domain delete
+- [implementation]  SSH key bytes never written to the filesystem
+- [observable]      status.phase reflects the last-observed domain state
+- [implementation]  All libvirt calls are made through the Session interface
+```
+
+`pcdp-lint` must validate that every invariant carries exactly one of
+`[observable]` or `[implementation]`. Untagged invariants are a lint error.
+
+**Proposed PCDP schema change:**
+Retain the single `## INVARIANTS` section. Require each invariant to carry
+an inline `[observable]` or `[implementation]` tag. Add tag validation to
+`pcdp-lint`.
 
 ---
 
@@ -551,16 +560,16 @@ Add these four rules to the template's DELIVERABLES section for
 
 | # | Finding | Proposed change | Location | Status |
 |---|---------|-----------------|----------|--------|
-| 1 | Duration/Condition type divergence | `TYPE-BINDINGS` table in template | Deployment template | RESOLVED |
+| 1 | Duration/Condition type divergence | `TYPE-BINDINGS` table in template | Deployment template | DEFERRED v0.3.13 |
 | 2 | BEHAVIOR specifies contract not algorithm | `STEPS:` required in every BEHAVIOR block | PCDP spec schema | RESOLVED |
 | 3 | Single-pass EXAMPLES miss intermediate states | Multi-pass WHEN/THEN with `MECHANISM:` annotation | PCDP spec schema | RESOLVED |
 | 4 | Interface types have no spec home | `INTERFACES:` section in spec schema | PCDP spec schema | RESOLVED |
 | 5 | External library API shapes don't belong in spec or template | `hints/` artefact in preset hierarchy | PCDP framework | RESOLVED |
 | 6 | Dependency provenance unspecified | `DEPENDENCIES:` section in spec | PCDP spec schema | RESOLVED |
-| 7 | File tree bakes in the language | Component-based DELIVERABLES in spec; filename mapping in template | Both | RESOLVED |
-| 8 | TRANSLATION_REPORT confidence is unverifiable | `Verification-method` column in confidence table | TRANSLATION_REPORT template | RESOLVED |
-| 9 | INVARIANTS mix observable and implementation | Split or annotate by verifiability | PCDP spec schema | OPEN |
-| 10 | EXAMPLES–INDEPENDENT_TESTS link is informal | Formal one-test-per-example rule; infrastructure-free requirement | Template DELIVERABLES | RESOLVED |
+| 7 | File tree bakes in the language | Component-based DELIVERABLES in spec; filename mapping in template | Both | DEFERRED v0.3.13 |
+| 8 | TRANSLATION_REPORT confidence is unverifiable | `Verification-method` column in confidence table | TRANSLATION_REPORT template | DEFERRED v0.3.13 |
+| 9 | INVARIANTS mix observable and implementation | Annotate with `[observable]`/`[implementation]` tags | PCDP spec schema | RESOLVED |
+| 10 | EXAMPLES–INDEPENDENT_TESTS link is informal | Formal one-test-per-example rule; infrastructure-free requirement | Template DELIVERABLES | DEFERRED v0.3.13 |
 
 ---
 
@@ -582,3 +591,4 @@ This is the cleanest resolution to the library API gotcha problem. It separates
 library-specific knowledge from both specs and templates, puts it in the right
 place in the preset hierarchy, and gives it a maintenance path independent of
 the spec or template lifecycle.
+
