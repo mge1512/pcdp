@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.12
-Spec-Schema: 0.3.12
+Version:     0.3.13
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -198,6 +198,7 @@ ENTRYPOINT ["/usr/bin/mcp-server-{n}", "http"]
 ---
 
 ## BEHAVIOR: stdio-transport
+Constraint: required
 
 INPUTS:
 ```
@@ -233,6 +234,7 @@ POSTCONDITIONS:
 ---
 
 ## BEHAVIOR: http-transport
+Constraint: required
 
 INPUTS:
 ```

@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.12
-Spec-Schema: 0.3.12
+Version:     0.3.13
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -87,6 +87,7 @@ are documentation and build orchestration artifacts.
 ---
 
 ## BEHAVIOR: validate-project
+Constraint: required
 
 *(Full BEHAVIOR specification pending — v0.3.13 target)*
 

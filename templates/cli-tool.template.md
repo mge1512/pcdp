@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.12
-Spec-Schema: 0.3.12
+Version:     0.3.13
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -40,6 +40,7 @@ Language := Go | Rust | C | CPP | CSharp
 ---
 
 ## BEHAVIOR: resolve
+Constraint: required
 
 Given a spec declaring `Deployment: cli-tool`, a translator reads this
 template to determine defaults, constraints, and valid overrides before
@@ -91,6 +92,7 @@ POSTCONDITIONS:
 ---
 
 ## BEHAVIOR/INTERNAL: precedence-resolution
+Constraint: required
 
 Defines how conflicting values across layers are resolved for any key.
 
@@ -363,5 +365,5 @@ Versioning:
   Breaking changes to a template increment the minor version.
   Additions of supported rows are non-breaking.
   Changes to required or forbidden rows are breaking.
-  Current version: 0.3.12
+  Current version: 0.3.13
 

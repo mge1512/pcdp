@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.12
-Spec-Schema: 0.3.12
+Version:     0.3.13
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -49,6 +49,7 @@ BaseImage := SLE-BCI | Distroless | Scratch
 ---
 
 ## BEHAVIOR: resolve
+Constraint: required
 
 Given a spec declaring `Deployment: cloud-native`, a translator reads this
 template to determine defaults, constraints, and valid overrides before
@@ -101,6 +102,7 @@ POSTCONDITIONS:
 ---
 
 ## BEHAVIOR/INTERNAL: precedence-resolution
+Constraint: required
 
 Defines how conflicting values across layers are resolved for any key.
 
@@ -181,6 +183,23 @@ emit Error: "Key <K> is forbidden in cloud-native specs."
 | INSTALL-METHOD | helm | supported | Installation via Helm package manager. |
 | INSTALL-METHOD | kubectl | required | Direct kubectl apply installation. |
 | INSTALL-METHOD | curl | forbidden | curl-based installation scripts are not permitted. Supply chain security requirement. |
+
+---
+
+## TYPE-BINDINGS
+
+Maps logical spec types to ecosystem-canonical Go types when LANGUAGE=Go.
+The translator applies this table mechanically after resolving LANGUAGE.
+Spec authors must never reference these language-specific type names directly.
+
+| Spec Type   | LANGUAGE=Go                                    | Notes                                     |
+|-------------|------------------------------------------------|-------------------------------------------|
+| Duration    | metav1.Duration (k8s.io/apimachinery/meta/v1)  | Serialises as "60s", "5m", "1h" etc.     |
+| Timestamp   | metav1.Time                                    | Serialises as RFC3339                     |
+| Condition   | metav1.Condition                               | Use standard k8s condition type           |
+| List\<T\>   | []T                                            |                                           |
+| ObjectRef   | corev1.ObjectReference                         | Cross-namespace references                |
+| LabelSet    | map[string]string                              | Standard Kubernetes label map             |
 
 ---
 
@@ -429,4 +448,4 @@ Versioning:
   Breaking changes to a template increment the minor version.
   Additions of supported rows are non-breaking.
   Changes to required or forbidden rows are breaking.
-  Current version: 0.3.12
+  Current version: 0.3.13

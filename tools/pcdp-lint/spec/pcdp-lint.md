@@ -1,9 +1,10 @@
+
 # pcdp-lint
 
 ## META
 Deployment:  cli-tool
-Version:     0.3.9
-Spec-Schema: 0.3.9
+Version:     0.3.13
+Spec-Schema: 0.3.13
 Author:      Matthias G. Eckermann <pcdp@mailbox.org>
 License:     GPL-2.0-only
 Verification: none
@@ -59,6 +60,11 @@ DeploymentTemplate := one_of(
 // "project-manifest" added in v0.3.8 for multi-component projects.
 // "mcp-server" added in v0.3.8 for MCP server components.
 
+BehaviorConstraint := required | supported | forbidden
+// Classifies a BEHAVIOR block. Default is `required` when absent.
+// A `forbidden` behavior must include a `reason:` annotation.
+// Validated by RULE-13.
+
 Severity := Error | Warning
 
 Diagnostic := {
@@ -90,6 +96,7 @@ validated with identical structural rules to BEHAVIOR sections.
 ---
 
 ## BEHAVIOR: lint
+Constraint: required
 
 The primary operation. Validates a specification file against the
 structural rules defined in this specification.
@@ -109,6 +116,19 @@ PRECONDITIONS:
 - file exists and is readable
 - file has `.md` extension
 - strict is a valid boolean (true | false)
+
+STEPS:
+1. Verify file has `.md` extension; on failure → exit 2 with
+   "error: file must have .md extension: {path}".
+2. Open and read file; on failure → exit 2 with
+   "error: cannot open file: {path}".
+3. Apply RULE-01 through RULE-13 in order; collect all diagnostics.
+   Rules are not short-circuited — all rules run regardless of earlier errors.
+4. Sort diagnostics by line number (monotonically non-decreasing).
+5. Write each diagnostic to stderr in the defined format.
+6. Compute exit_code: 1 if any Error present, or (strict=true AND any Warning); else 0.
+7. Write summary line to stdout in the defined format.
+8. Exit with exit_code.
 
 POSTCONDITIONS:
 - result.file = file
@@ -130,6 +150,7 @@ SIDE-EFFECTS:
 ---
 
 ## BEHAVIOR: list-templates
+Constraint: required
 
 Prints all known deployment templates with their resolved default
 target language. Useful for discovering valid Deployment: values.
@@ -147,6 +168,17 @@ stdout: list of template names with default language annotations
 PRECONDITIONS:
 - none
 
+STEPS:
+1. Load the canonical DeploymentTemplate value list.
+2. For each template T in defined order:
+   a. Attempt to locate companion `{T}.template.md` in the template search path.
+   b. If found: read default language from its TEMPLATE-TABLE.
+      If not found: annotation = "(template file not found)".
+   c. For special values (enhance-existing, manual, template, project-manifest):
+      use the fixed annotation defined in POSTCONDITIONS.
+3. Write one line per template to stdout in format: "{T}  →  {annotation}".
+4. Exit 0.
+
 POSTCONDITIONS:
 - exit_code = 0 always
 - stdout contains exactly 17 lines, one per known DeploymentTemplate value
@@ -160,9 +192,27 @@ POSTCONDITIONS:
 ---
 
 ## BEHAVIOR: lint-validation-rules
+Constraint: required
 
 Defines the ordered set of structural rules applied during lint.
 All rules are evaluated; lint does not stop at first error.
+
+STEPS:
+1. Apply RULE-01 (required sections present).
+2. Apply RULE-02 through RULE-02e (META fields).
+3. Apply RULE-03 (deployment template resolves).
+4. Apply RULE-04 (deprecated META fields).
+5. Apply RULE-05 (Verification field value).
+6. Apply RULE-06 (EXAMPLES section structure, including multi-pass).
+7. Apply RULE-07 (EXAMPLES minimum content).
+8. Apply RULE-08 (BEHAVIOR blocks contain STEPS).
+9. Apply RULE-09 (INVARIANTS entries carry observable/implementation tags).
+10. Apply RULE-10 (negative-path EXAMPLE required for BEHAVIOR with error exits).
+11. Apply RULE-11 (TOOLCHAIN-CONSTRAINTS section structure, if present).
+12. Apply RULE-12 (cross-section consistency: identifiers, types, file names).
+13. Apply RULE-13 (Constraint: field value on BEHAVIOR headers).
+    MECHANISM: rules are independent; a failure in one rule does not prevent
+    subsequent rules from running. All diagnostics are collected before output.
 
 ### RULE-01: Required sections present
 
@@ -335,10 +385,10 @@ The ## EXAMPLES section must contain at least one example block.
 
 An example block consists of:
   - a line matching "^EXAMPLE:" (example name declaration)
-  - a line matching "^GIVEN:"   (precondition state)
-  - a line matching "^WHEN:"    (operation)
-  - a line matching "^THEN:"    (expected outcome)
-  appearing in this order within the block.
+  - at least one WHEN:/THEN: pair appearing after GIVEN:
+  - WHEN: and THEN: must alternate: each WHEN: must be followed by
+    its matching THEN: before the next WHEN: or end of block
+  (Multi-pass examples with multiple WHEN/THEN pairs are valid — v0.3.12+)
 
 if no example block found:
   emit Error, section="EXAMPLES",
@@ -349,19 +399,24 @@ For each example block E:
   if E missing "GIVEN:":
     emit Error, section="EXAMPLES",
       message="Example '{n}' missing GIVEN: marker"
-  if E missing "WHEN:":
+  if E missing at least one "WHEN:":
     emit Error, section="EXAMPLES",
       message="Example '{n}' missing WHEN: marker"
-  if E missing "THEN:":
+  if E missing at least one "THEN:":
     emit Error, section="EXAMPLES",
       message="Example '{n}' missing THEN: marker"
+  for each WHEN: marker W in E (in order):
+    if W is not immediately followed (before next WHEN: or end of block) by a THEN: marker:
+      emit Error, section="EXAMPLES",
+        message="Example '{n}' has WHEN: without a matching THEN:"
 
 ### RULE-07: EXAMPLES minimum content
 
 Block boundaries are defined as follows:
-  GIVEN block  := lines strictly between GIVEN: and WHEN: markers
-  WHEN block   := lines strictly between WHEN: and THEN: markers
-  THEN block   := lines after THEN: marker until one of:
+  GIVEN block  := lines strictly between GIVEN: and first WHEN: marker
+  WHEN block   := lines strictly between a WHEN: marker and its matching THEN: marker
+  THEN block   := lines after a THEN: marker until one of:
+                    - next WHEN: marker at start of line (multi-pass)
                     - next EXAMPLE: marker at start of line
                     - next ## heading at start of line
                     - end of file
@@ -378,6 +433,103 @@ For each example block E:
   if THEN block is empty:
     emit Warning, section="EXAMPLES",
       message="Example '{n}' has empty THEN block"
+
+### RULE-08: BEHAVIOR blocks must contain STEPS (v0.3.12+)
+
+For each BEHAVIOR or BEHAVIOR/INTERNAL section B:
+  if B does not contain a line matching "^STEPS:":
+    emit Error, section=B,
+      message="BEHAVIOR '{n}' is missing required STEPS: block. \
+               Every BEHAVIOR must include ordered, imperative STEPS."
+
+### RULE-09: INVARIANTS entries should carry observable/implementation tags (v0.3.12+)
+
+For each entry line L in the ## INVARIANTS section:
+  // An entry line is a non-empty, non-heading line that is not a separator.
+  if L does not begin with "- [observable]" AND L does not begin with "- [implementation]":
+    emit Warning, section="INVARIANTS",
+      message="Invariant entry missing tag. \
+               Prefix with [observable] or [implementation] for audit utility."
+
+### RULE-10: Negative-path EXAMPLE required for BEHAVIOR with error exits (v0.3.13+)
+
+For each BEHAVIOR section B:
+  let error_exits = lines in B's STEPS block matching "→" (error exit notation)
+  if error_exits is non-empty:
+    // Collect EXAMPLES that reference this BEHAVIOR (by name or by being the
+    // sole BEHAVIOR in the spec). A negative-path EXAMPLE is one whose THEN:
+    // block contains at least one of: "Err(", "error", "exit_code = 1",
+    // "exit_code = 2", "stderr contains", or a declared ERROR code from B.
+    let negative_examples = EXAMPLES referencing B whose THEN block matches
+                            negative-path pattern
+    if negative_examples is empty:
+      emit Error, section=B,
+        message="BEHAVIOR '{n}' has error exits in STEPS but no negative-path \
+                 EXAMPLE. Add at least one EXAMPLE whose THEN: verifies an \
+                 error outcome."
+
+// Note: for specs with a single BEHAVIOR, all EXAMPLES are considered
+// to reference that BEHAVIOR. For multi-BEHAVIOR specs, association is
+// by name matching between EXAMPLE WHEN: text and BEHAVIOR name.
+
+### RULE-11: TOOLCHAIN-CONSTRAINTS section structure (v0.3.13+)
+
+if ## TOOLCHAIN-CONSTRAINTS section is present:
+  For each entry line L in the section:
+    if L declares a constraint value other than "required" or "forbidden":
+      emit Warning, section="TOOLCHAIN-CONSTRAINTS",
+        message="TOOLCHAIN-CONSTRAINTS entry uses unknown constraint value. \
+                 Valid values: required, forbidden."
+// The section is optional. Its absence is not an error.
+// Structural validation is minimal in v0.3.13; semantic validation deferred to v0.4.0.
+
+### RULE-12: Cross-section consistency (v0.3.13+, partial)
+
+**12a — Identifier consistency (warning):**
+  Collect all method names declared in ## INTERFACES sections
+    (lines matching pattern: "  <MethodName>(")
+  For each method name M:
+    if M appears in any BEHAVIOR STEPS block in a modified form
+       (e.g. "transport.Connect" where M is "Connect"):
+      emit Warning, section="BEHAVIOR",
+        message="Identifier '{M}' declared in INTERFACES but referenced as \
+                 '{variant}' in BEHAVIOR STEPS. Use the declared name verbatim."
+
+**12b — Type name consistency (error):**
+  Collect all type names declared in ## TYPES section
+    (lines matching "^<TypeName> :=")
+  For each type name T:
+    if T is redefined (assigned with :=) in any BEHAVIOR section:
+      emit Error, section="BEHAVIOR",
+        message="Type '{T}' declared in TYPES is redefined in BEHAVIOR. \
+                 Types must be declared in TYPES only."
+
+**12c — File name consistency (warning):**
+  Collect all file names in ## DELIVERABLES COMPONENT entries
+  Collect all file names referenced in ## BEHAVIOR/INTERNAL sections
+  For each file name F referenced in BEHAVIOR/INTERNAL but absent from DELIVERABLES:
+    emit Warning, section="BEHAVIOR/INTERNAL",
+      message="File '{F}' referenced in BEHAVIOR/INTERNAL is not declared \
+               in DELIVERABLES. Add a COMPONENT entry or remove the reference."
+
+// State-machine and endpoint semantic consistency deferred to v0.4.0.
+
+### RULE-13: Constraint: field value on BEHAVIOR headers (v0.3.13+)
+
+VALID_CONSTRAINTS := [ "required", "supported", "forbidden" ]
+
+For each BEHAVIOR or BEHAVIOR/INTERNAL section B:
+  if B has a line matching "^Constraint:":
+    let C = value of Constraint: field
+    if C not in VALID_CONSTRAINTS:
+      emit Error, section=B,
+        message="BEHAVIOR '{n}' has invalid Constraint: value '{C}'. \
+                 Valid values: required, supported, forbidden."
+    if C = "forbidden":
+      if B does not contain a line matching "^  reason:":
+        emit Warning, section=B,
+          message="BEHAVIOR '{n}' is Constraint: forbidden but has no reason: annotation."
+  // Absence of Constraint: field is valid; default is `required`.
 
 ---
 
@@ -413,18 +565,18 @@ For each example block E:
 
 ## INVARIANTS
 
-- GLOBAL: pcdp-lint is idempotent — running it twice on the same file
+- [observable]      pcdp-lint is idempotent — running it twice on the same file
   produces identical output and identical exit code
-- GLOBAL: all Error diagnostics produce exit_code ≥ 1
-- GLOBAL: Warnings alone never produce exit_code = 1 unless strict=true
-- GLOBAL: exit_code = 1 with only Warnings requires strict=true
-- GLOBAL: exit_code = 2 indicates invocation error only,
+- [observable]      all Error diagnostics produce exit_code ≥ 1
+- [observable]      Warnings alone never produce exit_code = 1 unless strict=true
+- [observable]      exit_code = 1 with only Warnings requires strict=true
+- [observable]      exit_code = 2 indicates invocation error only,
   never a lint result
-- GLOBAL: diagnostic line numbers are monotonically non-decreasing
+- [observable]      diagnostic line numbers are monotonically non-decreasing
   within a result
-- GLOBAL: pcdp-lint never produces exit_code = 0 when any Error
+- [observable]      pcdp-lint never produces exit_code = 0 when any Error
   diagnostic is present, regardless of strict value
-- GLOBAL: stderr receives diagnostics; stdout receives summary and
+- [observable]      stderr receives diagnostics; stdout receives summary and
   list-templates output; these streams are never swapped
 
 ---
@@ -700,9 +852,165 @@ THEN:
   stdout = (empty)
   exit_code = 2
 
----
+EXAMPLE: multi_pass_example_valid
+GIVEN:
+  file contains a BEHAVIOR: reconcile section with STEPS including "on failure →"
+  EXAMPLES contains:
+  ```
+  EXAMPLE: reconcile_graceful_stop
+  GIVEN:
+    VM "testvm-01", spec.desiredState = Stopped
+    Domain is Running
+  WHEN:  reconcile runs (pass 1)
+  THEN:
+    domain.Shutdown() is called
+    result = RequeueAfter(10s)
+  WHEN:  reconcile runs (pass 2); domain is Shutoff
+  THEN:
+    status.phase = Stopped
+    result = RequeueAfter(60s)
+  ```
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr = (empty)
+  stdout = "✓ spec.md: valid"
+  exit_code = 0
+  // multi-pass WHEN/THEN is valid under RULE-06
 
-## DEPLOYMENT
+EXAMPLE: behavior_missing_steps
+GIVEN:
+  file contains all required sections including:
+  ```
+  ## BEHAVIOR: do-something
+  PRECONDITIONS:
+    - input is valid
+  POSTCONDITIONS:
+    - output is produced
+  ```
+  BEHAVIOR section has no STEPS: block
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    section = "BEHAVIOR: do-something"
+    message contains "missing required STEPS: block"
+  exit_code = 1
+
+EXAMPLE: invariant_missing_tag_warning
+GIVEN:
+  file is otherwise valid with INVARIANTS section:
+  ```
+  ## INVARIANTS
+  - tool never modifies input files
+  - exit_code = 2 on invocation errors
+  ```
+  no [observable] or [implementation] tags present
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains two diagnostics, both severity = Warning
+    messages contain "missing tag"
+  stdout = "✓ spec.md: valid (2 warning(s))"
+  exit_code = 0
+
+EXAMPLE: invariant_missing_tag_strict
+GIVEN:
+  same file as invariant_missing_tag_warning
+  invocation: pcdp-lint strict=true spec.md
+WHEN:
+  result = lint(file, strict=true)
+THEN:
+  exit_code = 1
+  stdout contains "[strict mode]"
+
+EXAMPLE: behavior_error_exits_no_negative_example
+GIVEN:
+  file contains BEHAVIOR: transfer with STEPS:
+    "1. Validate inputs; on failure → return Err(INVALID)"
+  EXAMPLES contains only:
+  ```
+  EXAMPLE: successful_transfer
+  GIVEN:  valid inputs
+  WHEN:   transfer(a, b, 10)
+  THEN:   result = Ok
+  ```
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "has error exits in STEPS but no negative-path EXAMPLE"
+  exit_code = 1
+
+EXAMPLE: behavior_error_exits_with_negative_example
+GIVEN:
+  same BEHAVIOR: transfer as above
+  EXAMPLES now contains an additional block:
+  ```
+  EXAMPLE: transfer_invalid_input
+  GIVEN:  amount = -1
+  WHEN:   transfer(a, b, -1)
+  THEN:   result = Err(INVALID)
+  ```
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr = (empty)
+  exit_code = 0
+
+EXAMPLE: behavior_constraint_invalid_value
+GIVEN:
+  file contains:
+  ```
+  ## BEHAVIOR: some-op
+  Constraint: optional
+  ```
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "invalid Constraint: value 'optional'"
+    message contains "Valid values: required, supported, forbidden"
+  exit_code = 1
+
+EXAMPLE: behavior_constraint_forbidden_no_reason
+GIVEN:
+  file contains:
+  ```
+  ## BEHAVIOR: legacy-mode
+  Constraint: forbidden
+  ```
+  no reason: annotation present
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Warning
+    message contains "Constraint: forbidden but has no reason: annotation"
+  exit_code = 0
+
+EXAMPLE: behavior_constraint_absent_defaults_required
+GIVEN:
+  file is fully valid; BEHAVIOR: transfer has no Constraint: line
+  invocation: pcdp-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr = (empty)
+  exit_code = 0
+  // Absent Constraint: defaults to required; no diagnostic emitted
+
+---
 
 Runtime: command-line tool, single static binary, no runtime dependencies
 
