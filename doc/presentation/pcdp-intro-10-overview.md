@@ -23,13 +23,19 @@ Engineers never write implementation code directly.
 
 ## This is not "AI-assisted coding"
 
-| | Traditional | Vibe Coding | **PCDP** |
-|---|---|---|---|
-| Human writes | code | code + prompts | **specs only** |
-| AI role | none | suggests | **translates** |
-| Primary artifact | source code | source code | **specification** |
-| Target language | developer | developer | **template** |
-| Regulated domains | manual audit | prohibited | **enabled** |
++---------------------+---------------+---------------+-------------------+
+|                     | Traditional   | Vibe Coding   | **PCDP**          |
++=====================+===============+===============+===================+
+| Human writes        | code          | code + prompts| **specs only**    |
++---------------------+---------------+---------------+-------------------+
+| AI role             | none          | suggests      | **translates**    |
++---------------------+---------------+---------------+-------------------+
+| Primary artifact    | source code   | source code   | **specification** |
++---------------------+---------------+---------------+-------------------+
+| Target language     | developer     | developer     | **template**      |
++---------------------+---------------+---------------+-------------------+
+| Regulated domains   | manual audit  | prohibited    | **enabled**       |
++---------------------+---------------+---------------+-------------------+
 
 ---
 
@@ -147,7 +153,7 @@ derived from the spec.
 
 **Today**
 
-![](pcdp-workflow-today.png){height=2.2cm}
+![](pcdp-workflow-today.png)
 
 Every handoff loses information.\
 Requirements get simplified.\
@@ -158,7 +164,7 @@ Misunderstandings go undetected.
 
 **With PCDP**
 
-![](pcdp-workflow-pcdp.png){height=2.2cm}
+![](pcdp-workflow-pcdp.png)
 
 The cardiologist specifies\
 the device behaviour directly.

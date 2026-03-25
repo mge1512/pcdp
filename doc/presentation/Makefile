@@ -1,11 +1,13 @@
 default:	pcdp-introduction.pdf 
 
-pictures:	pcdp-icon-green.png pcdp-logo-green.png 								\
+pictures=	pcdp-icon-green.png pcdp-logo-green.png 								\
 		pcdp-workflow-pcdp.png pcdp-workflow.png pcdp-workflow-today.png pcdp-resolution.png 			\
 		pcdp-spec-sections.png pcdp-audit-bundle.png pcdp-translation-phases.png pcdp-mcp-server.png
 
 pcdp-introduction.md: pcdp-intro-00-header.md pcdp-intro-10-overview.md pcdp-intro-50-technical.md pcdp-intro-90-appendix.md
 	cat $^ > $@
+
+pcdp-introduction.pdf: pcdp-introduction.tex $(pictures)
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
@@ -29,7 +31,7 @@ distclean:
 	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.pdf pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
 
 clean:
-	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
+	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.tex pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
 
 view:	pcdp-introduction.pdf
 	evince -s pcdp-introduction.pdf

@@ -249,11 +249,15 @@ Every `TRANSLATION_REPORT.md` includes:
 
 \bigskip
 
-| EXAMPLE | Confidence | Verification method | Unverified claims |
-|---------|------------|---------------------|-------------------|
-| vm-start | High | `TestVMStart` — FakeSession | libvirt UUID format |
-| graceful-stop | Medium | `TestGracefulStop` pass 1 only | timeout path |
-| host-ready | Low | none | entire sequence |
++----------------+------------+-------------------------------------+--------------------+
+| EXAMPLE        | Confidence | Verification method                 | Unverified claims  |
++================+============+=====================================+====================+
+| vm-start       | High       | `TestVMStart` — FakeSession         | libvirt UUID format|
++----------------+------------+-------------------------------------+--------------------+
+| graceful-stop  | Medium     | `TestGracefulStop` pass 1 only      | timeout path       |
++----------------+------------+-------------------------------------+--------------------+
+| host-ready     | Low        | none                                | entire sequence    |
++----------------+------------+-------------------------------------+--------------------+
 
 \bigskip
 
