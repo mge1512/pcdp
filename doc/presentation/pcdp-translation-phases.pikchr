@@ -1,0 +1,8 @@
+# Translation phases (from template EXECUTION section)
+
+box "1  Core implementation" width 2.4in height 0.36in fill 0xe8f7f0 color 0x30ba78
+box "2  Build + packaging" same at (last.x, last.y - 0.44in)
+box "3  Test infrastructure" same at (last.x, last.y - 0.44in)
+box "4  Documentation" same at (last.x, last.y - 0.44in)
+box "5  Compile gate" same at (last.x, last.y - 0.44in)
+box "6  TRANSLATION_REPORT.md" width 2.4in height 0.36in fill 0x30ba78 color 0x30ba78 at (last.x, last.y - 0.44in)

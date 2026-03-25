@@ -1,0 +1,32 @@
+# Audit bundle structure
+
+# Root
+box "audit_bundle/" width 1.4in height 0.36in fill 0xe8f7f0 color 0x30ba78 at (0.75in, 2.90in)
+
+# Connector lines down from root
+line from last box.s down 0.18in color 0x30ba78 thin
+
+# Branch point
+B: last line.end
+
+# Children — using explicit positions
+box "specification/" width 1.3in height 0.34in color 0x30ba78 at (2.50in, 3.10in)
+box "generated/" same at (last.x, last.y - 0.42in)
+box "translation_report/" same at (last.x, last.y - 0.42in)
+box "independent_tests/" same at (last.x, last.y - 0.42in)
+box "proofs/ (optional)" width 1.3in height 0.34in color 0xaaaaaa at (last.x, last.y - 0.42in)
+box "metadata.json" width 1.3in height 0.34in color 0x30ba78 at (last.x, last.y - 0.42in)
+
+# Horizontal connector from root to first child
+line from (1.42in, 3.10in) to (1.87in, 3.10in) thin color 0x30ba78
+
+# Vertical bar connecting all children
+line from (1.87in, 3.10in) to (1.87in, 1.0in) thin color 0x30ba78
+
+# Horizontals to each child
+line from (1.87in, 3.10in) to (1.87in, 3.10in) thin color 0x30ba78
+line from (1.87in, 2.68in) right 0.13in thin color 0x30ba78
+line from (1.87in, 2.26in) right 0.13in thin color 0x30ba78
+line from (1.87in, 1.84in) right 0.13in thin color 0x30ba78
+line from (1.87in, 1.42in) right 0.13in thin color 0xaaaaaa
+line from (1.87in, 1.00in) right 0.13in thin color 0x30ba78

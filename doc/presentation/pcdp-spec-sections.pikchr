@@ -1,0 +1,21 @@
+# Spec sections — required (green) and optional (gray)
+# Required left column, optional right column
+
+# ── required ──
+"required" small bold color 0x30ba78 at (0.75in, 3.10in)
+
+box "META" width 1.2in height 0.38in fill 0xe8f7f0 color 0x30ba78 at (0.75in, 2.78in)
+box "TYPES" same at (last.x, last.y - 0.46in)
+box "BEHAVIOR + STEPS" same at (last.x, last.y - 0.46in)
+box "PRECONDITIONS" same at (last.x, last.y - 0.46in)
+box "POSTCONDITIONS" same at (last.x, last.y - 0.46in)
+box "INVARIANTS" same at (last.x, last.y - 0.46in)
+box "EXAMPLES" same at (last.x, last.y - 0.46in)
+
+# ── optional ──
+"optional" small bold color 0x888888 at (2.35in, 3.10in)
+
+box "INTERFACES" width 1.2in height 0.38in color 0x888888 at (2.35in, 2.78in)
+box "DEPENDENCIES" same at (last.x, last.y - 0.46in)
+box "TOOLCHAIN-" "CONSTRAINTS" same at (last.x, last.y - 0.46in)
+box "DELIVERABLES" same at (last.x, last.y - 0.46in)
