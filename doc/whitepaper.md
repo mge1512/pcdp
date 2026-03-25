@@ -4,7 +4,7 @@
 ## Human Intent, Machine Implementation
 
 **Status:** Draft  
-**Version:** 0.3.14  
+**Version:** 0.3.15  
 **Author:** Matthias G. Eckermann <pcdp@mailbox.org>  
 **Date:** 2026-03-24
 
@@ -50,6 +50,15 @@ The paradigm is built on four core principles:
 
 **1. Specifications, not code, as primary artifacts**  
 Domain experts author structured Markdown specifications describing system behavior, data types, invariants, state machines, and deployment context (backend, embedded, kernel-driver, etc.). These specifications are written in natural language with tables—no programming required, no formal syntax required. Engineers with domain expertise and architectural capacity can write valid specifications without knowing the target programming language or meta-language.
+
+In practice, specifications need not be written entirely by hand. A standard interview prompt (`prompts/interview-prompt.md`) instructs any capable LLM — including small models running locally without GPU acceleration — to conduct a structured interview with the domain expert and produce a complete specification from their answers. The full workflow then becomes:
+
+1. **AI interviews** the domain expert (one question at a time)
+2. **Human reviews** the produced specification
+3. **pcdp-lint validates** the specification structure
+4. **AI translates** the specification to verified code
+
+This keeps specifications human-reviewed and human-approved, while removing the need for domain experts to learn the specification format itself.
 
 **2. AI translates specifications to implementations with multi-layered validation**  
 An AI translator converts specifications to executable code. Two paths are available:
@@ -1216,15 +1225,22 @@ See Appendix A.18 for the second-agent test generation approach.
 
 **Phase 0: Preparation**
 - Identify candidate components (small, high-risk, well-understood domain).
-- Train team on specification writing (not programming, not formal methods).
+- Install `pcdp-lint` for specification validation.
 - Select deployment templates applicable to the project domain.
 - Configure org-level presets in `/etc/pcdp/presets/`.
+- No specification writing training required — domain experts use the
+  interview prompt (`prompts/interview-prompt.md`) to produce specs via
+  a guided AI conversation. The format is learned by the tool, not the human.
 
-**Phase 1: Specification alongside existing code**
-- Write Markdown specifications for 1-2 existing components.
-- Keep current manual implementation unchanged.
-- Run specification validators in CI (check completeness, consistency).
-- Goal: Validate that domain experts can write adequate specifications.
+**Phase 1: AI-assisted specification alongside existing code**
+- Domain expert runs the interview prompt with any capable LLM (including
+  small models running locally — no cloud dependency required).
+- LLM asks questions; expert answers in plain language; LLM produces the spec.
+- Expert reviews the produced specification and corrects any misunderstandings.
+- Run `pcdp-lint` to validate structural correctness.
+- Keep current manual implementation unchanged during this phase.
+- Goal: Validate that domain experts can produce adequate specifications
+  through the interview process, without learning the specification format.
 
 **Phase 2: Generate and compare (direct path first)**
 - Use AI translator: Specification → target language via deployment template (skip formal verification initially).
@@ -2789,6 +2805,7 @@ comparison report. This is itself a candidate for specification under PCDP
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 0.3.15 | 2026-03-25 | Added AI-interview workflow for spec authoring. Introduction principle 1 updated: domain experts no longer need to learn the spec format; prompts/interview-prompt.md guides any LLM to conduct a structured interview and produce a complete spec. A.4 Phase 0 and Phase 1 updated to reflect interview-based approach. |
 | 0.3.14 | 2026-03-25 | cloud-native template v0.3.14: INDEPENDENT_TESTS Go naming note; deploy/operator.yaml dedup; HEALTHCHECK contradiction resolved; CRD scope declared in spec; go.sum as generated file. Hints files shipped: go-libvirt and golang-crypto-ssh. Phase 7 compile gate in translator prompt. |
 | 0.3.13 | 2026-03-24 | Resolved all 8 items deferred from v0.3.12, plus 4 new findings from codex lessons. F1: TYPE-BINDINGS table added to deployment templates — maps logical spec types to language-specific types; spec stays language-agnostic. F7: component-based DELIVERABLES section added to spec schema — logical components only; filename mapping stays in templates. F8: TRANSLATION_REPORT confidence table now requires Verification-method and Unverified-claims columns. F10: four formal independent test rules added — one test per EXAMPLE, tests use only declared test doubles, infrastructure-free, multi-pass examples generate multi-step tests. F11 (codex): negative-path EXAMPLES now required for any BEHAVIOR with error exits in STEPS (RULE-10). F12 (codex): TOOLCHAIN-CONSTRAINTS optional spec section added for spec-specific OCI/build/generated-file constraints (RULE-11). F13 (codex): cross-section consistency checking added to pcdp-lint as RULE-12 (identifier, type name, file name consistency; partial implementation). F14 (codex): Constraint: field added to BEHAVIOR headers — required \| supported \| forbidden with default=required (RULE-13). All templates bumped to v0.3.12. CONTRIBUTING.md updated. |
 | 0.3.12 | 2026-03-24 | Applied 9 of 10 findings from remote-kvm-operator exercise. STEPS: now required in every BEHAVIOR block (F2). MECHANISM: inline annotation added (F2). Multi-pass WHEN/THEN EXAMPLES format added (F3). INTERFACES optional spec section added with test-double declarations (F4). hints/ directory added to preset hierarchy with library hints file format and naming convention (F5). DEPENDENCIES optional spec section added with do-not-fabricate flag (F6). [observable]/[implementation] INVARIANTS annotation — Option B adopted (F9). Deferred to v0.3.13: TYPE-BINDINGS in templates (F1), component-based DELIVERABLES (F7), TRANSLATION_REPORT confidence table update (F8), A.18 independent test formal rules (F10). |
