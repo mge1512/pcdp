@@ -1,4 +1,3 @@
-
 # PCDP — Post-Coding Development Paradigm
 
 **Human Intent, Machine Implementation.**
@@ -14,99 +13,55 @@ This is not "AI-assisted coding" where developers write code with AI suggestions
 ## Core Workflow
 
 ```mermaid
-flowchart TB
-    subgraph human["<div style='text-align:left'>HUMAN INPUT</div>"]
-        spec["<div style='text-align:left'>Constrained Markdown Specification
-        • Required sections 
-        • Formal notation for pre/postconditions
-        • Executable examples</div>"]
-    end
-
-    subgraph validation[" VALIDATION"]
-        lint["pcdp-lint
-        Structure & schema check
-        SPDX license validation
-        Deployment template resolution"]
-    end
-
-    subgraph template[" DEPLOYMENT TEMPLATE"]
-        tmpl["pre-defined templates
-        Resolves: target language, binary type,
-        packaging formats, ..."]
-    end
-
-    subgraph ai[" AI TRANSLATION"]
-        llm["LLM Translator
-        Reads spec + template
-        Produces all required deliverables"]
-    end
-
-    subgraph paths[" DUAL PATHS"]
-        direct["Direct Path
-        Spec → Go / C / Rust
-        Fast iteration"]
-        verified["Verified Path
-        Spec → Lean 4 / F* / Dafny → Go / C
-        Formal proofs, highest assurance"]
-    end
-
-    subgraph output[" AUDIT BUNDLE"]
-        bundle["• Specification (human-reviewable)
-        • Generated source code
-        • Packaging artifacts (RPM, DEB, OCI)
-        • Proofs (verified path only)
-        • TRANSLATION_REPORT.md
-        • metadata.json (traceability)"]
-    end
+flowchart LR
+    spec["SPEC
+types · behavior
+examples · invariants"]
+    lint{"pcdp-lint"}
+    tmpl["TEMPLATE
+cli-tool · cloud-native
+mcp-server · ..."]
+    llm["LLM
+Translator"]
+    direct["Direct
+Spec → Go / C / Rust"]
+    verified["Verified
+Spec → Lean 4 / F* → Go / C"]
+    bundle["AUDIT BUNDLE
+code · proofs
+report · metadata"]
 
     spec --> lint
-    lint -->|Valid| tmpl
-    lint -->|Invalid| spec
+    lint -->|valid| tmpl
+    lint -->|invalid| spec
     tmpl --> llm
-    llm --> direct
-    llm --> verified
-    direct --> bundle
-    verified --> bundle
+    llm --> direct & verified
+    direct & verified --> bundle
 
-    style human fill:#e1f5ff,stroke:#4a9eff
-    style validation fill:#fff4e1,stroke:#ffaa00
-    style template fill:#e8f5e9,stroke:#4caf50
-    style ai fill:#ffe1f0,stroke:#e91e8c
-    style paths fill:#f3e5f5,stroke:#9c27b0
-    style output fill:#fce4ec,stroke:#e91e63
+    style spec fill:#e1f5ff,stroke:#4a9eff
+    style lint fill:#fff4e1,stroke:#ffaa00
+    style tmpl fill:#e8f5e9,stroke:#4caf50
+    style llm fill:#ffe1f0,stroke:#e91e8c
+    style direct fill:#f3e5f5,stroke:#9c27b0
+    style verified fill:#f3e5f5,stroke:#9c27b0
+    style bundle fill:#fce4ec,stroke:#e91e63
 ```
 
 ---
 
 ## Target Language Resolution
 
-The target language is **never declared in the specification**. It is derived automatically from the deployment template — keeping specifications technology-agnostic and stable over time.
+The target language is **never declared in the specification**. It is derived automatically from the deployment template.
 
 ```mermaid
 flowchart LR
-    spec["Deployment: cli-tool
-    in spec META"]
+    spec["Deployment: cli-tool"]
+    presets["/usr/share/pcdp/ → /etc/pcdp/
+~/.config/pcdp/ → ./.pcdp/"]
+    resolved["Language: Go
+RPM · DEB · OCI via OBS"]
 
-    subgraph presets[" PRESET LAYERING (systemd-style)"]
-        p1["/usr/share/pcdp/templates/
-        shipped defaults"]
-        p2["/etc/pcdp/
-        system administrator"]
-        p3["~/.config/pcdp/
-        user overrides"]
-        p4["./.pcdp/
-        project-local"]
-        p1 --> p2 --> p3 --> p4
-    end
-
-    resolved["Target language: Go
-    Binary type: static
-    Output: RPM + DEB + OCI
-    CLI style: key=value
-    Install: OBS"]
-
-    spec --> presets
-    presets --> resolved
+    spec --> presets --> resolved
 
     style spec fill:#e1f5ff,stroke:#4a9eff
     style presets fill:#e8f5e9,stroke:#4caf50
@@ -115,53 +70,37 @@ flowchart LR
 
 ---
 
-## Repository Layout
+## Key Concepts
 
-```
-pcdp/
-├── README.md                          ← this file
-├── LICENSE                            ← CC-BY-4.0 (specs, templates, whitepaper)
-├── LICENSE-tools                      ← GPL-2.0-only (tools/)
-├── CONTRIBUTING.md
-│
-├── doc/
-│   ├── whitepaper.md                  ← canonical whitepaper
-│   ├── executive-brief.md             ← business / non-technical summary
-│   └── document-template.tex          ← pandoc template for PDF generation
-│
-├── hints/
-│   ├── cloud-native.go.go-libvirt.hints.md       ← go-libvirt API shapes
-│   └── cloud-native.go.golang-crypto-ssh.hints.md ← ssh key/error handling
-│
-├── templates/
-│   ├── cli-tool.template.md           ← CLI tool deployment template
-│   ├── cloud-native.template.md       ← cloud-native deployment template
-│   ├── library-c-abi.template.md      ← general-purpose C-ABI libraries
-│   ├── verified-library.template.md   ← safety/security-critical C-ABI libraries
-│   ├── mcp-server.template.md         ← MCP server components
-│   ├── project-manifest.template.md   ← multi-component projects
-│   └── python-tool.template.md        ← Python tooling (QM only)
-│
-├── tools/
-│   └── pcdp-lint/                     ← GPL-2.0-only
-│       ├── spec/
-│       │   ├── pcdp-lint.md           ← specification for pcdp-lint
-│       │   └── prompt.md              ← component-specific translator prompt
-│       └── code/                      ← generated implementation
-│
-├── examples/
-│   └── account-transfer.md            ← worked example (canonical spec)
-│
-└── prompts/
-    ├── README-small-models.md         ← guidance for smaller LLMs
-    └── prompt.md                      ← standard translator prompt (A.13)
-```
+**Deployment templates** define what a target environment requires — language defaults, binary type, packaging formats, installation method, conventions. The spec author declares `Deployment: cli-tool` and the template resolves all implementation details automatically.
+
+**Verification paths** are optional and pluggable:
+- *Direct path:* Specification → Go/C/Rust — fast iteration, lower assurance
+- *Verified path:* Specification → Lean 4/F*/Dafny → Go/C — formal proofs, highest assurance
+
+**Audit bundles** are first-class outputs: specification + generated code + proofs (if any) + translation report + metadata. Designed for regulatory compliance with ISO 26262, DO-178C, IEC 62304, and Common Criteria.
 
 ---
 
 ## Quick Start
 
-### 1. Write a specification
+### Step 1 — Write a specification
+
+**Option A — AI-assisted interview *(recommended)***
+
+Domain experts do not need to learn the specification format. Use
+`prompts/interview-prompt.md` with any capable LLM — including small models
+running locally without GPU acceleration.
+
+- **No existing material:** the model interviews the expert one question at a time
+- **Existing material** (email, meeting notes, design doc): paste it in — the model extracts what it can and asks only for what is missing
+
+```bash
+# with a local model:
+ollama run llama3.2 "$(cat prompts/interview-prompt.md)"
+```
+
+**Option B — Write the spec directly**
 
 Every specification follows this structure:
 
@@ -169,119 +108,109 @@ Every specification follows this structure:
 # My Component
 
 ## META
-Deployment:  cli-tool
-Version:     0.1.0
-Spec-Schema: 0.3.13
-Author:      Your Name <you@example.org>
-License:     Apache-2.0
+Deployment:   cli-tool
+Version:      0.1.0
+Spec-Schema:  0.3.15
+Author:       Your Name <you@example.org>
+License:      Apache-2.0
 Verification: none
 Safety-Level: QM
 
 ## TYPES
 ...
 
-## BEHAVIOR: my-function
+## BEHAVIOR: my-operation
 Constraint: required
 INPUTS: ...
 PRECONDITIONS: ...
 STEPS:
-  1. [first action]; on failure → [error action].
+  1. [action]; on failure → [error].
   2. [next action].
 POSTCONDITIONS: ...
-
-## PRECONDITIONS
-...
-
-## POSTCONDITIONS
-...
+ERRORS: ...
 
 ## INVARIANTS
-- [observable]  ...
+- [observable]      ...
 - [implementation]  ...
 
 ## EXAMPLES
 
-EXAMPLE: basic_case
-GIVEN:
-  ...
-WHEN:
-  ...
-THEN:
-  ...
+EXAMPLE: success_case
+GIVEN: ...
+WHEN:  ...
+THEN:  ...
 
 EXAMPLE: error_case
-GIVEN:
-  ...
-WHEN:
-  ...
-THEN:
-  result = Err(...)  // negative-path example required when STEPS have error exits
+GIVEN: ...
+WHEN:  ...
+THEN:  result = Err(...)
 ```
 
-### 2. Validate a specification (assuming the tool is already available as a package)
+Validate with `pcdp-lint myspec.md` before proceeding.
 
-```bash
-# Install pcdp-lint (openSUSE / SLES)
-zypper install pcdp-lint
+---
 
-# Install pcdp-lint (Debian / Ubuntu)
-apt install pcdp-lint
-
-# Install pcdp-lint (Fedora)
-dnf install pcdp-lint
-
-# Validate a specification file
-pcdp-lint myspec.md
-
-# Strict mode (warnings treated as errors)
-pcdp-lint strict=true myspec.md
-
-# List available deployment templates
-pcdp-lint list-templates
-```
-
-### 3. Translate a specification to code
+### Step 2 — Translate to code
 
 Use the standard translator prompt from `prompts/prompt.md` with any capable LLM. The prompt instructs the LLM to:
 
-- Derive the target language from the deployment template (never declared in the spec)
-- Produce all required deliverables defined in the template's DELIVERABLES section
-- Write a `TRANSLATION_REPORT.md` documenting decisions and confidence levels
+- Derive the target language from the deployment template — never declared in the spec
+- Produce all required deliverables from the template's DELIVERABLES section
+- Write a `TRANSLATION_REPORT.md` documenting every decision and confidence level
 
 ---
 
 ## Self-Hosting
 
-`pcdp-lint` — the validator in `tools/pcdp-lint/` — was developed using
-PCDP itself. The specification in `tools/pcdp-lint/spec/pcdp-lint.md`
-describes what the tool must do. The implementation in
-`tools/pcdp-lint/code/` was generated from that specification by an LLM,
-using `cli-tool.template.md` as the deployment template.
+`pcdp-lint` — the validator in `tools/pcdp-lint/` — was developed using PCDP itself. The specification in `tools/pcdp-lint/spec/pcdp-lint.md` describes what the tool must do. The implementation in `tools/pcdp-lint/code/` was generated from that specification by an LLM, using `cli-tool.template.md` as the deployment template.
 
-The LLM resolved Go as the target language from the template without being
-told. It produced the source code, RPM spec, Debian packaging, and a
-`TRANSLATION_REPORT.md` documenting every decision — all from the
-specification alone.
+The LLM resolved Go as the target language from the template without being told. It produced the source code, RPM spec, Debian packaging, and a `TRANSLATION_REPORT.md` — all from the specification alone.
 
-The same approach was tested across multiple LLMs of different capability
-classes, including a 120B open-weight model running at a regional European
-provider with no dependency on US cloud infrastructure. Every model resolved
-the target language correctly from the deployment template.
+The same approach was tested across multiple LLMs of different capability classes, including a 120B open-weight model running at a regional European provider with no dependency on US cloud infrastructure. Every model resolved the target language correctly from the deployment template.
 
-This is not a toy example. The paradigm specifies and generates its own
-tooling from the first real artifact.
+This is not a toy example. The paradigm specifies and generates its own tooling from the first real artifact.
 
 ---
 
-## Key Concepts
+## Repository Layout
 
-**Deployment templates** define what a target environment requires — language defaults, binary type, packaging formats, installation method, CLI conventions. The spec author declares `Deployment: cli-tool` and the template resolves all implementation details automatically.
-
-**Verification paths** are optional and pluggable:
-- *Direct path:* Specification → Go/C/Rust — fast iteration, lower assurance
-- *Verified path:* Specification → Lean 4/F*/Dafny → Go/C — formal proofs, highest assurance
-
-**Audit bundles** are first-class outputs: specification + generated code + proofs (if any) + translation report + metadata. Designed for regulatory compliance with ISO 26262, DO-178C, IEC 62304, and Common Criteria.
+```
+pcdp/
+├── README.md
+├── LICENSE                            ← CC-BY-4.0 (specs, templates, whitepaper)
+├── LICENSE-tools                      ← GPL-2.0-only (tools/)
+├── CONTRIBUTING.md
+│
+├── doc/
+│   ├── whitepaper.md                  ← canonical whitepaper
+│   └── executive-brief.md             ← business / non-technical summary
+│
+├── hints/
+│   ├── cloud-native.go.go-libvirt.hints.md
+│   └── cloud-native.go.golang-crypto-ssh.hints.md
+│
+├── templates/
+│   ├── cli-tool.template.md
+│   ├── cloud-native.template.md
+│   ├── mcp-server.template.md
+│   ├── verified-library.template.md
+│   ├── library-c-abi.template.md
+│   ├── project-manifest.template.md
+│   └── python-tool.template.md
+│
+├── tools/
+│   └── pcdp-lint/                     ← GPL-2.0-only
+│       ├── spec/pcdp-lint.md          ← specification
+│       └── code/                      ← generated implementation
+│
+├── examples/
+│   └── account-transfer.md
+│
+└── prompts/
+    ├── prompt.md                      ← standard translator prompt
+    ├── interview-prompt.md            ← AI-assisted spec authoring
+    └── README-small-models.md
+```
 
 ---
 
@@ -298,7 +227,7 @@ The CC-BY-4.0 license on specifications and templates means anyone may implement
 
 ## Status
 
-Current version: **0.3.13** (draft)
+Current version: **0.3.15** (draft)
 
 This project is in active development. The specification format, deployment templates, and tooling are stabilising toward a v1.0 release. Feedback, issue reports, and contributions are welcome.
 
@@ -307,4 +236,3 @@ This project is in active development. The specification format, deployment temp
 ## Author
 
 Matthias G. Eckermann — [pcdp@mailbox.org](mailto:pcdp@mailbox.org)
-
