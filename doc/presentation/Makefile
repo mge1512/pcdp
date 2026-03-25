@@ -25,8 +25,11 @@ pcdp-icon-green.png: pcdp-icon-green.svg
 %.svg: %.pikchr
 	pikchr --svg-only $< | sed 's/<text /<text font-family="DejaVu Sans, Liberation Sans, sans-serif" /g' > $@
 
-clean:
+distclean:
 	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.pdf pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
+
+clean:
+	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
 
 view:	pcdp-introduction.pdf
 	evince -s pcdp-introduction.pdf
