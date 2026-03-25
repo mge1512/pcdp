@@ -1,0 +1,10 @@
+# Today: intent lost at the developer handoff
+
+box "Domain" "Expert" width 1.1in height 0.6in color 0x888888
+arrow "describes" above color 0x888888
+box "Developer" width 1.1in height 0.6in color 0x888888
+C: arrow "interprets" above color 0x888888
+box "Code" width 1.1in height 0.6in color 0x888888
+
+line thin dotted from C.c down 0.35in color 0xcc3333
+"intent lost" small at last line.end color 0xcc3333

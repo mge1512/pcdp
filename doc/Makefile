@@ -1,6 +1,6 @@
 default:	pcdp-introduction.pdf 
 
-pictures:	pcdp-workflow.png pcdp-resolution.png pcdp-icon-green.png pcdp-logo-green.png
+pictures:	pcdp-workflow.png pcdp-resolution.png pcdp-icon-green.png pcdp-logo-green.png pcdp-icon-green.png pcdp-workflow-pcdp.png pcdp-workflow.png pcdp-workflow-today.png
 
 pcdp-introduction.md: pcdp-intro-00-header.md pcdp-intro-10-overview.md pcdp-intro-50-technical.md pcdp-intro-90-appendix.md
 	cat $^ > $@

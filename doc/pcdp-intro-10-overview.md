@@ -72,54 +72,131 @@ The **template** decides all of that.
 
 # Why
 
-## The problem: AI is blocked where it matters most
+## 1. Separation of concerns
 
-Regulated software markets **cannot use** current AI code generation:
+::::columns
+:::: {.column width=50%}
 
-- **Automotive** — ISO 26262
-- **Aviation** — DO-178C
-- **Medical devices** — IEC 62304
-- **Security certification** — Common Criteria / EUCC
+The spec says **what** and **where**.
 
-Reason: AI-generated code is opaque. No audit trail. Regulators reject it.
+The template decides **how**:
 
-\bigskip
+- programming language
+- packaging format
+- toolchain conventions
+- deployment target
 
-Automotive software alone: **\$50B+ annually**.
+::::
+:::: {.column width=50%}
+
+Change language across the whole project?
+
+**Change one preset file.**
+
+The spec is untouched.
+
+A spec written today is valid\ 
+in 2045 — regardless of\ 
+what language is in fashion.
+
+::::
+::::
 
 ---
 
-## The opportunity
+## 2. Long-term maintainability
 
 ::::columns
 :::: {.column width=55%}
 
-**Specifications are auditable.**
+**Specs are more stable than code.**
 
-Regulators review the spec — not the code.
+Code accumulates technical debt.
 
-The AI is a translator, not an author.
+Specs describe intent — intent rarely changes.
 
-Verifiability comes from:
+\bigskip
 
-- human-reviewable specs
-- formal proofs (optional)
-- independent test generation
-- full audit bundles
+When requirements change:
+
+- update the spec
+- regenerate the code
+- no manual refactoring
 
 ::::
 :::: {.column width=45%}
 
-**Digital sovereignty.**
+**The spec is the documentation.**
 
-Works with locally-hosted models.
+Not a comment that drifts from the code.
 
-No US cloud dependency.
+Not a wiki page nobody updates.
 
-Tested: 120B open-weight model\
-at a regional EU provider\
-— most complete output\
-of any tested model.
+The running system is always\ 
+derived from the spec.
+
+::::
+::::
+
+---
+
+## 3. Domain experts author directly
+
+::::columns
+:::: {.column width=50%}
+
+**Today**
+
+![](pcdp-workflow-today.png){height=2.2cm}
+
+Every handoff loses information.\
+Requirements get simplified.\
+Misunderstandings go undetected.
+
+::::
+:::: {.column width=50%}
+
+**With PCDP**
+
+![](pcdp-workflow-pcdp.png){height=2.2cm}
+
+The cardiologist specifies\
+the device behaviour directly.
+
+No interpreter in the middle.
+
+::::
+::::
+
+---
+
+## And: formal verification is available
+
+The LLM translation is probabilistic — we do not claim otherwise.
+
+\bigskip
+
+For components that **require** stronger guarantees:
+
+\bigskip
+
+::::columns
+:::: {.column width=60%}
+
+Lean 4, F*, or Dafny can be added\ 
+as an **optional verification layer** —\ 
+without changing the specification format.
+
+The spec stays the same.\ 
+The verification path is a template choice.
+
+::::
+:::: {.column width=40%}
+
+- memory safety by construction
+- formal proofs of invariants
+- state machine correctness
+- ISO 26262 / DO-178C evidence
 
 ::::
 ::::
@@ -128,14 +205,14 @@ of any tested model.
 
 ## Proof: pcdp-lint
 
-`pcdp-lint` — the specification validator — was\
+`pcdp-lint` — the specification validator — was\ 
 **specified and generated using PCDP itself.**
 
 Zero hand-written implementation code.
 
 \bigskip
 
-Tested across multiple AI models,\
+Tested across multiple AI models,\ 
 three continents, one result:
 
 \bigskip
@@ -151,9 +228,7 @@ three continents, one result:
 
 ## The workflow
 
-![](pcdp-workflow.png){height=3.5cm}
-
-\bigskip
+![](pcdp-workflow.png){height=3cm}
 
 1. Domain expert writes a spec (or AI interviews them)
 2. `pcdp-lint` validates structure
@@ -166,14 +241,12 @@ three continents, one result:
 
 ![](pcdp-resolution.png){height=3cm}
 
-\bigskip
-
 The spec declares **what** and **where** (deployment context).
 
 The template resolves **language, packaging, conventions**.
 
 A spec written today is valid if the organisation\
-switches from Go to Rust in 2029 — **no spec change needed**.
+switches from Go to Rust in 2045 — **no spec change needed**.
 
 ---
 
