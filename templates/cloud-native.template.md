@@ -440,6 +440,48 @@ in the specification title (first `#` heading). It must be:
 
 ---
 
+## BUILD-GATE
+
+Specifies which output formats require an actual build attempt as part of
+translation verification, beyond the compile gate. The translator prompt
+instructs the translator to consult this section after compilation succeeds.
+
+If no suitable tool is available for a required build, the translator must
+document this explicitly in TRANSLATION_REPORT.md under
+"Build gate — \<FORMAT\> not executed" and state which tools were tried.
+Silent omission is not permitted.
+
+Once a build succeeds, do not modify any source files further.
+
+### OCI (if OUTPUT-FORMAT: OCI is active)
+
+Attempt to build the container image from the `Containerfile`.
+
+**Acceptable tools** (try in order; use the first available):
+
+| Tool | Command |
+|---|---|
+| `podman` | `podman build -f Containerfile -t <name>:<version> .` |
+| `docker` | `docker build -f Containerfile -t <name>:<version> .` |
+| `buildah` | `buildah bud -f Containerfile -t <name>:<version> .` |
+
+where `<name>` is the component name (lowercase, hyphenated) and `<version>`
+is the version from the spec META section.
+
+If the project also contains a compose file (`compose.yml` or
+`docker-compose.yml`), the following tools may be used instead:
+
+| Tool | Command |
+|---|---|
+| `podman compose` | `podman compose build` |
+| `docker compose` | `docker compose build` |
+
+If the build fails, treat it as a compile gate failure: fix only the
+identified files (typically the Containerfile or build configuration)
+and retry. Do not rewrite source files.
+
+---
+
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
