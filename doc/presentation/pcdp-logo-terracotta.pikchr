@@ -40,7 +40,7 @@ circle rad 0.07in \
   fill 0xb84c20 color 0xb84c20
 
 # Wordmark
-"PCDP" big bold \
+"Piccadilly" big bold \
   at (1.50in, 0.55in) \
   color 0xb84c20
 
