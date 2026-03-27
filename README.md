@@ -25,8 +25,8 @@ types · behavior
 examples · invariants"]
     lint{"pcdp-lint"}
     tmpl["TEMPLATE
-cli-tool · cloud-native
-mcp-server · ..."]
+cli-tool · backend-service
+cloud-native · mcp-server · ..."]
     llm["LLM
 Translator"]
     direct["Direct
@@ -78,7 +78,7 @@ RPM · DEB · OCI via OBS"]
 
 ## Key Concepts
 
-**Deployment templates** define what a target environment requires — language defaults, binary type, packaging formats, installation method, conventions. The spec author declares `Deployment: cli-tool` and the template resolves all implementation details automatically.
+**Deployment templates** define what a target environment requires — language defaults, binary type, packaging formats, installation method, conventions. The spec author declares `Deployment: cli-tool`, `Deployment: backend-service`, or another template, and the template resolves implementation details automatically.
 
 **Verification paths** are optional and pluggable:
 - *Direct path:* Specification → Go/C/Rust — fast iteration, lower assurance
@@ -245,6 +245,7 @@ pcdp/
 │
 ├── templates/
 │   ├── cli-tool.template.md
+│   ├── backend-service.template.md
 │   ├── cloud-native.template.md
 │   ├── mcp-server.template.md
 │   ├── verified-library.template.md
@@ -293,5 +294,4 @@ This project is in active development. The specification format, deployment temp
 ## Author
 
 Matthias G. Eckermann — [pcdp@mailbox.org](mailto:pcdp@mailbox.org)
-
 

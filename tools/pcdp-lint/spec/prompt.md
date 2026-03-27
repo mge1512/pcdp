@@ -67,9 +67,9 @@ flag it in the translation report and leave the version for the maintainer
 to verify. Never invent commit hashes or pseudo-version timestamps.
 
 **LICENSE files.**
-When writing a LICENSE file, include only the license name, a brief
-description, and a reference URL to the authoritative text.
-Never reproduce the full license text.
+Follow the deployment template's LICENSE deliverable requirements exactly.
+If the template does not specify LICENSE content, include the license name
+and a reference URL to the authoritative text rather than inventing custom text.
 
 **Do not make language or toolchain decisions based on your environment.**
 The deployment template describes the target runtime, not the environment
