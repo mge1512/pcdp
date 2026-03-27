@@ -247,6 +247,7 @@ pcdp/
 │   ├── cli-tool.template.md
 │   ├── backend-service.template.md
 │   ├── cloud-native.template.md
+│   ├── gui-tool.template.md
 │   ├── mcp-server.template.md
 │   ├── verified-library.template.md
 │   ├── library-c-abi.template.md
@@ -257,9 +258,12 @@ pcdp/
 │   ├── pcdp-lint/                     ← GPL-2.0-only
 │   │   ├── spec/pcdp-lint.md          ← specification
 │   │   └── code/                      ← generated implementation
-│   └── mcp-server-pcdp/               ← GPL-2.0-only
-│       ├── spec/mcp-server-pcdp.md    ← specification
-│       └── code/                      ← generated implementation
+│   ├── mcp-server-pcdp/               ← GPL-2.0-only
+│   │   ├── spec/mcp-server-pcdp.md    ← specification
+│   │   └── code/                      ← generated implementation
+│   └── pcdp-templates/                ← CC-BY-4.0
+│       ├── pcdp-templates.spec        ← RPM spec
+│       └── debian/                    ← Debian packaging
 │
 ├── examples/
 │   └── account-transfer.md
@@ -285,7 +289,7 @@ The CC-BY-4.0 license on specifications and templates means anyone may implement
 
 ## Status
 
-Current version: **0.3.17** (draft)
+Current version: **0.3.19** (draft)
 
 This project is in active development. The specification format, deployment templates, and tooling are stabilising toward a v1.0 release. Feedback, issue reports, and contributions are welcome.
 
