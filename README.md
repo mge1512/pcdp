@@ -1,10 +1,10 @@
 
 
-# PCDP — Post-Coding Development Paradigm
+# Piccadilly — PCDP — Post-Coding Development Paradigm
 
 **Human Intent, Machine Implementation.**
 
-*Meet me at the Piccadilly — the place where intent becomes implementation.*
+*Meet me at the Piccadilly — the place where intent becomes implementation.* 
 
 PCDP is an open specification for a new software development paradigm: domain experts write structured natural-language specifications; AI generates all implementation code. Engineers never write implementation code directly.
 
@@ -295,7 +295,13 @@ This project is in active development. The specification format, deployment temp
 
 ---
 
+![](doc/logo/pcdp-logo-green.png)
+
+---
+
 ## Author
 
 Matthias G. Eckermann — [pcdp@mailbox.org](mailto:pcdp@mailbox.org)
+
+
 
