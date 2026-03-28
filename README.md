@@ -1,10 +1,10 @@
 
 
-# PiCcaDilly — PCD — Post-Coding Development 
+# Post-Coding Development 
+
+## Meet me at the Piccadilly — where intent becomes implementation
 
 **Human Intent, Machine Implementation.**
-
-*Meet me at the Piccadilly — the place where intent becomes implementation.* 
 
 PCD is an open specification for a new software development paradigm: domain experts write structured natural-language specifications; AI generates all implementation code. Engineers never write implementation code directly.
 
