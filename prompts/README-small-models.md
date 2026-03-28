@@ -9,11 +9,11 @@ handle this without confusion. Smaller models benefit from having the
 actual filenames stated explicitly in the prompt so the context is
 unambiguous.
 
-See `tools/pcdp-lint/spec/prompt.md` for an example of this pattern.
+See `tools/pcd-lint/spec/prompt.md` for an example of this pattern.
 
 ## Recommendation 2 — Phase the delivery
 
-Long specifications (pcdp-lint.md is 1000+ lines with 27 examples) push
+Long specifications (pcd-lint.md is 1000+ lines with 27 examples) push
 models toward token and rate limits if asked to produce all deliverables
 in a single pass. Splitting the run into explicit phases prevents
 mid-generation interruptions:
@@ -31,7 +31,7 @@ Ask for `README.md` and `TRANSLATION_REPORT.md` separately.
 assess every EXAMPLE) and benefits from having all other files visible
 in context before it is written.
 
-The `tools/pcdp-lint/spec/prompt.md` prompt encodes this phase
+The `tools/pcd-lint/spec/prompt.md` prompt encodes this phase
 structure and resume logic directly, so the model knows which files
 to skip if it is restarting a partial run.
 

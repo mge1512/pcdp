@@ -5,7 +5,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -39,7 +39,7 @@ Dependency := {
 
 BuildOrder := List<string>
 // Component names in topological order.
-// pcdp-lint v2 validates this matches the dependency graph.
+// pcd-lint v2 validates this matches the dependency graph.
 // Circular dependencies are an error.
 
 InterfaceVersion := string where matches "^[0-9]+\.[0-9]+\.[0-9]+$"
@@ -92,7 +92,7 @@ Constraint: required
 *(Full BEHAVIOR specification pending — v0.3.13 target)*
 
 Validates the project manifest and all referenced component specs:
-- All component specs pass pcdp-lint individually
+- All component specs pass pcd-lint individually
 - All imports resolve to valid interface specs
 - No circular dependencies in the dependency graph
 - Build order is consistent with the dependency graph
@@ -100,14 +100,14 @@ Validates the project manifest and all referenced component specs:
 
 INPUTS:
 ```
-manifest: path    // pcdp-project.md
+manifest: path    // pcd-project.md
 strict:   bool
 ```
 
 STEPS:
 *(Full STEPS specification pending — v0.3.13 target)*
 1. Load and parse manifest file; on error → exit 2.
-2. For each referenced component spec: run pcdp-lint; collect errors.
+2. For each referenced component spec: run pcd-lint; collect errors.
 3. Resolve all Imports; report unresolvable references.
 4. Check dependency graph for cycles; report any found.
 5. Compute topological build order; verify consistency.
@@ -160,7 +160,7 @@ POSTCONDITIONS:
 
 EXAMPLE: minimal_two_component_project
 GIVEN:
-  pcdp-project.md declares:
+  pcd-project.md declares:
     Components:
       - name: account-service
         spec: components/account-service.md
@@ -177,9 +177,9 @@ GIVEN:
     SystemInvariants:
       - "GLOBAL: Σ(all Account.balance) is conserved across all services"
 WHEN:
-  pcdp-lint validates the project manifest
+  pcd-lint validates the project manifest
 THEN:
-  all component specs pass pcdp-lint individually
+  all component specs pass pcd-lint individually
   all imports resolve correctly
   build order matches dependency graph
   system invariant references valid exported type (Account from account-service interface)
@@ -187,11 +187,11 @@ THEN:
 
 EXAMPLE: circular_dependency_rejected
 GIVEN:
-  pcdp-project.md Dependencies contains:
+  pcd-project.md Dependencies contains:
     - from: service-a, to: service-b
     - from: service-b, to: service-a
 WHEN:
-  pcdp-lint validates the project manifest
+  pcd-lint validates the project manifest
 THEN:
   stderr contains: "Circular dependency: service-a → service-b → service-a"
   exit_code = 1
@@ -201,7 +201,7 @@ GIVEN:
   Dependencies declare service-a depends on service-b
   BuildOrder declares service-a before service-b
 WHEN:
-  pcdp-lint validates the project manifest
+  pcd-lint validates the project manifest
 THEN:
   stderr contains: "Build order inconsistent with dependencies:
     service-a must come after service-b"
@@ -212,14 +212,14 @@ THEN:
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-Location: /usr/share/pcdp/templates/project-manifest.template.md
+Location: /usr/share/pcd/templates/project-manifest.template.md
 Status: Work in progress — v0.3.9 target for completion.
 
 Conventional project layout when using this template:
 
 ```
 <project-root>/
-├── pcdp-project.md          ← the project manifest (uses this template)
+├── pcd-project.md          ← the project manifest (uses this template)
 ├── interfaces/
 │   ├── index.md             ← required deliverable: interface index
 │   ├── account-service.interface.md
@@ -241,9 +241,9 @@ The Makefile drives per-component translation in build order:
 all: account-service transfer-service
 
 account-service:
-	pcdp-translate components/account-service.md
+	pcd-translate components/account-service.md
 
 transfer-service: account-service
-	pcdp-translate components/transfer-service.md
+	pcd-translate components/transfer-service.md
 ```
 

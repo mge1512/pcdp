@@ -6,7 +6,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -84,7 +84,7 @@ ListenAddress := string
 | TRANSPORT | streamable-http | required | Always implement. Required for web and remote access. |
 | BINARY-TYPE | static | required | Single static binary. No runtime dependencies. CGO_ENABLED=0 for Go. |
 | BINARY-COUNT | 1 | required | One binary serves both transports, selected by invocation mode. |
-| CLI-ARG-STYLE | key=value | required | Consistent with pcdp conventions. |
+| CLI-ARG-STYLE | key=value | required | Consistent with pcd conventions. |
 | TRANSPORT-SELECTION | bare-word | required | Transport selected by bare word: `mcp-server-{n} stdio` or `mcp-server-{n} http` |
 | LISTEN-DEFAULT | 127.0.0.1:8080 | default | Default bind address for streamable-http. Override: listen=host:port |
 | MCP-CAPABILITY | tools | required | All MCP servers must implement at least tools capability. |
@@ -523,7 +523,7 @@ Output streams:
 Naming convention:
   Binary name: mcp-server-{n}
   where {n} is the use-case identifier, lowercase, hyphen-separated
-  Examples: mcp-server-pcdp, mcp-server-github, mcp-server-postgres
+  Examples: mcp-server-pcd, mcp-server-github, mcp-server-postgres
 
 Installation:
   OBS package: mcp-server-{n}
@@ -543,6 +543,6 @@ Go Framework Selection Guide:
                      stdio well-supported; check HTTP transport status
                      before selecting for production http use
 
-Location: /usr/share/pcdp/templates/mcp-server.template.md
+Location: /usr/share/pcd/templates/mcp-server.template.md
 
 

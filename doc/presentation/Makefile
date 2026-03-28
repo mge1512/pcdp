@@ -1,13 +1,13 @@
-default:	pcdp-introduction.pdf 
+default:	pcd-introduction.pdf 
 
-pictures=	pcdp-icon-green.png pcdp-logo-green.png 								\
-		pcdp-workflow-pcdp.png pcdp-workflow.png pcdp-workflow-today.png pcdp-resolution.png 			\
-		pcdp-spec-sections.png pcdp-audit-bundle.png pcdp-translation-phases.png pcdp-mcp-server.png
+pictures=	pcd-icon-green.png pcd-logo-green.png 								\
+		pcd-workflow-pcd.png pcd-workflow.png pcd-workflow-today.png pcd-resolution.png 			\
+		pcd-spec-sections.png pcd-audit-bundle.png pcd-translation-phases.png pcd-mcp-server.png
 
-pcdp-introduction.md: pcdp-intro-00-header.md pcdp-intro-10-overview.md pcdp-intro-50-technical.md pcdp-intro-90-appendix.md
+pcd-introduction.md: pcd-intro-00-header.md pcd-intro-10-overview.md pcd-intro-50-technical.md pcd-intro-90-appendix.md
 	cat $^ > $@
 
-pcdp-introduction.pdf: pcdp-introduction.tex $(pictures)
+pcd-introduction.pdf: pcd-introduction.tex $(pictures)
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
@@ -18,7 +18,7 @@ pcdp-introduction.pdf: pcdp-introduction.tex $(pictures)
 %.docx: %.md
 	pandoc --to=docx --slide-level=2 --standalone --output=$@ $+
 
-pcdp-icon-green.png: pcdp-icon-green.svg 
+pcd-icon-green.png: pcd-icon-green.svg 
 	magick -background none -size 50x50 $< $@
 
 %.png: %.svg
@@ -28,11 +28,11 @@ pcdp-icon-green.png: pcdp-icon-green.svg
 	pikchr --svg-only $< | sed 's/<text /<text font-family="DejaVu Sans, Liberation Sans, sans-serif" /g' > $@
 
 distclean:
-	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.pdf pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
+	rm pcd-introduction.md pcd-introduction.aux pcd-introduction.log pcd-introduction.nav pcd-introduction.pdf pcd-introduction.snm pcd-introduction.toc pcd-introduction.vrb *.svg *.png
 
 clean:
-	rm pcdp-introduction.md pcdp-introduction.aux pcdp-introduction.log pcdp-introduction.nav pcdp-introduction.tex pcdp-introduction.snm pcdp-introduction.toc pcdp-introduction.vrb *.svg *.png
+	rm pcd-introduction.md pcd-introduction.aux pcd-introduction.log pcd-introduction.nav pcd-introduction.tex pcd-introduction.snm pcd-introduction.toc pcd-introduction.vrb *.svg *.png
 
-view:	pcdp-introduction.pdf
-	evince -s pcdp-introduction.pdf
+view:	pcd-introduction.pdf
+	evince -s pcd-introduction.pdf
 

@@ -1,0 +1,8 @@
+pcd-lint (0.3.13-1) unstable; urgency=low
+
+  * Initial release of pcd-lint
+  * Implements PCD specification validation (v0.3.13)
+  * Supports lint, list-templates, and version commands
+  * Full rule set: RULE-01 through RULE-14
+
+ -- Matthias G. Eckermann <pcd@mailbox.org>  Wed, 25 Mar 2026 22:49:19 +0100

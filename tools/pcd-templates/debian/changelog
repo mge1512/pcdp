@@ -1,0 +1,5 @@
+pcd-templates (0.3.19-1) unstable; urgency=low
+
+  * Initial release: all deployment templates and library hints.
+
+ -- Matthias G. Eckermann <pcd@mailbox.org>  Fri, 27 Mar 2026 10:00:00 +0100

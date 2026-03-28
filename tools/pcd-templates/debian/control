@@ -1,0 +1,22 @@
+Source: pcd-templates
+Section: devel
+Priority: optional
+Maintainer: Matthias G. Eckermann <pcd@mailbox.org>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.0
+Homepage: https://github.com/mge1512/pcd
+
+Package: pcd-templates
+Architecture: all
+Depends: ${misc:Depends}
+Description: Deployment templates and library hints for PCD
+ pcd-templates provides the deployment templates and library hints files
+ for the Post-Coding Development (PCD).
+ .
+ Deployment templates define language defaults, packaging conventions,
+ and AI translation execution recipes for each supported deployment type.
+ Library hints files provide verified dependency versions and API shapes
+ for common libraries.
+ .
+ Both pcd-lint and mcp-server-pcd read from the installed template
+ and hints directories at runtime.

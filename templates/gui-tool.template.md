@@ -4,7 +4,7 @@
 Deployment:   template
 Version:      0.3.18
 Spec-Schema:  0.3.18
-Author:       Matthias G. Eckermann <pcdp@mailbox.org>
+Author:       Matthias G. Eckermann <pcd@mailbox.org>
 License:      CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -37,7 +37,7 @@ GUIFramework := Qt6 | Tauri | Flutter
 Language := CPP | Rust | Dart
 // CPP:  Qt6 default. Also used for Qt6 + embedded-linux.
 // Rust: Tauri backend. Frontend is HTML/CSS/JS — not a compiled
-//       language in the PCDP sense; translator generates web assets.
+//       language in the PCD sense; translator generates web assets.
 // Dart: Flutter. Dart VM on desktop/mobile; AOT on mobile.
 
 OutputFormat := RPM | DEB | PKG | MSI | APK | AAB | IPA | binary
@@ -128,11 +128,11 @@ Constraint: required
 
 Preset layering (systemd-style, later wins):
 ```
-/usr/share/pcdp/templates/gui-tool.template.md   ← this file
-/usr/share/pcdp/presets/                         ← vendor presets
-/etc/pcdp/presets/                               ← system admin
-~/.config/pcdp/presets/                          ← user
-./.pcdp/presets/                                 ← project-local
+/usr/share/pcd/templates/gui-tool.template.md   ← this file
+/usr/share/pcd/presets/                         ← vendor presets
+/etc/pcd/presets/                               ← system admin
+~/.config/pcd/presets/                          ← user
+./.pcd/presets/                                 ← project-local
 ```
 
 Framework override is only accepted from preset files, not from
@@ -146,7 +146,7 @@ override the framework choice within the compatibility rules.
 | Key | Value | Constraint | Notes |
 |-----|-------|------------|-------|
 | VERSION | MAJOR.MINOR.PATCH | required | Semantic versioning. |
-| SPEC-SCHEMA | MAJOR.MINOR.PATCH | required | PCDP schema version. |
+| SPEC-SCHEMA | MAJOR.MINOR.PATCH | required | PCD schema version. |
 | AUTHOR | name \<email\> | required | Repeating key; multiple authors permitted. |
 | LICENSE | SPDX identifier | required | Valid SPDX identifier or compound expression. |
 | PLATFORM | Linux | default | Desktop Linux. RPM + DEB output required. |
@@ -186,7 +186,7 @@ override the framework choice within the compatibility rules.
 | FLUTTER-TARGET | desktop | default | Linux/macOS/Windows desktop when FRAMEWORK=Flutter. |
 | FLUTTER-TARGET | mobile | supported | Android + iOS when FRAMEWORK=Flutter. |
 | TAURI-FRONTEND | html-css-js | supported | Plain web frontend for Tauri. |
-| TAURI-FRONTEND | svelte | supported | Svelte frontend (recommended for PCDP — LLM-friendly). |
+| TAURI-FRONTEND | svelte | supported | Svelte frontend (recommended for PCD — LLM-friendly). |
 | TAURI-FRONTEND | react | supported | React frontend. |
 | PRESET-SYSTEM | systemd-style | required | Preset layering follows systemd conventions. See whitepaper A.11. |
 
@@ -386,11 +386,11 @@ LANGUAGE, and PLATFORM set. The following logical components apply:
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-It is read by pcdp-lint (for template resolution validation) and by
+It is read by pcd-lint (for template resolution validation) and by
 AI translators (for code generation context).
 
 Location in preset hierarchy:
-  /usr/share/pcdp/templates/gui-tool.template.md
+  /usr/share/pcd/templates/gui-tool.template.md
 
 Versioning:
   Template version is declared in META (Version: field).

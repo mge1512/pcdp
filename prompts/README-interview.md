@@ -1,7 +1,7 @@
-# PCDP Specification Interview — Usage Guide
+# PCD Specification Interview — Usage Guide
 
 `interview-prompt.md` is a prompt that instructs any LLM to produce a complete
-PCDP specification from a conversation with a domain expert. Two options are
+PCD specification from a conversation with a domain expert. Two options are
 supported:
 
 - **Option 1 — Full interview:** The model asks questions from scratch.
@@ -12,7 +12,7 @@ supported:
   contradictions, confirms the extraction, then asks only for what is missing.
   Good for components that already have some documentation.
 
-The expert does not need to know the PCDP format, any programming language,
+The expert does not need to know the PCD format, any programming language,
 or formal notation.
 
 ## How to use it
@@ -50,11 +50,11 @@ conversation after the model asks its opening question.
 
 ## What the interview produces
 
-At the end, the model writes a complete PCDP specification in Markdown.
+At the end, the model writes a complete PCD specification in Markdown.
 Copy it into a `.md` file, then validate:
 
 ```bash
-pcdp-lint mycomponent.md
+pcd-lint mycomponent.md
 ```
 
 Then translate to code using the standard translation prompt:
@@ -66,8 +66,8 @@ Then translate to code using the standard translation prompt:
 ## Full workflow
 
 ```
-Option 1: AI interviews → human reviews → pcdp-lint → AI translates → code
-Option 2: human provides material → AI extracts + gaps → human reviews → pcdp-lint → AI translates → code
+Option 1: AI interviews → human reviews → pcd-lint → AI translates → code
+Option 2: human provides material → AI extracts + gaps → human reviews → pcd-lint → AI translates → code
 ```
 
 ## Phase coverage
@@ -111,7 +111,7 @@ to a larger model for Phase 8 only by copying the conversation transcript
 and asking the larger model to produce the spec from it.
 
 Phase 9 (self-check) is more reliable with larger models. For critical
-specifications, run `pcdp-lint` regardless of the model's self-assessment.
+specifications, run `pcd-lint` regardless of the model's self-assessment.
 
 For Option 2 with long source material (multiple documents, long design
 docs), a model with a larger context window is preferable.
@@ -125,7 +125,7 @@ different models can be used for each.
 ```
 interview-prompt.md  ──►  specification (.md)
                                   │
-                          pcdp-lint (validate)
+                          pcd-lint (validate)
                                   │
                      prompts/prompt.md  ──►  code + audit bundle
 ```

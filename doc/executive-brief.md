@@ -1,7 +1,7 @@
-# Post-Coding Development Paradigm
+# Post-Coding Development
 ## Executive Brief
 
-**Author:** Matthias G. Eckermann <pcdp@mailbox.org>
+**Author:** Matthias G. Eckermann <pcd@mailbox.org>
 **Date:** 2026-03-23
 **Status:** Draft
 
@@ -33,9 +33,9 @@ benefit from AI productivity gains.
 
 ## The Opportunity
 
-The Post-Coding Development Paradigm (PCDP) solves this problem.
+The Post-Coding Development (PCD) solves this problem.
 
-PCDP is not AI-assisted coding, where engineers write code and AI
+PCD is not AI-assisted coding, where engineers write code and AI
 suggests completions. It is a fundamentally different approach: domain
 experts write structured natural-language specifications describing
 *what* a system should do, and AI generates all implementation code
@@ -49,7 +49,7 @@ generated code back to a specific specification clause. The AI is a
 translator, not an author. Its output is verifiable because the input
 is human-readable and formally structured.
 
-PCDP unlocks AI productivity gains across the entire regulated software
+PCD unlocks AI productivity gains across the entire regulated software
 market — a market that has been waiting for exactly this capability.
 
 ---
@@ -84,7 +84,7 @@ human-reviewable at every layer.
 
 ## Empirical Validation
 
-PCDP is not a theoretical proposal. The reference validator — `pcdp-lint`,
+PCD is not a theoretical proposal. The reference validator — `pcd-lint`,
 a command-line tool that checks specification files for structural
 correctness — was itself specified and generated using the paradigm.
 Zero implementation code was written by hand.
@@ -104,7 +104,7 @@ alongside the Linux artifacts.
 This finding has direct implications for digital sovereignty. Regulated
 industries in Germany, France, and the broader EU increasingly require
 that sensitive development processes not depend on non-European
-infrastructure. PCDP works with locally-hosted AI models. The
+infrastructure. PCD works with locally-hosted AI models. The
 paradigm's core mechanism — target language resolution from deployment
 templates — functions correctly regardless of which AI model performs
 the translation.
@@ -113,7 +113,7 @@ the translation.
 
 ## Strategic Positioning
 
-PCDP occupies a position that no existing product addresses.
+PCD occupies a position that no existing product addresses.
 
 Current AI coding assistants (GitHub Copilot, Cursor, and their
 competitors) are explicitly prohibited in regulated domains. They
@@ -126,7 +126,7 @@ specialised expertise that most engineering organisations do not
 have. Their adoption has been limited to elite research groups and
 a handful of high-assurance projects.
 
-PCDP bridges this gap. Specifications are written in structured
+PCD bridges this gap. Specifications are written in structured
 natural language — accessible to domain experts, not just formal
 methods specialists. Formal verification is available as an optional
 layer for the highest-assurance components. The same specification
@@ -158,7 +158,7 @@ tools. Stub templates for safety/security-critical libraries, general
 C-ABI libraries, Python tooling, multi-component project manifests,
 and MCP server components.
 
-**Reference implementation.** `pcdp-lint`, the specification validator,
+**Reference implementation.** `pcd-lint`, the specification validator,
 generated from its own specification. Available as RPM, DEB, and
 container image via the openSUSE Build Service.
 
@@ -179,7 +179,7 @@ one to establish this paradigm.
 
 First, AI model capability has crossed the threshold where structured
 specification-to-code translation is reliable enough for production
-use. The empirical evidence from the `pcdp-lint` development confirms
+use. The empirical evidence from the `pcd-lint` development confirms
 this for a representative real-world component.
 
 Second, the EU Cyber Resilience Act and strengthening of Common
@@ -202,7 +202,7 @@ community-controlled reference exists first.
 
 The project is seeking collaborators in three areas:
 
-**Regulated-industry pilots.** Early adopters willing to apply PCDP
+**Regulated-industry pilots.** Early adopters willing to apply PCD
 to a real component — a cryptographic primitive, a state machine, a
 device driver — and document the certification cost and effort
 reduction.
@@ -216,10 +216,10 @@ requirements.
 deployment templates for their domain — additional safety standards,
 programming languages, packaging formats, or verification back-ends.
 
-Contact: pcdp@mailbox.org
+Contact: pcd@mailbox.org
 
 ---
 
-*The Post-Coding Development Paradigm is an independent open-source
+*The Post-Coding Development is an independent open-source
 project. The author is affiliated with SUSE but this document does not
 represent SUSE's official position.*

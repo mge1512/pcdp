@@ -5,7 +5,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -109,14 +109,14 @@ components. Reference: https://cps-org.github.io/cps/
 ## EXAMPLES
 
 *(Pending — to be completed in v0.3.8)*
-*(Reference examples: libpcdp-util, a simple string processing library)*
+*(Reference examples: libpcd-util, a simple string processing library)*
 
 ---
 
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-Location: /usr/share/pcdp/templates/library-c-abi.template.md
+Location: /usr/share/pcd/templates/library-c-abi.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Note: For safety/security-critical C libraries, use verified-library instead.
 

@@ -3,12 +3,12 @@
 
 
 
-# Post-Coding Development Paradigm
+# Post-Coding Development
 ## Human Intent, Machine Implementation
 
 **Status:** Draft  
 **Version:** 0.3.19  
-**Author:** Matthias G. Eckermann <pcdp@mailbox.org>  
+**Author:** Matthias G. Eckermann <pcd@mailbox.org>  
 **Date:** 2026-03-24
 
 ---
@@ -17,7 +17,7 @@
 
 Informally known as **Piccadilly** — *the place where intent becomes implementation.*
 
-The **Post-Coding Development Paradigm** fundamentally changes how software is created: **domain experts write specifications in structured natural language; AI generates verified implementations**. Engineers never write implementation code. Instead, they author precise specifications in Markdown describing what a system should do—data types, behaviors, invariants, state machines, deployment context. An AI translator converts these specifications into type-safe, memory-safe implementations, optionally through formal verification in proven meta-languages (Lean 4, F*, Dafny).
+The **Post-Coding Development** fundamentally changes how software is created: **domain experts write specifications in structured natural language; AI generates verified implementations**. Engineers never write implementation code. Instead, they author precise specifications in Markdown describing what a system should do—data types, behaviors, invariants, state machines, deployment context. An AI translator converts these specifications into type-safe, memory-safe implementations, optionally through formal verification in proven meta-languages (Lean 4, F*, Dafny).
 
 **This is not "AI-assisted coding"** where developers write code with AI suggestions. This is **post-coding development** where domain experts write specifications and AI generates all implementation code. The human role shifts from programming to architectural specification.
 
@@ -27,7 +27,7 @@ The paradigm enables AI-augmented development in **safety-critical and regulated
 
 **Target language is not a specification concern.** A key design principle introduced in v0.3.0: the target programming language is a *function of the deployment context*, not a free variable that the spec author must decide. Deployment templates encode this mapping, separating architectural intent (the specification) from implementation mechanics (the generated code).
 
-Deliverables include specification schemas, deployment templates, translator prototypes, pluggable IR formats, reference backends (C, Rust, Go, WASM), CI patterns producing audit bundles, and migration guidance for gradual adoption. The `pcdp-lint` validator is developed as the paradigm's own reference implementation—eating its own dog food from the first artifact.
+Deliverables include specification schemas, deployment templates, translator prototypes, pluggable IR formats, reference backends (C, Rust, Go, WASM), CI patterns producing audit bundles, and migration guidance for gradual adoption. The `pcd-lint` validator is developed as the paradigm's own reference implementation—eating its own dog food from the first artifact.
 
 ### Value Proposition at a Glance
 
@@ -49,7 +49,7 @@ Deliverables include specification schemas, deployment templates, translator pro
 
 ## 1. Introduction
 
-AI has made code synthesis cheap, but unstructured generation is brittle and unsuitable for regulated environments. Traditional formal methods provide guarantees but require specialized expertise. The Post-Coding Development Paradigm bridges this gap through a fundamental shift: **humans write what the system should do (specifications); AI writes how to do it (implementation)**. Crucially, while the AI translation process introduces inherent probabilistic uncertainty, the paradigm addresses this through multiple verification layers rather than relying solely on specification structure.
+AI has made code synthesis cheap, but unstructured generation is brittle and unsuitable for regulated environments. Traditional formal methods provide guarantees but require specialized expertise. The Post-Coding Development bridges this gap through a fundamental shift: **humans write what the system should do (specifications); AI writes how to do it (implementation)**. Crucially, while the AI translation process introduces inherent probabilistic uncertainty, the paradigm addresses this through multiple verification layers rather than relying solely on specification structure.
 
 The paradigm is built on four core principles:
 
@@ -60,7 +60,7 @@ In practice, specifications need not be written entirely by hand. A standard int
 
 1. **AI interviews** the domain expert (one question at a time)
 2. **Human reviews** the produced specification
-3. **pcdp-lint validates** the specification structure
+3. **pcd-lint validates** the specification structure
 4. **AI translates** the specification to verified code
 
 This keeps specifications human-reviewed and human-approved, while removing the need for domain experts to learn the specification format itself.
@@ -167,7 +167,7 @@ A concise competitor comparison is provided in Appendix A.3.
 
 - **Small pilots validate approach:** Targeted pilots on well-defined components (crypto primitives, state machines) create momentum and reduce organizational risk.
 
-- **Eat your own dog food:** The `pcdp-lint` validator is being developed using this paradigm itself. A specification that cannot describe its own tooling has not yet proven its expressiveness.
+- **Eat your own dog food:** The `pcd-lint` validator is being developed using this paradigm itself. A specification that cannot describe its own tooling has not yet proven its expressiveness.
 
 ---
 
@@ -175,7 +175,7 @@ A concise competitor comparison is provided in Appendix A.3.
 
 **Pilot and validate**  
 - Run pilots on well-scoped components (crypto primitives, register accessors, state machines, protocol implementations).
-- Use `pcdp-lint` as the first reference implementation developed under the paradigm.
+- Use `pcd-lint` as the first reference implementation developed under the paradigm.
 - Measure defect reduction, specification review time, audit effort, and certification cost reduction.
 - For highest-assurance components, employ dual-LLM verification where independent translators cross-validate via formal equivalence.
 
@@ -398,7 +398,7 @@ Logging: All attempts logged with user_id, from_id, to_id, amount, result
 
 **1. Machine-parsable before translation:**
 ```
-$ pcdp-lint account_transfer.md
+$ pcd-lint account_transfer.md
 
 ✓ All required sections present (META, TYPES, BEHAVIOR, PRECONDITIONS, POSTCONDITIONS, INVARIANTS, EXAMPLES)
 ✓ META complete: Deployment, Verification, Safety-Level
@@ -452,7 +452,7 @@ Ready for code generation.
 
 ```bash
 #!/bin/bash
-# pcdp-lint.sh - Validate specification structure
+# pcd-lint.sh - Validate specification structure
 
 spec_file=$1
 
@@ -478,7 +478,7 @@ done
 deployment=$(grep "^Deployment:" "$spec_file" | awk '{print $2}')
 spec-template-resolve "$deployment" || {
   echo "ERROR: Unknown deployment template: $deployment"
-  echo "       Use 'pcdp-lint --list-templates' to see available templates"
+  echo "       Use 'pcd-lint --list-templates' to see available templates"
   exit 1
 }
 
@@ -603,7 +603,7 @@ Side-Channel-Countermeasures: {{list}}
 
 A specification may contain multiple BEHAVIOR sections, each describing a distinct operation. This is the standard pattern for CLI tools with multiple commands, or any component with more than one public entry point.
 
-A `BEHAVIOR/INTERNAL` section describes implementation logic that is not directly user-facing — internal rules, algorithms, or sub-procedures invoked by a `BEHAVIOR`. Translators use `BEHAVIOR/INTERNAL` sections to generate private functions or methods. `pcdp-lint` validates `BEHAVIOR/INTERNAL` sections with the same structural rules as `BEHAVIOR` sections.
+A `BEHAVIOR/INTERNAL` section describes implementation logic that is not directly user-facing — internal rules, algorithms, or sub-procedures invoked by a `BEHAVIOR`. Translators use `BEHAVIOR/INTERNAL` sections to generate private functions or methods. `pcd-lint` validates `BEHAVIOR/INTERNAL` sections with the same structural rules as `BEHAVIOR` sections.
 
 Example:
 ```markdown
@@ -619,8 +619,8 @@ Example:
 ```
 1. Domain expert writes constrained specification
      ↓
-2. pcdp-lint validates structure and completeness
-   pcdp-lint resolves deployment template → target language
+2. pcd-lint validates structure and completeness
+   pcd-lint resolves deployment template → target language
      ↓ (if invalid → reject with specific errors)
 3. Human reviews specification (peer review)
      ↓
@@ -740,7 +740,7 @@ ERRORS:
   - ERR_ACCOUNT_FROZEN if account is not active
 ```
 
-`pcdp-lint` validates the `Constraint:` value (RULE-13) and records it in the
+`pcd-lint` validates the `Constraint:` value (RULE-13) and records it in the
 TRANSLATION_REPORT. Translators must not implement `forbidden` behaviors.
 `supported` behaviors are implemented only if the resolved preset activates them.
 
@@ -824,7 +824,7 @@ GENERATED-FILES:
   - api/v1alpha1/groupversion_info.go
 ```
 
-`pcdp-lint` validates section structure as RULE-11. The translator reads this
+`pcd-lint` validates section structure as RULE-11. The translator reads this
 section alongside the template DELIVERABLES and records compliance in the
 TRANSLATION_REPORT.
 
@@ -951,7 +951,7 @@ Any BEHAVIOR block whose STEPS contain one or more error exits must include
 at least one EXAMPLE whose THEN clause verifies the error outcome. This rule
 applies specifically to BEHAVIORs involving mutual-exclusion validation,
 timeouts, deletion/finalizer flows, retries, and unsupported conditions.
-`pcdp-lint` enforces this as RULE-10 (error, not warning).
+`pcd-lint` enforces this as RULE-10 (error, not warning).
 
 ```markdown
 EXAMPLE: transfer_insufficient_funds
@@ -1175,7 +1175,7 @@ See Appendix A.18 for the second-agent test generation approach.
   "deployment_template": {
     "name": "backend-service",
     "resolved_target": "go",
-    "preset_source": "/etc/pcdp/presets/org.toml"
+    "preset_source": "/etc/pcd/presets/org.toml"
   },
   "translation": {
     "translator": "spec2lean-v1.0",
@@ -1230,9 +1230,9 @@ See Appendix A.18 for the second-agent test generation approach.
 
 **Phase 0: Preparation**
 - Identify candidate components (small, high-risk, well-understood domain).
-- Install `pcdp-lint` for specification validation.
+- Install `pcd-lint` for specification validation.
 - Select deployment templates applicable to the project domain.
-- Configure org-level presets in `/etc/pcdp/presets/`.
+- Configure org-level presets in `/etc/pcd/presets/`.
 - No specification writing training required — domain experts use the
   interview prompt (`prompts/interview-prompt.md`) to produce specs via
   a guided AI conversation. The format is learned by the tool, not the human.
@@ -1242,7 +1242,7 @@ See Appendix A.18 for the second-agent test generation approach.
   small models running locally — no cloud dependency required).
 - LLM asks questions; expert answers in plain language; LLM produces the spec.
 - Expert reviews the produced specification and corrects any misunderstandings.
-- Run `pcdp-lint` to validate structural correctness.
+- Run `pcd-lint` to validate structural correctness.
 - Keep current manual implementation unchanged during this phase.
 - Goal: Validate that domain experts can produce adequate specifications
   through the interview process, without learning the specification format.
@@ -1299,13 +1299,13 @@ translators and commercial tools — provided attribution is given. This maximis
 adoption and allows regulated-industry organisations to build certified
 closed-source translators without license conflict.
 
-**Reference implementation (`pcdp-lint`): `GPL-2.0-only`**
-The `pcdp-lint` validator and any other reference tools are licensed under
+**Reference implementation (`pcd-lint`): `GPL-2.0-only`**
+The `pcd-lint` validator and any other reference tools are licensed under
 GNU General Public License version 2 only. This follows the Linux kernel model:
-companies that ship or modify `pcdp-lint` must contribute their changes back.
+companies that ship or modify `pcd-lint` must contribute their changes back.
 This forces collaboration on the validation toolchain — the compliance layer
 that must remain community-controlled and vendor-neutral for the paradigm to
-be trustworthy in regulated markets. No single company can fork `pcdp-lint`,
+be trustworthy in regulated markets. No single company can fork `pcd-lint`,
 add proprietary validation rules, and use it to lock in customers.
 
 The strategic rationale: the GPL-2.0-only reference implementation was a
@@ -1316,7 +1316,7 @@ the validator is more valuable than any single company's proprietary advantage.
 **License compatibility note:**
 - CC-BY-4.0 specifications may be implemented by GPL-2.0-only, Apache-2.0,
   proprietary, or any other licensed tools without conflict.
-- GPL-2.0-only `pcdp-lint` may validate Apache-2.0, CC-BY-4.0, and other
+- GPL-2.0-only `pcd-lint` may validate Apache-2.0, CC-BY-4.0, and other
   licensed specifications without conflict.
 - Organisations developing proprietary translators should use the
   CC-BY-4.0 specification documents as their normative reference.
@@ -1337,7 +1337,7 @@ the validator is more valuable than any single company's proprietary advantage.
 3. Implement reference translator with both paths:
    - Direct: Specification → target language (via deployment template)
    - Verified: Specification → Lean 4 → target language
-4. Build `pcdp-lint` as reference implementation under the paradigm itself.
+4. Build `pcd-lint` as reference implementation under the paradigm itself.
 5. Develop domain-specific templates (automotive, finance, embedded, crypto).
 6. Run pilot with safety-critical domain (automotive or medical device).
 7. Engage regulatory bodies (ISO, FAA, FDA) for certification pathway validation.
@@ -1395,7 +1395,7 @@ AI translators can hallucinate invalid intermediate representations, introduce s
 
 ```
 Specification (human)
-  ↓ [pcdp-lint validates + deployment template resolves target language]
+  ↓ [pcd-lint validates + deployment template resolves target language]
   ↓ [AI translates]
 Intermediate Representation (machine-checkable)
   ↓ [Meta-language type-checks] ← VERIFICATION CHECKPOINT
@@ -1651,22 +1651,22 @@ Deployment: enhance-existing
 Language: COBOL
 ```
 
-Valid values include any language with a functioning compiler/interpreter: COBOL, Fortran, PHP, Python, Perl, Ruby, Java, C, C++, Go, Rust, and others. The toolchain must be able to generate code compatible with the existing codebase. The pcdp-lint tool will warn if no translator backend exists for the declared language.
+Valid values include any language with a functioning compiler/interpreter: COBOL, Fortran, PHP, Python, Perl, Ruby, Java, C, C++, Go, Rust, and others. The toolchain must be able to generate code compatible with the existing codebase. The pcd-lint tool will warn if no translator backend exists for the declared language.
 
 ### Preset Layering (systemd-style)
 
 Presets follow a layered override model identical in principle to systemd's unit file loading. Later layers override earlier ones; the first match for any given setting wins in reverse order.
 
 ```
-/usr/share/pcdp/templates/        # shipped deployment template definitions (read-only)
-/usr/share/pcdp/presets/          # shipped vendor/community presets (read-only)
-/usr/share/pcdp/hints/            # shipped library hints files (read-only)
-/etc/pcdp/presets/                # system administrator overrides
-/etc/pcdp/hints/                  # system administrator hints
-~/.config/pcdp/presets/           # user-level overrides
-~/.config/pcdp/hints/             # user-level hints
-<project-dir>/.pcdp/presets/      # project-local overrides (committed to git)
-<project-dir>/.pcdp/hints/        # project-local hints (committed to git)
+/usr/share/pcd/templates/        # shipped deployment template definitions (read-only)
+/usr/share/pcd/presets/          # shipped vendor/community presets (read-only)
+/usr/share/pcd/hints/            # shipped library hints files (read-only)
+/etc/pcd/presets/                # system administrator overrides
+/etc/pcd/hints/                  # system administrator hints
+~/.config/pcd/presets/           # user-level overrides
+~/.config/pcd/hints/             # user-level hints
+<project-dir>/.pcd/presets/      # project-local overrides (committed to git)
+<project-dir>/.pcd/hints/        # project-local hints (committed to git)
 ```
 
 ### Template Search Path
@@ -1677,10 +1677,10 @@ discovery and no environment variable magic — the path is baked in at
 build time, consistent with supply chain security requirements.
 
 ```
-TEMPLATE_DIR (compile-time default, read-only)     /usr/share/pcdp/templates/
-/etc/pcdp/templates/                         system administrator additions
-~/.config/pcdp/templates/                    user additions
-<project-dir>/.pcdp/templates/               project-local additions
+TEMPLATE_DIR (compile-time default, read-only)     /usr/share/pcd/templates/
+/etc/pcd/templates/                         system administrator additions
+~/.config/pcd/templates/                    user additions
+<project-dir>/.pcd/templates/               project-local additions
 ```
 
 Later entries take precedence. A template file found in a later path
@@ -1689,16 +1689,16 @@ organisations and projects to ship custom or overriding templates
 without modifying the system-level installation.
 
 The `TEMPLATE_DIR` default for Linux OBS packages is
-`/usr/share/pcdp/templates/`. Platform defaults for macOS
+`/usr/share/pcd/templates/`. Platform defaults for macOS
 and Windows are deferred to v2.
 
 For OBS packaging, `TEMPLATE_DIR` must be set at build time:
 ```
 %build
-make build TEMPLATE_DIR=/usr/share/pcdp/templates/
+make build TEMPLATE_DIR=/usr/share/pcd/templates/
 ```
 
-Example preset file (`/etc/pcdp/presets/suse.toml`):
+Example preset file (`/etc/pcd/presets/suse.toml`):
 
 ```toml
 [templates.cli-tool]
@@ -1721,7 +1721,7 @@ verification = "lean4"  # org mandates formal verification for kernel code
 # Reminder: python-tool is QM only, not for safety-critical components
 ```
 
-Example project-local override (`.pcdp/presets/project.toml`):
+Example project-local override (`.pcd/presets/project.toml`):
 
 ```toml
 [templates.cli-tool]
@@ -1743,7 +1743,7 @@ neither in the spec (which must be language-agnostic) nor in the template
 
 Example:
 ```
-/usr/share/pcdp/hints/cloud-native.go.go-libvirt.hints.md
+/usr/share/pcd/hints/cloud-native.go.go-libvirt.hints.md
 ```
 
 The translator reads all matching hints files after template resolution,
@@ -1814,15 +1814,15 @@ Other templates define their own bindings appropriate to their ecosystem.
 
 ---
 
-### pcdp-lint as Reference Implementation
+### pcd-lint as Reference Implementation
 
-`pcdp-lint` is the first component to be specified and generated under this paradigm. This serves two purposes:
+`pcd-lint` is the first component to be specified and generated under this paradigm. This serves two purposes:
 
-1. **Empirical validation:** If the paradigm cannot describe its own tooling unambiguously, the template design is incomplete. Any gap discovered during `pcdp-lint` specification authoring feeds back directly into template and schema improvements.
+1. **Empirical validation:** If the paradigm cannot describe its own tooling unambiguously, the template design is incomplete. Any gap discovered during `pcd-lint` specification authoring feeds back directly into template and schema improvements.
 
 2. **Demonstrable credibility:** A specification system that can specify itself is a stronger argument than any hand-picked external example.
 
-The `pcdp-lint` specification uses:
+The `pcd-lint` specification uses:
 
 ```markdown
 ## META
@@ -1833,7 +1833,7 @@ Safety-Level: QM
 
 Target language resolves to Go (system default for `cli-tool`), unless overridden by org preset. The spec author — in this case, the project itself — does not need to decide or declare a target language.
 
-The `pcdp-lint` specification will be developed as the next working artifact, with the template schema defined above as its validation schema.
+The `pcd-lint` specification will be developed as the next working artifact, with the template schema defined above as its validation schema.
 
 ### Open Questions for v0.4.0
 
@@ -1851,7 +1851,7 @@ The following questions were deferred to keep v0.3.0 focused:
 
 ### Overview
 
-The Post-Coding Development Paradigm combines several established ideas in a novel way. Each individual ingredient has precedent; the combination does not exist as a productised, accessible, regulated-domain-ready system.
+The Post-Coding Development combines several established ideas in a novel way. Each individual ingredient has precedent; the combination does not exist as a productised, accessible, regulated-domain-ready system.
 
 ### Closest Existing Approaches
 
@@ -1904,7 +1904,7 @@ The combination that does not exist elsewhere:
 
 4. **Regulated-domain certification as a design goal** — audit bundles, traceability matrices, and formal proofs are first-class outputs, not afterthoughts. The paradigm is designed to satisfy ISO 26262, DO-178C, IEC 62304, and Common Criteria requirements.
 
-5. **Self-hosting from the first artifact** — the `pcdp-lint` validator is developed using its own specification format. This is not a theoretical claim; it is an empirical test run from the beginning.
+5. **Self-hosting from the first artifact** — the `pcd-lint` validator is developed using its own specification format. This is not a theoretical claim; it is an empirical test run from the beginning.
 
 ### Academic Framing
 
@@ -1947,7 +1947,7 @@ principles. Everything language- or deployment-specific lives in the
 template's `## EXECUTION` section. A new deployment type gets its own
 execution recipe without touching the shared prompt.
 
-**pcdp-lint validates** that every deployment template (files with
+**pcd-lint validates** that every deployment template (files with
 `Deployment: template` in META) contains a `## EXECUTION` section with
 the required subsections. See RULE-14.
 
@@ -2049,9 +2049,9 @@ translation report. This is the feedback mechanism for spec improvement.
 
 ---
 
-## A.14 Empirical Testing: pcdp-lint
+## A.14 Empirical Testing: pcd-lint
 
-In March 2026, the `pcdp-lint` specification and `cli-tool` deployment template
+In March 2026, the `pcd-lint` specification and `cli-tool` deployment template
 were submitted to multiple LLMs across different environments as an empirical
 test of the paradigm. This appendix documents all test runs and findings.
 
@@ -2061,7 +2061,7 @@ capability class and environment rather than vendor.
 
 ### Test Configuration
 
-- **Specification:** `pcdp-lint.md`
+- **Specification:** `pcd-lint.md`
 - **Template:** `cli-tool.template.md`
 - **Prompt:** A.13 prompt, refined iteratively across runs
 - **Environments tested:** Browser, API + mcphost + filesystem MCP, local Ollama
@@ -2191,7 +2191,7 @@ DELIVERABLES table as of v0.3.3.
 
 ### LLM-G: Small model, API-only, complete run
 
-On 2026-03-25, `pcdp-lint.md` v0.3.13 and `cli-tool.template.md` v0.3.13 were
+On 2026-03-25, `pcd-lint.md` v0.3.13 and `cli-tool.template.md` v0.3.13 were
 submitted to a small frontier model via the Anthropic API — using the new KIT
 tool with filesystem access and the ability to run test builds.  The model
 delivered all source and packaging artifacts inline, as clearly separated files
@@ -2221,8 +2221,8 @@ though the deliverables summary skipped mentioning them explicitly —
 an indexing gap in the report, not an implementation gap.
 
 *CLI style correct.* All commands use bare-word and key=value syntax
-(`pcdp-lint strict=true myspec.md`, `pcdp-lint list-templates`) with no
-`--flags`. One slip in INDEX.md (`pcdp-lint --help`) did not affect the
+(`pcd-lint strict=true myspec.md`, `pcd-lint list-templates`) with no
+`--flags`. One slip in INDEX.md (`pcd-lint --help`) did not affect the
 implementation.
 
 *SPDX compound expressions.* The `Apache-2.0 OR MIT` compound expression
@@ -2241,7 +2241,7 @@ worked as designed.
 
 **Significance:** Demonstrates that a small frontier model, via direct API
 with no MCP infrastructure, can produce a complete, tested, packaging-ready
-PCDP implementation. The barrier to entry for PCDP translation is lower than
+PCD implementation. The barrier to entry for PCD translation is lower than
 the earlier test series suggested — capable models do not require extended
 context windows, filesystem MCP servers, or extended reasoning modes.
 
@@ -2254,7 +2254,7 @@ Tool call reliability and large payload handling improve with SDK updates.
 Recommend tracking mcphost version in the audit bundle metadata.
 
 **max_tokens must be set high.**
-16384 minimum for a complete pcdp-lint implementation including packaging.
+16384 minimum for a complete pcd-lint implementation including packaging.
 Lower values cause JSON truncation in tool calls, producing silent failures.
 
 **Filesystem MCP config must allow subdirectory creation.**
@@ -2288,14 +2288,14 @@ validation cycle.
 
 No LLM can provide a legal guarantee that generated code is free of patterns
 derived from differently-licensed training data. This is an unsolved problem
-in the field. The `License:` META field and SPDX validation in `pcdp-lint`
+in the field. The `License:` META field and SPDX validation in `pcd-lint`
 are necessary but not sufficient for license compliance.
 
 ### What the Paradigm Provides
 
 The paradigm is better positioned than generic AI coding assistants:
 
-- The `License:` META field declares intent upfront, validated by `pcdp-lint`
+- The `License:` META field declares intent upfront, validated by `pcd-lint`
 - The translator receives an explicit license constraint and must acknowledge
   it in the translation report
 - The audit bundle contains the generated source, making SCA scanning
@@ -2309,7 +2309,7 @@ as a required step in the audit bundle pipeline, after code generation and
 before deployment sign-off:
 
 ```
-Specification → pcdp-lint → AI translator → generated code
+Specification → pcd-lint → AI translator → generated code
   → SCA scan → audit bundle → human review → deployment
 ```
 
@@ -2358,13 +2358,13 @@ freedom — GPL-compatible code may be used freely.
 
 ### The Problem
 
-Everything in PCDP v0.3.x assumes a single component with a single specification
+Everything in PCD v0.3.x assumes a single component with a single specification
 file. Real software systems are composed of many components with defined interfaces
 between them. A payment system is not one spec — it is an account service, a
 transfer service, a ledger, an audit log, and a notification system, each with
 precisely defined contracts between them.
 
-The paradigm must scale to this reality. The architect role in PCDP is to
+The paradigm must scale to this reality. The architect role in PCD is to
 decompose a system into components, define the interfaces between them, and
 specify the build order. Individual domain experts then author the per-component
 specifications.
@@ -2409,7 +2409,7 @@ The `#INTERFACE` fragment means "import only the exported interface,
 not the full implementation spec."
 
 **Project Manifest**
-A top-level file (`pcdp-project.md`) that declares all components in a
+A top-level file (`pcd-project.md`) that declares all components in a
 system, their dependencies, build order, and system-level invariants.
 The manifest is the architect's primary artifact in a multi-component project.
 See Appendix A.17 for the `project-manifest` deployment template.
@@ -2428,7 +2428,7 @@ not in individual component specs:
 ### Architectural Workflow for Large Projects
 
 ```
-1. Architect authors pcdp-project.md
+1. Architect authors pcd-project.md
    Declares: components, dependencies, build order, system invariants
 
 2. Architect authors interface specs (*.interface.md)
@@ -2443,7 +2443,7 @@ not in individual component specs:
    Import resolution provides full type information at translation time
    Generated code respects interface contracts by construction
 
-5. pcdp-lint validates the full project
+5. pcd-lint validates the full project
    Checks: all imports resolve, interface contracts consistent,
    no circular dependencies, system invariants present
 ```
@@ -2495,9 +2495,9 @@ Imports:
   - account-service: ./account-service.md#INTERFACE@>=1.2.0
 ```
 
-### What This Means for pcdp-lint
+### What This Means for pcd-lint
 
-`pcdp-lint` v1 validates single specs in isolation. A future version
+`pcd-lint` v1 validates single specs in isolation. A future version
 (v2 scope) will validate full projects:
 
 - Resolve all imports and check they exist
@@ -2508,12 +2508,12 @@ Imports:
 
 ---
 
-## A.17 The mcp-server-pcdp: MCP Server for PCDP
+## A.17 The mcp-server-pcd: MCP Server for PCD
 
 ### Motivation
 
 The filesystem-based template system works well for single-developer use.
-`mcp-server-pcdp` makes the full PCDP toolchain accessible to any MCP-capable
+`mcp-server-pcd` makes the full PCD toolchain accessible to any MCP-capable
 LLM host — no local file copies of templates, prompts, or hints required.
 The LLM connects to the server and has everything it needs in one session.
 
@@ -2528,15 +2528,15 @@ Benefits over filesystem-only access:
 
 ### Tools
 
-Seven tools covering the full PCDP workflow:
+Seven tools covering the full PCD workflow:
 
 | Tool | Description |
 |---|---|
 | `list_templates` | List all installed deployment templates with version and default language |
 | `get_template` | Retrieve full template content by name and version |
 | `list_resources` | List all available resources (templates, prompts, hints) |
-| `read_resource` | Read any resource by `pcdp://` URI |
-| `lint_content` | Validate a PCDP spec given as a string; returns structured diagnostics |
+| `read_resource` | Read any resource by `pcd://` URI |
+| `lint_content` | Validate a PCD spec given as a string; returns structured diagnostics |
 | `lint_file` | Validate a spec file on disk; returns structured diagnostics |
 | `get_schema_version` | Return the Spec-Schema version the server was built against |
 
@@ -2546,10 +2546,10 @@ Resources are browseable natively by any MCP client — no tool call required:
 
 | URI pattern | Content |
 |---|---|
-| `pcdp://templates/{name}` | Full deployment template Markdown |
-| `pcdp://prompts/interview` | Interview prompt — guides AI-assisted spec authoring |
-| `pcdp://prompts/translator` | Universal translator prompt |
-| `pcdp://hints/{template}.{lang}.{lib}` | Library-specific translator hints |
+| `pcd://templates/{name}` | Full deployment template Markdown |
+| `pcd://prompts/interview` | Interview prompt — guides AI-assisted spec authoring |
+| `pcd://prompts/translator` | Universal translator prompt |
+| `pcd://hints/{template}.{lang}.{lib}` | Library-specific translator hints |
 
 Prompt content is compiled into the binary as string constants — no runtime
 filesystem dependency and no separate install path for prompts.
@@ -2557,13 +2557,13 @@ filesystem dependency and no separate install path for prompts.
 ### The LLM as Wizard
 
 The server provides the data and validation layer; the LLM provides the
-conversational layer. A connected LLM can run the complete PCDP workflow
+conversational layer. A connected LLM can run the complete PCD workflow
 in a single session without any manual file handling:
 
-1. Read `pcdp://prompts/interview` → conduct spec authoring interview
+1. Read `pcd://prompts/interview` → conduct spec authoring interview
 2. Call `lint_content` on the produced spec → receive structured diagnostics
 3. Fix any errors → call `lint_content` again until clean
-4. Read `pcdp://templates/{name}` → translate spec to code
+4. Read `pcd://templates/{name}` → translate spec to code
 5. Iterate
 
 No wizard tool. No file copying. No manual prompt management.
@@ -2573,29 +2573,29 @@ No wizard tool. No file copying. No manual prompt management.
 Both transports are implemented in the same binary, selected by bare-word argument:
 
 ```bash
-mcp-server-pcdp stdio   # for mcphost, Claude Desktop, VS Code
-mcp-server-pcdp http    # for web-based hosts; default listen: 127.0.0.1:8080
+mcp-server-pcd stdio   # for mcphost, Claude Desktop, VS Code
+mcp-server-pcd http    # for web-based hosts; default listen: 127.0.0.1:8080
 ```
 
 **mcphost config (stdio):**
 ```yaml
 mcpServers:
-  pcdp:
-    command: mcp-server-pcdp
+  pcd:
+    command: mcp-server-pcd
     args: [stdio]
 ```
 
 **mcphost config (HTTP, if running as service):**
 ```yaml
 mcpServers:
-  pcdp:
+  pcd:
     url: http://127.0.0.1:8080/mcp
 ```
 
 ### Implementation and self-hosting
 
-`mcp-server-pcdp` is specified in PCDP format at
-`tools/mcp-server-pcdp/spec/mcp-server-pcdp.md` with `Deployment: mcp-server`.
+`mcp-server-pcd` is specified in PCD format at
+`tools/mcp-server-pcd/spec/mcp-server-pcd.md` with `Deployment: mcp-server`.
 The implementation is generated from that spec. Self-hosting applies.
 
 The `mcp-server` deployment template (`templates/mcp-server.template.md`) defines
@@ -2628,7 +2628,7 @@ of this appendix as planned future work.
 
 #### Rationale
 
-The EXAMPLES section of a PCDP specification is written by the spec author.
+The EXAMPLES section of a PCD specification is written by the spec author.
 It tests what the author thought of. A second AI model, independently reading
 the same specification, will generate tests for cases the author did not
 consider — boundary conditions, error paths, invariant violations, and
@@ -2744,7 +2744,7 @@ it is `required` for components with Safety-Level above QM.
 
 ### Cross-Section Consistency Checking (v0.3.13+, partial)
 
-`pcdp-lint` previously validated structural completeness only: required
+`pcd-lint` previously validated structural completeness only: required
 sections present, META fields valid, EXAMPLES with GIVEN/WHEN/THEN.
 Identifier and type name drift across sections — a method named `Dial`
 in INTERFACES but `transport.Connect` in BEHAVIOR prose — was undetected.
@@ -2795,7 +2795,7 @@ for the following reasons:
   to SVG in the whitepaper and documentation pipeline without additional
   tooling.
 - **Go wrapper available:** A Go library wraps the Pikchr C code, meaning
-  `pcdp-tools` could generate Pikchr diagrams natively without shelling out.
+  `pcd-tools` could generate Pikchr diagrams natively without shelling out.
 
 Mermaid is retained in `README.md` where GitHub native rendering matters
 more than layout precision.
@@ -2831,10 +2831,10 @@ Validation results:
 #### Example Diagram Structure
 
 ```pikchr
-# Translation workflow for: pcdp-lint
+# Translation workflow for: pcd-lint
 # Generated: 2026-03-23
 
-box "pcdp-lint.md" "v0.3.10" fit
+box "pcd-lint.md" "v0.3.10" fit
 arrow
 box "cli-tool.template.md" "v0.3.10" fit with .n at last arrow.e
 arrow
@@ -2842,7 +2842,7 @@ diamond "Language?" fit
 arrow "Go (default)" right
 box "main.go" "go.mod" "Makefile" fit
 arrow down from last box.s
-box "pcdp-lint.spec" "debian/" "Containerfile" fit
+box "pcd-lint.spec" "debian/" "Containerfile" fit
 arrow down
 box "TRANSLATION_REPORT.md" "translation-workflow.pikchr" fit color lightblue
 ```
@@ -2853,7 +2853,7 @@ run, not a generic template.
 
 #### Tooling
 
-`pikchr` should added to the `pcdp-tools` package alongside `pcdp-lint`.
+`pikchr` should added to the `pcd-tools` package alongside `pcd-lint`.
 Both are built from source, statically linked, and distributed as a single
 package. 
 
@@ -2864,16 +2864,16 @@ package.
 Subplot (https://gitlab.com/subplot/subplot) is a tool for writing
 acceptance criteria in Markdown with embedded GIVEN/WHEN/THEN scenarios,
 producing automated test suites from those documents. Its scenario format
-is nearly identical to the EXAMPLES section of a PCDP specification.
+is nearly identical to the EXAMPLES section of a PCD specification.
 
 **Potential application:** Run Subplot against the EXAMPLES section of a
-PCDP spec to generate and execute an automated acceptance test suite against
+PCD spec to generate and execute an automated acceptance test suite against
 the generated binary. This would partially replace the need for the
 second-agent approach for EXAMPLES validation.
 
 **Current status:** Subplot is a relatively small project. Before committing
-to it as infrastructure, a prototype is needed: run the `pcdp-lint.md`
-EXAMPLES through Subplot against the generated `pcdp-lint` binary and
+to it as infrastructure, a prototype is needed: run the `pcd-lint.md`
+EXAMPLES through Subplot against the generated `pcd-lint` binary and
 evaluate the integration effort, maintained-ness, and Go support.
 
 **Parked for:** v0.3.11 or later, pending prototype evaluation.
@@ -2905,12 +2905,12 @@ Comparison must target behavioural equivalence, not structural identity:
    meta-language verified path, prove behavioural equivalence in the
    meta-language. This is what A.10 describes.
 
-**`pcdp-compare` tool:** A tool that takes two implementation directories
+**`pcd-compare` tool:** A tool that takes two implementation directories
 and a specification, runs behavioural equivalence testing, and produces a
-comparison report. This is itself a candidate for specification under PCDP
-— `pcdp-compare.md` with `Deployment: cli-tool`.
+comparison report. This is itself a candidate for specification under PCD
+— `pcd-compare.md` with `Deployment: cli-tool`.
 
-**Parked for:** v0.3.11 or later, pending specification of `pcdp-compare`.
+**Parked for:** v0.3.11 or later, pending specification of `pcd-compare`.
 
 ---
 
@@ -2919,20 +2919,20 @@ comparison report. This is itself a candidate for specification under PCDP
 | Version | Date | Changes |
 |---------|------|---------|
 | 0.3.19 | 2026-03-27 | Added informal name "Piccadilly" and tagline "Meet me at the Piccadilly — the place where intent becomes implementation." README subtitle and whitepaper Executive Summary updated. Presentation header subtitle added. |
-| 0.3.18 | 2026-03-26 | A.17 rewritten: mcp-server-pcdp now fully specified, implemented, and tested. Updated to reflect actual tool set (7 tools), native MCP resource registration, embedded prompts, dual transports, registry.suse.com container base. README updated: Self-Hosting expanded to Tooling section covering both pcdp-lint and mcp-server-pcdp; repository layout updated. |
+| 0.3.18 | 2026-03-26 | A.17 rewritten: mcp-server-pcd now fully specified, implemented, and tested. Updated to reflect actual tool set (7 tools), native MCP resource registration, embedded prompts, dual transports, registry.suse.com container base. README updated: Self-Hosting expanded to Tooling section covering both pcd-lint and mcp-server-pcd; repository layout updated. |
 | 0.3.17 | 2026-03-25 | A.14 updated: LLM-G run added (small frontier model, direct API, no MCP, 15/15 tests pass, full compile gate, two-layer prompt v0.3.16 validated end-to-end). Models and deliverables tables updated. |
-| 0.3.16 | 2026-03-25 | Two-layer prompt architecture: prompts/prompt.md is now fully language-agnostic; all delivery phases, resume logic, and compile gate instructions moved to template ## EXECUTION sections. EXECUTION section added to cli-tool, cloud-native, and mcp-server templates. RULE-14 added to pcdp-lint: deployment templates must have ## EXECUTION section. A.13 rewritten to document the two-layer design. |
+| 0.3.16 | 2026-03-25 | Two-layer prompt architecture: prompts/prompt.md is now fully language-agnostic; all delivery phases, resume logic, and compile gate instructions moved to template ## EXECUTION sections. EXECUTION section added to cli-tool, cloud-native, and mcp-server templates. RULE-14 added to pcd-lint: deployment templates must have ## EXECUTION section. A.13 rewritten to document the two-layer design. |
 | 0.3.15 | 2026-03-25 | Added AI-interview workflow for spec authoring. Introduction principle 1 updated: domain experts no longer need to learn the spec format; prompts/interview-prompt.md guides any LLM to conduct a structured interview and produce a complete spec. A.4 Phase 0 and Phase 1 updated to reflect interview-based approach. |
 | 0.3.14 | 2026-03-25 | cloud-native template v0.3.14: INDEPENDENT_TESTS Go naming note; deploy/operator.yaml dedup; HEALTHCHECK contradiction resolved; CRD scope declared in spec; go.sum as generated file. Hints files shipped: go-libvirt and golang-crypto-ssh. Phase 7 compile gate in translator prompt. |
-| 0.3.13 | 2026-03-24 | Resolved all 8 items deferred from v0.3.12, plus 4 new findings from codex lessons. F1: TYPE-BINDINGS table added to deployment templates — maps logical spec types to language-specific types; spec stays language-agnostic. F7: component-based DELIVERABLES section added to spec schema — logical components only; filename mapping stays in templates. F8: TRANSLATION_REPORT confidence table now requires Verification-method and Unverified-claims columns. F10: four formal independent test rules added — one test per EXAMPLE, tests use only declared test doubles, infrastructure-free, multi-pass examples generate multi-step tests. F11 (codex): negative-path EXAMPLES now required for any BEHAVIOR with error exits in STEPS (RULE-10). F12 (codex): TOOLCHAIN-CONSTRAINTS optional spec section added for spec-specific OCI/build/generated-file constraints (RULE-11). F13 (codex): cross-section consistency checking added to pcdp-lint as RULE-12 (identifier, type name, file name consistency; partial implementation). F14 (codex): Constraint: field added to BEHAVIOR headers — required \| supported \| forbidden with default=required (RULE-13). All templates bumped to v0.3.12. CONTRIBUTING.md updated. |
+| 0.3.13 | 2026-03-24 | Resolved all 8 items deferred from v0.3.12, plus 4 new findings from codex lessons. F1: TYPE-BINDINGS table added to deployment templates — maps logical spec types to language-specific types; spec stays language-agnostic. F7: component-based DELIVERABLES section added to spec schema — logical components only; filename mapping stays in templates. F8: TRANSLATION_REPORT confidence table now requires Verification-method and Unverified-claims columns. F10: four formal independent test rules added — one test per EXAMPLE, tests use only declared test doubles, infrastructure-free, multi-pass examples generate multi-step tests. F11 (codex): negative-path EXAMPLES now required for any BEHAVIOR with error exits in STEPS (RULE-10). F12 (codex): TOOLCHAIN-CONSTRAINTS optional spec section added for spec-specific OCI/build/generated-file constraints (RULE-11). F13 (codex): cross-section consistency checking added to pcd-lint as RULE-12 (identifier, type name, file name consistency; partial implementation). F14 (codex): Constraint: field added to BEHAVIOR headers — required \| supported \| forbidden with default=required (RULE-13). All templates bumped to v0.3.12. CONTRIBUTING.md updated. |
 | 0.3.12 | 2026-03-24 | Applied 9 of 10 findings from remote-kvm-operator exercise. STEPS: now required in every BEHAVIOR block (F2). MECHANISM: inline annotation added (F2). Multi-pass WHEN/THEN EXAMPLES format added (F3). INTERFACES optional spec section added with test-double declarations (F4). hints/ directory added to preset hierarchy with library hints file format and naming convention (F5). DEPENDENCIES optional spec section added with do-not-fabricate flag (F6). [observable]/[implementation] INVARIANTS annotation — Option B adopted (F9). Deferred to v0.3.13: TYPE-BINDINGS in templates (F1), component-based DELIVERABLES (F7), TRANSLATION_REPORT confidence table update (F8), A.18 independent test formal rules (F10). |
-| 0.3.11 | 2026-03-24 | Added cloud-native.template.md (complete). Added prompts/README-small-models.md. Added tools/pcdp-lint/spec/prompt.md (component-specific hardcoded-filename prompt for small models). |
+| 0.3.11 | 2026-03-24 | Added cloud-native.template.md (complete). Added prompts/README-small-models.md. Added tools/pcd-lint/spec/prompt.md (component-specific hardcoded-filename prompt for small models). |
 | 0.3.10 | 2026-03-23 | Added A.18: Improving Translation Confidence — second-agent independent test generation (implemented) and Pikchr workflow diagram (implemented); Subplot and dual-LLM comparison parked for research. Updated audit bundle structure with independent_tests/ and translation-workflow.pikchr. Updated A.13 prompt to request workflow diagram. |
 | 0.3.9 | 2026-03-23 | Corrected logical fallacy regarding verifiability claims. Clarified that AI translation is probabilistic and that specification structure alone cannot guarantee correctness. Verifiability is achieved through multiple complementary mechanisms. |
-| 0.3.8 | 2026-03-19 | Added A.16: Large Projects. Added A.17: mcp-server-pcdp. project-manifest stub. pcdp-wizard dropped. MCP naming convention. |
+| 0.3.8 | 2026-03-19 | Added A.16: Large Projects. Added A.17: mcp-server-pcd. project-manifest stub. pcd-wizard dropped. MCP naming convention. |
 | 0.3.7 | 2026-03-18 | Anonymized all LLM/vendor names in A.14. Removed version numbers from all internal filename references. |
 | 0.3.6 | 2026-03-18 | crypto-library → verified-library. python-tool added. library-c-abi CPS note. |
-| 0.3.5 | 2026-03-18 | Renamed spec-lint → pcdp-lint. post-coding paths → pcdp. Filename convention. Curly brace placeholders. |
+| 0.3.5 | 2026-03-18 | Renamed spec-lint → pcd-lint. post-coding paths → pcd. Filename convention. Curly brace placeholders. |
 | 0.3.4 | 2026-03-18 | CC-BY-4.0 for specs/templates, GPL-2.0-only for tools. A.15 SCA. |
 | 0.3.3 | 2026-03-17 | Expanded A.13/A.14. translation_report/ in audit bundle. DELIVERABLES expanded. |
 | 0.3.2 | 2026-03-17 | A.13 prompt. A.14 empirical tests. DELIVERABLES in template. Unified versioning. |

@@ -28,7 +28,7 @@ PCD is a paradigm where:
 ### Repository Structure
 
 ```
-pcdp/
+pcd/
 ├── doc/                           # Documentation
 │   ├── whitepaper.md             # Canonical whitepaper
 │   └── executive-brief.md
@@ -37,7 +37,7 @@ pcdp/
 │   ├── mcp-server.template.md    # Complete, production-ready
 │   └── ...                       # Various template stubs
 ├── tools/                         # PCD tooling
-│   └── pcdp-lint/                # Specification validator
+│   └── pcd-lint/                # Specification validator
 ├── examples/                      # Example specifications
 └── prompts/                       # AI translator prompts
 ```
@@ -164,7 +164,7 @@ module/path:
 
 Tag each invariant with `[observable]` (verifiable by external observation or the
 independent test suite) or `[implementation]` (verifiable by code review or static
-analysis only). Untagged invariants are a `pcdp-lint` warning.
+analysis only). Untagged invariants are a `pcd-lint` warning.
 
 ```markdown
 ## INVARIANTS
@@ -209,9 +209,9 @@ Hints are advisory only — they cannot override spec invariants.
 
 ### 3. Tool Development
 
-#### pcdp-lint Validation Rules
+#### pcd-lint Validation Rules
 
-The `pcdp-lint` tool validates specifications against these rules:
+The `pcd-lint` tool validates specifications against these rules:
 
 - **RULE-01**: Required sections present (META, TYPES, BEHAVIOR, PRECONDITIONS, POSTCONDITIONS, INVARIANTS, EXAMPLES)
 - **RULE-02**: META fields validation
@@ -226,8 +226,8 @@ The `pcdp-lint` tool validates specifications against these rules:
 #### CLI Conventions
 
 All PCD tools follow these conventions:
-- Key=value syntax: `pcdp-lint strict=true spec.md`
-- Bare words for commands: `pcdp-lint list-templates`
+- Key=value syntax: `pcd-lint strict=true spec.md`
+- Bare words for commands: `pcd-lint list-templates`
 - **NO `--flag` style ever** (firm decision)
 - stderr for diagnostics; stdout for summaries and lists
 - Exit codes: 0 = valid, 1 = errors/strict warnings, 2 = invocation error
@@ -246,7 +246,7 @@ The project uses a dual-license model:
 | Artifact Type | License |
 |---|---|
 | Whitepaper, specs, templates, examples | CC-BY-4.0 |
-| Tools (pcdp-lint, etc.) | GPL-2.0-only |
+| Tools (pcd-lint, etc.) | GPL-2.0-only |
 
 **Rationale for GPL-2.0-only on tools:** Mirrors the Linux kernel model. Encourages everybody to contribute changes back to the validator toolchain.
 
@@ -257,7 +257,7 @@ The project uses a dual-license model:
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Make your changes following the guidelines above
-4. Test your changes with `pcdp-lint` if applicable
+4. Test your changes with `pcd-lint` if applicable
 5. Commit with clear, descriptive messages
 6. Push to your fork and submit a pull request
 
@@ -273,7 +273,7 @@ Reference any relevant issues.
 
 ### Testing
 
-- Run `pcdp-lint` on any specifications you modify
+- Run `pcd-lint` on any specifications you modify
 - For Go code: ensure `go build ./...` succeeds
 - Test templates with example specifications
 
@@ -294,13 +294,13 @@ Reference any relevant issues.
 5. Add `independent_tests/` deliverable to cli-tool and mcp-server templates
 
 ### Tooling
-6. Regenerate `pcdp-lint` implementation from v0.3.13 spec (RULE-08–13 new)
+6. Regenerate `pcd-lint` implementation from v0.3.13 spec (RULE-08–13 new)
 7. Update generic `prompts/prompt.md` (A.13) to include compile gate, TYPE-BINDINGS
    guidance, and v0.3.13 confidence table format
 
 ## Communication
 
-- **Email**: pcdp@mailbox.org
+- **Email**: pcd@mailbox.org
 - **Issues**: Use GitHub issues for bug reports and feature requests
 - **Discussions**: Use GitHub discussions for questions and ideas
 
@@ -313,7 +313,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 If you have questions about contributing, please:
 1. Check existing issues and discussions
 2. Review the whitepaper in `doc/whitepaper.md`
-3. Contact us at pcdp@mailbox.org
+3. Contact us at pcd@mailbox.org
 
 Thank you for contributing to PCD!
 

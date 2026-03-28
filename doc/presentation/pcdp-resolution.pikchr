@@ -1,8 +1,0 @@
-# PCDP language resolution — for slides
-# Spec declares deployment → presets resolve language
-
-box "Deployment:" "cli-tool" fit fill 0xe8f7f0 color 0x30ba78
-arrow color 0x30ba78
-box "/usr/share/pcdp/" "→  /etc/pcdp/" "→  ~/.config/" "→  ./.pcdp/" fit color 0x30ba78
-arrow color 0x30ba78
-box "Language: Go" "RPM · DEB · OCI" fit fill 0xfce8ec color 0x30ba78

@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+	# Nothing to build — data package
+
+override_dh_auto_install:
+	install -d debian/pcd-templates/usr/share/pcd/templates
+	install -d debian/pcd-templates/usr/share/pcd/hints
+	install -m 0644 templates/backend-service.template.md  debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/cli-tool.template.md         debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/cloud-native.template.md     debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/gui-tool.template.md         debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/library-c-abi.template.md    debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/mcp-server.template.md       debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/project-manifest.template.md debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/python-tool.template.md      debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 templates/verified-library.template.md debian/pcd-templates/usr/share/pcd/templates/
+	install -m 0644 hints/cloud-native.go.go-libvirt.hints.md        debian/pcd-templates/usr/share/pcd/hints/
+	install -m 0644 hints/cloud-native.go.golang-crypto-ssh.hints.md debian/pcd-templates/usr/share/pcd/hints/
+	install -m 0644 hints/mcp-server.go.mcp-go.hints.md              debian/pcd-templates/usr/share/pcd/hints/

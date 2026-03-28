@@ -5,7 +5,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -125,7 +125,7 @@ Required deliverables will include:
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-Location: /usr/share/pcdp/templates/verified-library.template.md
+Location: /usr/share/pcd/templates/verified-library.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Supersedes: crypto-library template (retired in v0.3.6).
 

@@ -6,7 +6,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -99,10 +99,10 @@ Defines how conflicting values across layers are resolved for any key.
 
 STEPS:
 1. Start with template defaults as the base map.
-2. Merge /usr/share/pcdp/presets/ values (vendor defaults); later entries override earlier.
-3. Merge /etc/pcdp/presets/ values (system admin); overrides vendor defaults.
-4. Merge ~/.config/pcdp/presets/ values (user); overrides system.
-5. Merge <project-dir>/.pcdp/ values (project-local); overrides user.
+2. Merge /usr/share/pcd/presets/ values (vendor defaults); later entries override earlier.
+3. Merge /etc/pcd/presets/ values (system admin); overrides vendor defaults.
+4. Merge ~/.config/pcd/presets/ values (user); overrides system.
+5. Merge <project-dir>/.pcd/ values (project-local); overrides user.
 6. For each key in spec META: if constraint=supported → apply; if constraint=required or default →
    emit Warning: "Spec overrides template default for <K>. Ensure this is intentional."
 7. If spec META declares a constraint=forbidden key → emit Error: "Key <K> is forbidden in cli-tool specs."
@@ -110,10 +110,10 @@ STEPS:
 
 Resolution order (last writer wins):
   1. template default
-  2. /usr/share/pcdp/presets/    (vendor default)
-  3. /etc/pcdp/presets/          (system administrator)
-  4. ~/.config/pcdp/presets/     (user)
-  5. <project-dir>/.pcdp/        (project-local, committed to git)
+  2. /usr/share/pcd/presets/    (vendor default)
+  3. /etc/pcd/presets/          (system administrator)
+  4. ~/.config/pcd/presets/     (user)
+  5. <project-dir>/.pcd/        (project-local, committed to git)
   6. spec META explicit override        (only permitted for constraint=supported keys)
 
 If spec META declares a value for a constraint=required or constraint=default key,
@@ -230,7 +230,7 @@ GIVEN:
     Deployment: cli-tool
     Verification: none
     Safety-Level: QM
-  /etc/pcdp/presets/org.toml contains:
+  /etc/pcd/presets/org.toml contains:
     [templates.cli-tool]
     default_language = "rust"
 WHEN:
@@ -353,11 +353,11 @@ in the specification title (first `#` heading). It must be:
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-It is read by pcdp-lint (for template resolution validation) and by
+It is read by pcd-lint (for template resolution validation) and by
 AI translators (for code generation context).
 
 Location in preset hierarchy:
-  /usr/share/pcdp/templates/cli-tool.template.md
+  /usr/share/pcd/templates/cli-tool.template.md
 
 Versioning:
   Template version is declared in META (Version: field).

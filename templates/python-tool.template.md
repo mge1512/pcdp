@@ -5,7 +5,7 @@
 Deployment:  template
 Version:     0.3.13
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
@@ -73,7 +73,7 @@ component, consider:
 | PYTHON-MIN-VERSION | 3.11 | default | Minimum Python version. Override via preset. |
 | TYPE-CHECKING | mypy | default | mypy or pyright. Replaces compile-time type safety. |
 | RUNTIME-DEPS | declared in pyproject.toml | required | All dependencies pinned in pyproject.toml. |
-| CLI-ARG-STYLE | key=value | required | Consistent with pcdp conventions. |
+| CLI-ARG-STYLE | key=value | required | Consistent with pcd conventions. |
 | NETWORK-CALLS | context-dependent | supported | Declare explicitly in DEPLOYMENT section if used. |
 | OUTPUT-FORMAT | wheel | required | Python wheel (.whl) for pip installation. |
 | OUTPUT-FORMAT | sdist | required | Source distribution for audit and OBS builds. |
@@ -104,8 +104,8 @@ Required deliverables will include:
 
 ## PRECONDITIONS
 
-- Safety-Level must be QM — any other value is rejected by pcdp-lint
-- Verification must be none — any other value is rejected by pcdp-lint
+- Safety-Level must be QM — any other value is rejected by pcd-lint
+- Verification must be none — any other value is rejected by pcd-lint
 - pyproject.toml is a required deliverable
 - Python minimum version must be declared in DEPLOYMENT section
 
@@ -119,8 +119,8 @@ Required deliverables will include:
 
 ## INVARIANTS
 
-- [observable]      Safety-Level anything other than QM is rejected at pcdp-lint time
-- [observable]      Verification anything other than none is rejected at pcdp-lint time
+- [observable]      Safety-Level anything other than QM is rejected at pcd-lint time
+- [observable]      Verification anything other than none is rejected at pcd-lint time
 - [observable]      python-tool components may not be used in safety-critical systems
 - [observable]      template version is recorded in every audit bundle
 
@@ -129,7 +129,7 @@ Required deliverables will include:
 ## EXAMPLES
 
 *(Pending — to be completed in v0.3.8)*
-*(Reference example: a pcdp-validate tool that runs pcdp-lint and
+*(Reference example: a pcd-validate tool that runs pcd-lint and
   spec-validate as a Python wrapper)*
 
 ---
@@ -137,7 +137,7 @@ Required deliverables will include:
 ## DEPLOYMENT
 
 Runtime: this file is a template specification, not executable code.
-Location: /usr/share/pcdp/templates/python-tool.template.md
+Location: /usr/share/pcd/templates/python-tool.template.md
 Status: Work in progress — v0.3.8 target for completion.
 Note: python-tool is QM only. Not suitable for safety-critical components.
 

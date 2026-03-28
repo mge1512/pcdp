@@ -1,0 +1,18 @@
+# mcp-server-pcd tool groups
+
+box "mcp-server-pcd" width 1.8in height 0.40in fill 0xe8f7f0 color 0x30ba78 at (1.0in, 2.40in)
+
+# Three tool group boxes below
+box "template/*" width 1.4in height 0.36in color 0x30ba78 at (0.40in, 1.60in)
+box "lint/*" same at (1.50in, 1.60in)
+box "project/*" same at (2.60in, 1.60in)
+
+# Connectors from server to each group
+line from (0.60in, 2.20in) to (0.60in, 1.78in) thin color 0x30ba78
+line from (1.0in, 2.20in) to (1.50in, 1.78in) thin color 0x30ba78
+line from (1.40in, 2.20in) to (2.60in, 1.78in) thin color 0x30ba78
+
+# Sub-items for each group
+"list · get · resolve" small color 0x30ba78 at (0.40in, 1.10in)
+"validate · check" small color 0x30ba78 at (1.50in, 1.10in)
+"get-interface · resolve" small color 0x30ba78 at (2.60in, 1.10in)

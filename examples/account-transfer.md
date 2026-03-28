@@ -5,7 +5,7 @@
 Deployment:  backend-service
 Version:     0.3.8
 Spec-Schema: 0.3.13
-Author:      Matthias G. Eckermann <pcdp@mailbox.org>
+Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: lean4
 Safety-Level: financial-integrity-critical

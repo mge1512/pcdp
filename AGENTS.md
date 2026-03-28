@@ -60,31 +60,31 @@ edit the code. In PCD, you fix the specification and regenerate. The spec
 is always the source of truth.
 
 **Key artifacts:**
-- `pcdp-lint` — validates PCD specification files (RULE-01 through RULE-14)
-- `mcp-server-pcdp` — MCP server serving templates, prompts, and hints;
+- `pcd-lint` — validates PCD specification files (RULE-01 through RULE-14)
+- `mcp-server-pcd` — MCP server serving templates, prompts, and hints;
   exposes `lint_content` and `lint_file` tools for in-session validation
 - Deployment templates — define target language, packaging, conventions,
   and the full translation execution recipe per deployment type
 
 **Licenses:**
 - Whitepaper, specs, templates, examples: CC-BY-4.0
-- Tools (`pcdp-lint`, `mcp-server-pcdp`): GPL-2.0-only
+- Tools (`pcd-lint`, `mcp-server-pcd`): GPL-2.0-only
 
 ---
 
 ## What You Can Do
 
-- Fix bugs in `pcdp-lint` rule implementations
+- Fix bugs in `pcd-lint` rule implementations
 - Add or improve deployment templates
 - Add or improve library hints files
-- Improve `mcp-server-pcdp` tool and resource implementations
+- Improve `mcp-server-pcd` tool and resource implementations
 - Update documentation — whitepaper, README, slide content
 - Add EXAMPLES to existing specs
 - Translate a spec to code using the standard translator prompt
 
 ## What Requires Human Review
 
-- Changes to pcdp-lint RULE definitions — rules affect all downstream
+- Changes to pcd-lint RULE definitions — rules affect all downstream
   translation runs and must be reviewed for correctness and consistency
 - New deployment templates — the EXECUTION section governs how AI
   translators behave; errors here affect every translation for that type
@@ -126,7 +126,7 @@ templates/<n>.template.md      — deployment-specific ## EXECUTION section:
     ### Compile gate
 ```
 
-`pcdp-lint` RULE-14 validates that every deployment template has
+`pcd-lint` RULE-14 validates that every deployment template has
 a `## EXECUTION` section with the required subsections.
 
 ### Deployment templates (current)
@@ -141,21 +141,21 @@ a `## EXECUTION` section with the required subsections.
 | `python-tool` | Stub | Python |
 | `project-manifest` | Stub | — |
 
-### mcp-server-pcdp
+### mcp-server-pcd
 
 7 tools: `list_templates`, `get_template`, `list_resources`,
 `read_resource`, `lint_content`, `lint_file`, `get_schema_version`
 
 Native MCP resources (browseable without tool calls):
-- `pcdp://templates/{name}` — full template Markdown
-- `pcdp://prompts/interview` — interview prompt (embedded at build time)
-- `pcdp://prompts/translator` — translator prompt (embedded at build time)
-- `pcdp://hints/{template}.{lang}.{lib}` — library hints
+- `pcd://templates/{name}` — full template Markdown
+- `pcd://prompts/interview` — interview prompt (embedded at build time)
+- `pcd://prompts/translator` — translator prompt (embedded at build time)
+- `pcd://hints/{template}.{lang}.{lib}` — library hints
 
 Transports — same binary, bare-word selection:
 ```bash
-mcp-server-pcdp stdio   # for mcphost, Claude Desktop, VS Code
-mcp-server-pcdp http    # default: 127.0.0.1:8080
+mcp-server-pcd stdio   # for mcphost, Claude Desktop, VS Code
+mcp-server-pcd http    # default: 127.0.0.1:8080
 ```
 
 ### Repository layout
@@ -165,11 +165,11 @@ prompts/          — translator prompt, interview prompt, usage guides
 templates/        — deployment templates (*.template.md)
 hints/            — library hints files (*.hints.md — not PCD specs)
 tools/
-  pcdp-lint/
-    spec/         — canonical pcdp-lint specification
+  pcd-lint/
+    spec/         — canonical pcd-lint specification
     code/         — generated Go implementation
-  mcp-server-pcdp/
-    spec/         — canonical mcp-server-pcdp specification
+  mcp-server-pcd/
+    spec/         — canonical mcp-server-pcd specification
     code/         — generated Go implementation
 doc/              — whitepaper, executive brief, presentation slides
 examples/         — example PCD specs
@@ -179,7 +179,7 @@ examples/         — example PCD specs
 
 ## Conventions
 
-### CLI style (all pcdp tools)
+### CLI style (all pcd tools)
 - `key=value` for options, bare words for commands
 - No `--flag` style. Ever.
 - `stderr` for diagnostics, `stdout` for summaries
@@ -205,7 +205,7 @@ examples/         — example PCD specs
 ### Hints files
 - Named: `<template>.<language>.<library>.hints.md`
 - Live in `hints/` — they are **not** PCD specs
-- Running `pcdp-lint` against a hints file produces expected errors;
+- Running `pcd-lint` against a hints file produces expected errors;
   this is correct behaviour, not a bug
 - Advisory only — cannot override spec invariants or template constraints
 
@@ -213,8 +213,8 @@ examples/         — example PCD specs
 
 ## Tooling Notes
 
-- **pcdp-lint:** `pcdp-lint myspec.md` / `pcdp-lint strict=true myspec.md` /
-  `pcdp-lint list-templates`
+- **pcd-lint:** `pcd-lint myspec.md` / `pcd-lint strict=true myspec.md` /
+  `pcd-lint list-templates`
 - **mcp-go:** v0.46.0. Use `NewStreamableHTTPServer` (not `NewSSEServer`).
   Use `mcp.NewToolResultError` for domain errors, not Go `error` returns.
 - **pikchr:** system dependency; install via OBS. Font fix required:

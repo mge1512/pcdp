@@ -27,7 +27,7 @@ import "github.com/mark3labs/mcp-go/server"
 import "github.com/mark3labs/mcp-go/mcp"
 
 s := server.NewMCPServer(
-    "mcp-server-pcdp",
+    "mcp-server-pcd",
     "0.1.0",
     server.WithToolCapabilities(true),
     server.WithResourceCapabilities(true, true), // subscribe, listChanged
@@ -39,7 +39,7 @@ s := server.NewMCPServer(
 ```go
 s.AddTool(
     mcp.NewTool("lint_content",
-        mcp.WithDescription("Validate a PCDP spec given as a string"),
+        mcp.WithDescription("Validate a PCD spec given as a string"),
         mcp.WithString("content",
             mcp.Required(),
             mcp.Description("Full Markdown text of the spec"),
@@ -84,7 +84,7 @@ return mcp.NewToolResultError("unknown template: " + name), nil
 ```go
 s.AddResource(
     mcp.NewResource(
-        "pcdp://templates/cli-tool",
+        "pcd://templates/cli-tool",
         "cli-tool deployment template",
         mcp.WithResourceDescription("Deployment template for CLI tools"),
         mcp.WithMIMEType("text/markdown"),
@@ -112,14 +112,14 @@ func cliToolResourceHandler(
 
 ### Resource templates (dynamic URIs)
 
-For dynamic resources like `pcdp://hints/{key}`, use resource templates:
+For dynamic resources like `pcd://hints/{key}`, use resource templates:
 
 ```go
 s.AddResourceTemplate(
     mcp.NewResourceTemplate(
-        "pcdp://hints/{key}",
-        "PCDP hints file",
-        mcp.WithTemplateDescription("Library hints for PCDP translation"),
+        "pcd://hints/{key}",
+        "PCD hints file",
+        mcp.WithTemplateDescription("Library hints for PCD translation"),
         mcp.WithTemplateMIMEType("text/markdown"),
     ),
     hintsResourceHandler,

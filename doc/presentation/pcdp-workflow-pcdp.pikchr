@@ -1,9 +1,0 @@
-# PCDP: domain expert authors directly
-
-box "Domain" "Expert" width 1.0in height 0.6in fill 0xe8f7f0 color 0x30ba78
-arrow "writes" above color 0x30ba78
-box "Spec" width 1.0in height 0.6in fill 0xe8f7f0 color 0x30ba78
-arrow color 0x30ba78
-box "AI" width 1.0in height 0.6in fill 0xe8f7f0 color 0x30ba78
-arrow color 0x30ba78
-box "Code" width 1.0in height 0.6in fill 0xe8f7f0 color 0x30ba78

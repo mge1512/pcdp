@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	CGO_ENABLED=0 go build -o pcd-lint .
+
+override_dh_auto_install:
+	install -D -m 0755 pcd-lint debian/pcd-lint/usr/bin/pcd-lint
+
+override_dh_auto_test:
+	go test -v ./...

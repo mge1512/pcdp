@@ -12,11 +12,11 @@ This is not "AI-assisted coding" where developers write code with AI suggestions
 
 **The key distinction:** if the generated code is wrong, you never edit the code — you fix the specification and regenerate. The spec is always the source of truth.
 
-`pcdp-lint`, the reference validator in this repository, was itself specified and generated using PCD — with zero hand-written implementation code.
+`pcd-lint`, the reference validator in this repository, was itself specified and generated using PCD — with zero hand-written implementation code.
 
 ---
 
-Note on naming: The project was originally named "PCDP" (Post-Coding Development Paradigm), but will be renamed to just "PCD" end of March 2026.
+Note on naming: The project was originally named "PCD" (Post-Coding Development), but will be renamed to just "PCD" end of March 2026.
 
 ---
 
@@ -27,7 +27,7 @@ flowchart LR
     spec["SPEC
 types · behavior
 examples · invariants"]
-    lint{"pcdp-lint"}
+    lint{"pcd-lint"}
     tmpl["TEMPLATE
 cli-tool · backend-service
 cloud-native · mcp-server · ..."]
@@ -66,8 +66,8 @@ The target language is **never declared in the specification**. It is derived au
 ```mermaid
 flowchart LR
     spec["Deployment: cli-tool"]
-    presets["/usr/share/pcdp/ → /etc/pcdp/
-~/.config/pcdp/ → ./.pcdp/"]
+    presets["/usr/share/pcd/ → /etc/pcd/
+~/.config/pcd/ → ./.pcd/"]
     resolved["Language: Go
 RPM · DEB · OCI via OBS"]
 
@@ -156,7 +156,7 @@ WHEN:  ...
 THEN:  result = Err(...)
 ```
 
-Validate with `pcdp-lint myspec.md` before proceeding.
+Validate with `pcd-lint myspec.md` before proceeding.
 
 ---
 
@@ -172,15 +172,15 @@ Use the standard translator prompt from `prompts/prompt.md` with any capable LLM
 
 ## Tooling
 
-### pcdp-lint
+### pcd-lint
 
-`pcdp-lint` — the validator in `tools/pcdp-lint/` — was specified and generated using PCD itself. The specification in `tools/pcdp-lint/spec/pcdp-lint.md` describes what the tool must do. The implementation in `tools/pcdp-lint/code/` was generated from that specification by an LLM, using `cli-tool.template.md` as the deployment template.
+`pcd-lint` — the validator in `tools/pcd-lint/` — was specified and generated using PCD itself. The specification in `tools/pcd-lint/spec/pcd-lint.md` describes what the tool must do. The implementation in `tools/pcd-lint/code/` was generated from that specification by an LLM, using `cli-tool.template.md` as the deployment template.
 
 The LLM resolved Go as the target language from the template without being told. It produced the source code, RPM spec, Debian packaging, and a `TRANSLATION_REPORT.md` — all from the specification alone.
 
-### mcp-server-pcdp
+### mcp-server-pcd
 
-`mcp-server-pcdp` is an MCP server that makes the full PCD toolchain accessible to any MCP-capable LLM host (mcphost, Claude Desktop, VS Code, KIT, custom agents) — no local file copies of templates or prompts needed.
+`mcp-server-pcd` is an MCP server that makes the full PCD toolchain accessible to any MCP-capable LLM host (mcphost, Claude Desktop, VS Code, KIT, custom agents) — no local file copies of templates or prompts needed.
 
 **Tools** (callable by the LLM):
 
@@ -189,7 +189,7 @@ The LLM resolved Go as the target language from the template without being told.
 | `list_templates` | List all installed deployment templates |
 | `get_template` | Retrieve a template by name |
 | `list_resources` | List all available resources (templates, prompts, hints) |
-| `read_resource` | Read any resource by `pcdp://` URI |
+| `read_resource` | Read any resource by `pcd://` URI |
 | `lint_content` | Validate a spec given as a string — returns structured diagnostics |
 | `lint_file` | Validate a spec file on disk |
 | `get_schema_version` | Return the Spec-Schema version the server was built against |
@@ -198,17 +198,17 @@ The LLM resolved Go as the target language from the template without being told.
 
 | URI pattern | Content |
 |---|---|
-| `pcdp://templates/{name}` | Full deployment template Markdown |
-| `pcdp://prompts/interview` | The interview prompt — guides spec authoring |
-| `pcdp://prompts/translator` | The universal translator prompt |
-| `pcdp://hints/{template}.{lang}.{lib}` | Library-specific translator hints |
+| `pcd://templates/{name}` | Full deployment template Markdown |
+| `pcd://prompts/interview` | The interview prompt — guides spec authoring |
+| `pcd://prompts/translator` | The universal translator prompt |
+| `pcd://hints/{template}.{lang}.{lib}` | Library-specific translator hints |
 
 **Usage with mcphost:**
 
 ```yaml
 mcpServers:
-  pcdp:
-    command: mcp-server-pcdp
+  pcd:
+    command: mcp-server-pcd
     args: [stdio]
 ```
 
@@ -216,7 +216,7 @@ A connected LLM can then conduct the full PCD workflow in a single session:
 read the interview prompt → interview the domain expert → write the spec →
 call `lint_content` → fix errors → read the template → translate to code.
 
-`mcp-server-pcdp` is itself specified in `tools/mcp-server-pcdp/spec/mcp-server-pcdp.md`
+`mcp-server-pcd` is itself specified in `tools/mcp-server-pcd/spec/mcp-server-pcd.md`
 and generated using PCD. Self-hosting all the way down.
 
 ### Empirical results
@@ -259,14 +259,14 @@ pcd/
 │   └── python-tool.template.md
 │
 ├── tools/
-│   ├── pcdp-lint/                     ← GPL-2.0-only
-│   │   ├── spec/pcdp-lint.md          ← specification
+│   ├── pcd-lint/                     ← GPL-2.0-only
+│   │   ├── spec/pcd-lint.md          ← specification
 │   │   └── code/                      ← generated implementation
-│   ├── mcp-server-pcdp/               ← GPL-2.0-only
-│   │   ├── spec/mcp-server-pcdp.md    ← specification
+│   ├── mcp-server-pcd/               ← GPL-2.0-only
+│   │   ├── spec/mcp-server-pcd.md    ← specification
 │   │   └── code/                      ← generated implementation
-│   └── pcdp-templates/                ← CC-BY-4.0
-│       ├── pcdp-templates.spec        ← RPM spec
+│   └── pcd-templates/                ← CC-BY-4.0
+│       ├── pcd-templates.spec        ← RPM spec
 │       └── debian/                    ← Debian packaging
 │
 ├── examples/
@@ -285,9 +285,9 @@ pcd/
 | Artifact | License |
 |---|---|
 | Whitepaper, specifications, templates | [CC-BY-4.0](LICENSE) |
-| `pcdp-lint` and tools | [GPL-2.0-only](LICENSE-tools) |
+| `pcd-lint` and tools | [GPL-2.0-only](LICENSE-tools) |
 
-The CC-BY-4.0 license on specifications and templates means anyone may implement the paradigm — including proprietary translators and commercial tools — provided attribution is given. The GPL-2.0-only license on `pcdp-lint` ensures the reference validator remains community-controlled and open.
+The CC-BY-4.0 license on specifications and templates means anyone may implement the paradigm — including proprietary translators and commercial tools — provided attribution is given. The GPL-2.0-only license on `pcd-lint` ensures the reference validator remains community-controlled and open.
 
 ---
 
@@ -299,13 +299,13 @@ This project is in active development. The specification format, deployment temp
 
 ---
 
-![](doc/logo/pcdp-logo-green.png)
+![](doc/logo/pcd-logo-green.png)
 
 ---
 
 ## Author
 
-Matthias G. Eckermann — [pcdp@mailbox.org](mailto:pcdp@mailbox.org)
+Matthias G. Eckermann — [pcd@mailbox.org](mailto:pcd@mailbox.org)
 
 
 
