@@ -3,13 +3,14 @@
 
 ## META
 Deployment:  template
-Version:     0.3.13
-Spec-Schema: 0.3.13
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
 Template-For: project-manifest
+EXECUTION:   none
 
 ---
 

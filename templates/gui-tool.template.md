@@ -2,8 +2,8 @@
 
 ## META
 Deployment:   template
-Version:      0.3.18
-Spec-Schema:  0.3.18
+Version:      0.3.19
+Spec-Schema:  0.3.19
 Author:       Matthias G. Eckermann <pcd@mailbox.org>
 License:      CC-BY-4.0
 Verification: none
@@ -138,6 +138,17 @@ Preset layering (systemd-style, later wins):
 Framework override is only accepted from preset files, not from
 spec META. The spec author declares PLATFORM; the preset may
 override the framework choice within the compatibility rules.
+
+STEPS:
+1. Start with template defaults as the base map.
+2. Merge /usr/share/pcd/presets/ values; later entries override earlier.
+3. Merge /etc/pcd/presets/ values; overrides vendor defaults.
+4. Merge ~/.config/pcd/presets/ values; overrides system.
+5. Merge ./.pcd/presets/ values; overrides user.
+6. If merged preset contains framework-override: validate compatibility
+   with platform-set per BEHAVIOR: resolve-framework rules;
+   on incompatibility → emit Error, halt.
+7. Return merged preset map.
 
 ---
 
@@ -328,6 +339,19 @@ THEN:
   Warning: "Flutter has limited embedded-linux support"
   FRAMEWORK = Flutter (override accepted with warning)
   LANGUAGE  = Dart
+
+EXAMPLE: resolve-framework-invalid-override-rejected
+GIVEN:
+  spec declares Deployment: gui-tool
+  PLATFORM = [Android]
+  preset declares framework-override = Tauri
+WHEN:
+  resolve-framework runs
+THEN:
+  errors contains: "Framework override Tauri is incompatible with mobile platform targets"
+  FRAMEWORK is unresolved
+  translation does not proceed
+  exit_code = 1
 
 ---
 

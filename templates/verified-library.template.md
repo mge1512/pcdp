@@ -3,13 +3,14 @@
 
 ## META
 Deployment:  template
-Version:     0.3.13
-Spec-Schema: 0.3.13
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
 Template-For: verified-library
+EXECUTION:   none
 
 ---
 
@@ -89,6 +90,43 @@ Required deliverables will include:
 
 ---
 
+## BEHAVIOR: resolve
+Constraint: required
+
+Given a spec declaring `Deployment: verified-library`, validate that
+safety and verification constraints are met and derive the build configuration.
+
+INPUTS:
+```
+spec_meta: Map<string, string>
+preset:    Map<string, string>
+```
+
+STEPS:
+1. Verify Template-For = "verified-library"; on mismatch → error, halt.
+2. Check Safety-Level ≠ QM; on violation →
+   error: "Safety-Level: QM is forbidden for Deployment: verified-library".
+3. Check Verification ≠ none; on violation →
+   error: "Verification: none is forbidden for Deployment: verified-library".
+4. Merge preset layers: vendor → system → user → project (last writer wins).
+5. For each constraint=required key: if not resolved → errors += violation.
+6. For each constraint=forbidden key: if present → errors += violation.
+7. If errors non-empty → return errors; else return resolved map.
+
+POSTCONDITIONS:
+- resolved contains an effective value for every required key
+- Safety-Level is not QM
+- Verification is one of: lean4, fstar, dafny, custom
+- curl is never an accepted install method
+
+ERRORS:
+- ERR_QM_SAFETY    if Safety-Level = QM
+- ERR_NO_VERIFY    if Verification = none
+- ERR_FORBIDDEN    if a forbidden key is present
+- ERR_MISSING      if a required key is absent after preset merge
+
+---
+
 ## PRECONDITIONS
 
 - Safety-Level must not be QM
@@ -117,8 +155,43 @@ Required deliverables will include:
 
 ## EXAMPLES
 
-*(Pending — to be completed in v0.3.8)*
-*(Reference examples: AES-256-GCM, ECDSA P-256, SHA-3, mutex primitive)*
+EXAMPLE: valid_asil_b_lean4
+GIVEN:
+  spec META declares:
+    Deployment: verified-library
+    Safety-Level: ASIL-B
+    Verification: lean4
+  no preset overrides
+WHEN:
+  resolve runs
+THEN:
+  resolved["LANGUAGE"] = "C"
+  resolved["VERIFICATION"] = "lean4"
+  errors = []
+
+EXAMPLE: qm_safety_level_rejected
+GIVEN:
+  spec META declares:
+    Deployment: verified-library
+    Safety-Level: QM
+    Verification: lean4
+WHEN:
+  resolve runs
+THEN:
+  errors contains: "Safety-Level: QM is forbidden for Deployment: verified-library"
+  resolved is not produced
+
+EXAMPLE: no_verification_rejected
+GIVEN:
+  spec META declares:
+    Deployment: verified-library
+    Safety-Level: ASIL-A
+    Verification: none
+WHEN:
+  resolve runs
+THEN:
+  errors contains: "Verification: none is forbidden for Deployment: verified-library"
+  resolved is not produced
 
 ---
 

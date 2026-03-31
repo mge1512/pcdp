@@ -3,13 +3,14 @@
 
 ## META
 Deployment:  template
-Version:     0.3.13
-Spec-Schema: 0.3.13
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
 Safety-Level: QM
 Template-For: library-c-abi
+EXECUTION:   none
 
 ---
 
@@ -83,6 +84,36 @@ components. Reference: https://cps-org.github.io/cps/
 
 ---
 
+## BEHAVIOR: resolve
+Constraint: required
+
+Given a spec declaring `Deployment: library-c-abi`, derive the effective
+build configuration from template defaults and preset overrides.
+
+INPUTS:
+```
+spec_meta: Map<string, string>
+preset:    Map<string, string>
+```
+
+STEPS:
+1. Verify Template-For = "library-c-abi"; on mismatch → error, halt.
+2. Merge preset layers: vendor → system → user → project (last writer wins).
+3. For each constraint=required key: if not resolved → errors += violation.
+4. For each constraint=forbidden key: if present → errors += violation.
+5. If errors non-empty → return errors; else return resolved map.
+
+POSTCONDITIONS:
+- resolved contains an effective value for every required key
+- LANGUAGE is one of: C, Rust
+- curl is never an accepted install method
+
+ERRORS:
+- ERR_FORBIDDEN if a forbidden key (e.g. INSTALL-METHOD=curl) is present
+- ERR_MISSING   if a required key is absent after preset merge
+
+---
+
 ## PRECONDITIONS
 
 - Public header file must be declared in spec TYPES section
@@ -108,8 +139,27 @@ components. Reference: https://cps-org.github.io/cps/
 
 ## EXAMPLES
 
-*(Pending — to be completed in v0.3.8)*
-*(Reference examples: libpcd-util, a simple string processing library)*
+EXAMPLE: default_c_static_library
+GIVEN:
+  spec META declares Deployment: library-c-abi
+  no preset overrides
+WHEN:
+  resolve runs
+THEN:
+  resolved["LANGUAGE"] = "C"
+  resolved["BINARY-TYPE"] = "static"
+  resolved["ABI-STABILITY"] = "stable"
+  errors = []
+
+EXAMPLE: forbidden_curl_rejected
+GIVEN:
+  spec META declares Deployment: library-c-abi
+  preset declares INSTALL-METHOD = curl
+WHEN:
+  resolve runs
+THEN:
+  errors contains: "Key INSTALL-METHOD=curl is forbidden for Deployment: library-c-abi"
+  resolved is not produced
 
 ---
 
