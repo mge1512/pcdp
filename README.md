@@ -4,11 +4,13 @@
 
 ## Meet me at the PiCcaDilly — where intent becomes implementation
 
+*(Piccadilly is the informal project name — and a reminder of where the work happens: at the intersection of intent and implementation.)*
+
 **Human Intent, Machine Implementation.**
 
 PCD is an open specification for a new software development paradigm: domain experts write structured natural-language specifications; AI generates all implementation code. Engineers never write implementation code directly.
 
-This is not "AI-assisted coding" where developers write code with AI suggestions. This is **post-coding development** where specifications are the primary artifact and code is a generated output.
+This is not "AI-assisted coding" where developers write code with AI suggestions. This is **Post-Coding Development** — a paradigm named for the era we are entering: one where writing code is no longer the central human activity in software creation. Specifications are the primary artifact; code is a generated output.
 
 **The key distinction:** if the generated code is wrong, you never edit the code — you fix the specification and regenerate. The spec is always the source of truth.
 

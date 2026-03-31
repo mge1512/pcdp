@@ -1886,7 +1886,25 @@ At AWS re:Invent 2025, Amazon CTO Werner Vogels dedicated his final keynote to s
 
 Key differences from Post-Coding Development: Kiro is a proprietary, IDE-integrated, AWS-hosted product. It does not define a portable, lintable specification format, has no deployment template abstraction, no formal verification path, no supply chain or packaging conventions, and no pathway to regulated-domain certification. The paradigms are complementary rather than competing. The convergence of Werner Vogels' final keynote with the core thesis of this work—independently developed—is notable external validation of the problem framing.
 
+### A Note on the Name
+
+The term **Post-Coding Development** is occasionally used informally in SDLC
+contexts to mean "the activities that happen after the coding phase" — testing,
+deployment, and maintenance. That usage is descriptive and unpublished; it has
+not produced a named methodology, a body of literature, or an abbreviation.
+
+This paradigm uses **Post-Coding Development** as a proper noun with a
+deliberately inverted meaning: *coding is no longer the central human activity*.
+The human role shifts from writing implementation code to authoring specifications.
+Code becomes a generated output — a compiler artefact — rather than the primary
+work product. The name marks that shift, not a phase that follows coding.
+
+The informal alias **Piccadilly** — *the place where intent becomes
+implementation* — further distinguishes the project identity and is used
+throughout the tooling and documentation.
+
 ### Comparative Summary
+
 
 | Approach | Human writes | AI layer | Formal verification | Regulated domains | Deployment templates |
 |---|---|---|---|---|---|
