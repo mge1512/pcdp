@@ -2,8 +2,8 @@
 
 ## META
 Deployment:   template
-Version:      0.3.20
-Spec-Schema:  0.3.20
+Version:      0.3.19
+Spec-Schema:  0.3.19
 Author:       Matthias G. Eckermann <pcd@mailbox.org>
 License:      CC-BY-4.0
 Verification: none
@@ -373,7 +373,6 @@ LANGUAGE, and PLATFORM set. The following logical components apply:
 | embedded-rootfs | PLATFORM includes embedded-linux | Cross-compilation config. Yocto layer recipe or OBS cross-build spec. |
 | license | always | LICENSE file — SPDX reference only, no full text. |
 | docs | always | README.md — installation, usage, platform notes. |
-| man | always | `<n>.1.md`, `<n>.1` — Markdown source converted to troff via `pandoc`. Section 1. Install via RPM/DEB packaging. |
 | tests | always | Independent test suite using declared test doubles. No live display required. |
 | report | always | TRANSLATION_REPORT.md — always last. |
 
@@ -396,19 +395,9 @@ LANGUAGE, and PLATFORM set. The following logical components apply:
 **RPM spec (`<n>.spec`):**
 - `License:` must use SPDX identifier from spec META
 - `BuildRequires:` must not include curl or any network fetch tool
-- `BuildRequires:` must include `pandoc` (for man page generation)
-- `%build` must include: `pandoc <n>.1.md -s -t man -o <n>.1`
-- `%files` must include: `%{_mandir}/man1/<n>.1*`
 - For Qt6: `BuildRequires: cmake qt6-base-devel` (and Qt module deps)
 - For Flutter: `BuildRequires: flutter` (OBS Flutter package)
 - For Tauri: `BuildRequires: cargo webkit2gtk-devel`
-
-**debian/control:**
-- `Build-Depends` must include `pandoc`
-
-**debian/rules:**
-- Must include man page build step: `pandoc <n>.1.md -s -t man -o <n>.1`
-- Man page must be installed to `usr/share/man/man1/<n>.1`
 
 **README.md:**
 - Must document installation via OBS (zypper, apt, dnf)

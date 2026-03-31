@@ -4,8 +4,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.20
-Spec-Schema: 0.3.20
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -125,9 +125,8 @@ must be produced. Supported OUTPUT-FORMATs are produced if active in preset.
 | OUTPUT-FORMAT | Constraint | Required Deliverable Files | Notes |
 |---|---|---|---|
 | source | required | `main.go`, `go.mod` | Single file preferred under ~800 lines. Tool handlers may be split into `tools.go`, `resources.go` etc. for larger servers. |
-| build | required | `Makefile` | Targets: `build`, `test`, `install`, `clean`, `man`. CGO_ENABLED=0. `man` target: `pandoc mcp-server-{n}.1.md -s -t man -o mcp-server-{n}.1`. |
+| build | required | `Makefile` | Targets: `build`, `test`, `install`, `clean`. CGO_ENABLED=0. |
 | docs | required | `README.md` | Must document: installation (zypper/apt/dnf), invocation (stdio and http modes), tool list with descriptions, configuration. |
-| man | required | `mcp-server-{n}.1.md`, `mcp-server-{n}.1` | Markdown source converted to troff via `pandoc`. Section 1 (user commands). Install to `%{_mandir}/man1/` (RPM) and `usr/share/man/man1/` (DEB). |
 | license | required | `LICENSE` | SPDX identifier from spec META + authoritative URL to the full license text. Never reproduce the full license text. |
 | RPM | required | `{n}.spec` | OBS RPM spec. Must include systemd service unit for http transport mode. |
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | DEP-5 copyright. Must include systemd service unit. |
@@ -183,18 +182,6 @@ For go-sdk (alternative):
 ```
 require github.com/modelcontextprotocol/go-sdk vX.Y.Z
 ```
-
-**RPM spec (`{n}.spec`):**
-- `BuildRequires:` must include `pandoc` (for man page generation)
-- `%build` must include: `pandoc mcp-server-{n}.1.md -s -t man -o mcp-server-{n}.1`
-- `%files` must include: `%{_mandir}/man1/mcp-server-{n}.1*`
-
-**debian/control:**
-- `Build-Depends` must include `pandoc`
-
-**debian/rules:**
-- Must include man page build step: `pandoc mcp-server-{n}.1.md -s -t man -o mcp-server-{n}.1`
-- Man page must be installed to `usr/share/man/man1/mcp-server-{n}.1`
 
 **Containerfile:**
 ```dockerfile

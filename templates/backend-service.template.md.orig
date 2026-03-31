@@ -2,8 +2,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.20
-Spec-Schema: 0.3.20
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -241,10 +241,9 @@ declared as `required` or active `supported`.
 | OUTPUT-FORMAT | Constraint | Required Deliverable Files | Notes |
 |---|---|---|---|
 | source | required | `main.go` or `cmd/<n>/main.go`, `go.mod` | Single binary service. Split files only when complexity requires it. |
-| build | required | `Makefile` | Must include `build`, `test`, `install`, `clean`, `man` targets. `man` target: `pandoc <n>.1.md -s -t man -o <n>.1`. |
+| build | required | `Makefile` | Must include `build`, `test`, `install`, `clean` targets. |
 | service | required | `<n>.service` | systemd unit for Linux service deployment. |
 | docs | required | `README.md` | Must document installation, config file path, arguments, endpoints, and signal handling. |
-| man | required | `<n>.1.md`, `<n>.1` | Markdown source converted to troff via `pandoc`. Section 1 (user commands). Install to `%{_mandir}/man1/` (RPM) and `usr/share/man/man1/` (DEB). |
 | license | required | `LICENSE` | SPDX identifier from spec META + authoritative URL to the full license text. Never reproduce the full license text. |
 | RPM | required | `<n>.spec` | OBS RPM spec file. Must install the binary, service unit, and default config path if spec declares one. |
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | Debian package metadata. Must install the service unit. |
@@ -277,18 +276,6 @@ Adjust `ExecStart` and config path only if the spec DEPLOYMENT section declares
 different values. Do not add environment-variable based configuration.
 
 ### Deliverable Content Requirements
-
-**RPM spec (`<n>.spec`):**
-- `BuildRequires:` must include `pandoc` (for man page generation)
-- `%build` must include: `pandoc <n>.1.md -s -t man -o <n>.1`
-- `%files` must include: `%{_mandir}/man1/<n>.1*`
-
-**debian/control:**
-- `Build-Depends` must include `pandoc`
-
-**debian/rules:**
-- Must include man page build step: `pandoc <n>.1.md -s -t man -o <n>.1`
-- Man page must be installed to `usr/share/man/man1/<n>.1`
 
 **Containerfile (when OCI is active in preset):**
 - Must use multi-stage build: builder stage + minimal final stage

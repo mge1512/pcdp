@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.20
-Spec-Schema: 0.3.20
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -85,10 +85,6 @@ Required deliverables will include:
 - Test vectors (from applicable standard: NIST CAVP, ISO, etc.)
 - `<n>.pc` pkg-config file
 - `<n>.cps` CPS file (CMake 4.3+)
-- `<n>.3.md` — man page source (Markdown); `<n>.3` — generated via `pandoc`
-  (section 3: library functions). `BuildRequires: pandoc` in RPM spec;
-  `pandoc` in DEB `Build-Depends`. Install to `%{_mandir}/man3/` (RPM)
-  and `usr/share/man/man3/` (DEB).
 - RPM spec, Debian package files
 - `TRANSLATION_REPORT.md`
 

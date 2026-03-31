@@ -3,8 +3,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.20
-Spec-Schema: 0.3.20
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -232,9 +232,8 @@ The translator must produce a src/ layout with the following structure:
 | OUTPUT-FORMAT | Constraint | Required Files | Notes |
 |---|---|---|---|
 | source | required | `src/`, `pyproject.toml` | src/ layout mandatory. SPDX headers in every .py file. |
-| build | required | `Makefile` | Targets: `lint`, `typecheck`, `test`, `build`, `man`, `clean`. `man` target: `pandoc {TOOL_NAME}.1.md -s -t man -o {TOOL_NAME}.1`. |
+| build | required | `Makefile` | Targets: `lint`, `typecheck`, `test`, `build`, `clean`. |
 | docs | required | `README.md` | Installation via OBS (zypper/apt/dnf). Must not document curl-based installation. |
-| man | required | `{TOOL_NAME}.1.md`, `{TOOL_NAME}.1` | Markdown source converted to troff via `pandoc`. Section 1 (user commands). Install to `%{_mandir}/man1/` (RPM) and `usr/share/man/man1/` (DEB). |
 | license | required | `LICENSE` | SPDX identifier from spec META + authoritative URL. Never reproduce the full license text. |
 | RPM | required | `packaging/{TOOL_NAME}.spec` | OBS RPM spec. BuildArch: noarch. pip install --no-deps in %install. |
 | DEB | required | `packaging/debian/control`, `packaging/debian/changelog`, `packaging/debian/rules`, `packaging/debian/copyright` | DEP-5 copyright. dh-python build sequence. |
@@ -259,18 +258,8 @@ The translator must produce a src/ layout with the following structure:
 
 **RPM spec:**
 - `BuildArch: noarch`
-- `BuildRequires:` must include `pandoc` (for man page generation)
-- `%build` must include: `pandoc {TOOL_NAME}.1.md -s -t man -o {TOOL_NAME}.1`
 - `%install` must use `pip install --no-deps --root %{buildroot}`
 - `%files` must use `%{python3_sitelib}`, not `%{python3_sitearch}`
-- `%files` must include: `%{_mandir}/man1/{TOOL_NAME}.1*`
-
-**debian/control:**
-- `Build-Depends` must include `pandoc`
-
-**debian/rules:**
-- Must include man page build step: `pandoc {TOOL_NAME}.1.md -s -t man -o {TOOL_NAME}.1`
-- Man page must be installed to `usr/share/man/man1/{TOOL_NAME}.1`
 
 **Containerfile:**
 - Base image: `registry.opensuse.org/opensuse/leap:15.6` (or current Leap release)

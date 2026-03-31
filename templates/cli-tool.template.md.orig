@@ -4,8 +4,8 @@
 
 ## META
 Deployment:  template
-Version:     0.3.20
-Spec-Schema: 0.3.20
+Version:     0.3.19
+Spec-Schema: 0.3.19
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     CC-BY-4.0
 Verification: none
@@ -304,9 +304,8 @@ Deliverables must be produced in the following order:
 | OUTPUT-FORMAT | Constraint | Required Deliverable Files | Notes |
 |---|---|---|---|
 | source | required | `main.go` or `cmd/<n>/main.go`, `go.mod` | Single file preferred for tools under 1000 lines. Multi-package layout for larger tools. Translator documents choice in translation report. |
-| build | required | `Makefile` | Must include: `build`, `test`, `install`, `clean`, `man` targets. `build` target must set `CGO_ENABLED=0` for Go, `-static` for C/C++. `man` target: `pandoc <n>.1.md -s -t man -o <n>.1`. |
+| build | required | `Makefile` | Must include: `build`, `test`, `install`, `clean` targets. `build` target must set `CGO_ENABLED=0` for Go, `-static` for C/C++. |
 | docs | required | `README.md` | Must document: installation via OBS (zypper, apt, dnf), usage, flags, exit codes. Must not document curl-based installation. |
-| man | required | `<n>.1.md`, `<n>.1` | Markdown source converted to troff via `pandoc`. Section 1 (user commands). Install to `%{_mandir}/man1/` (RPM) and `debian/<n>/usr/share/man/man1/` (DEB). |
 | license | required | `LICENSE` | SPDX identifier from spec META + authoritative URL to the full license text. Never reproduce the full license text. |
 | RPM | required | `<n>.spec` | OBS RPM spec file. Must include: Name, Version, License (SPDX), Summary, BuildRequires, %build, %install, %files sections. |
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | Standard Debian source package layout. `debian/copyright` must use DEP-5 machine-readable format with SPDX license identifier. |
@@ -328,22 +327,12 @@ in the specification title (first `#` heading). It must be:
 **RPM spec (`<n>.spec`):**
 - `License:` field must use the SPDX identifier from the spec META
 - `BuildRequires:` must not include curl or any network fetch tool
-- `BuildRequires:` must include `pandoc` (for man page generation)
-- `%build` must include: `pandoc <n>.1.md -s -t man -o <n>.1`
-- `%files` must include: `%{_mandir}/man1/<n>.1*`
 - `%build` section must set `CGO_ENABLED=0` for Go, `-static` for C/C++
 - `Source0:` must reference a local tarball, not a URL
 
 **debian/copyright:**
 - Must use DEP-5 machine-readable format
 - `License:` field must use the SPDX identifier from the spec META
-
-**debian/control Build-Depends:**
-- Must include `pandoc` in `Build-Depends`
-
-**debian/rules:**
-- Must include man page build step: `pandoc <n>.1.md -s -t man -o <n>.1`
-- Man page must be installed to `usr/share/man/man1/<n>.1`
 
 **Containerfile:**
 - Must use multi-stage build: builder stage + minimal final stage
