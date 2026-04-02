@@ -63,6 +63,15 @@ ResourceRecord := {
   name:     string
   content:  string
 }
+
+MilestoneStatus := "pending" | "active" | "failed" | "released"
+
+SetMilestoneResult := {
+  spec_path:        string          // path of the modified spec file
+  milestone_name:   string          // e.g. "0.1.0"
+  previous_status:  MilestoneStatus
+  new_status:       MilestoneStatus
+}
 ```
 
 ---
@@ -351,6 +360,59 @@ ERRORS:
 
 ---
 
+## BEHAVIOR: set_milestone_status
+Constraint: required
+
+Sets the `Status:` field of a named MILESTONE section in a spec file on disk.
+Used by the agent pipeline to advance the milestone cursor without human
+intervention.
+
+INPUTS:
+```
+spec_path:        string          // absolute path to the spec .md file
+milestone_name:   string          // exact MILESTONE label, e.g. "0.1.0"
+new_status:       MilestoneStatus // pending | active | failed | released
+```
+
+PRECONDITIONS:
+- spec_path exists and is readable and writable
+- spec_path has .md extension
+- milestone_name matches an existing ## MILESTONE: section in the file
+- new_status is a valid MilestoneStatus value
+
+STEPS:
+1. Read spec_path from disk via Filesystem.ReadFile; on error → MCP error -32602.
+2. Locate the `## MILESTONE: {milestone_name}` section; on not found →
+   MCP error -32602 with message "MILESTONE '{milestone_name}' not found in {spec_path}".
+3. If new_status = "active": scan all other MILESTONE sections in the file.
+   If any other section already has `Status: active` →
+   MCP error -32602 with message
+   "Cannot set MILESTONE '{milestone_name}' to active: MILESTONE '{other}' is
+    already active. Set it to released or failed first."
+4. Record previous_status (current Status: value, or "pending" if absent).
+5. Replace or insert the `Status: {value}` line within the located MILESTONE section.
+   MECHANISM: the Status: line must be the first non-blank line after the
+   ## MILESTONE: header line. If no Status: line is present, insert one.
+   Do not modify any other content in the file.
+6. Write the modified content back to spec_path via Filesystem.WriteFile;
+   on error → MCP error -32603.
+7. Return SetMilestoneResult.
+
+POSTCONDITIONS:
+- spec_path on disk has exactly the Status: value changed for the named milestone
+- All other content in the file is byte-for-byte identical to the input
+- If new_status = "active", no other milestone in the file has Status: active
+- result.previous_status reflects the status before this call
+- result.new_status = new_status
+
+ERRORS:
+- MCP error -32602 if spec_path not found or not readable
+- MCP error -32602 if milestone_name not found in spec
+- MCP error -32602 if new_status = "active" and another milestone is already active
+- MCP error -32603 if write to spec_path fails
+
+---
+
 ## BEHAVIOR: http-transport
 Constraint: required
 
@@ -422,6 +484,10 @@ ERRORS:
 
 - [observable]      stdio transport: stdout contains only MCP JSON-RPC messages
 - [observable]      lint_content result is identical to pcd-lint CLI on same input
+- [observable]      set_milestone_status never modifies any content in the spec
+                    other than the Status: line of the named milestone
+- [observable]      set_milestone_status with new_status=active fails if any other
+                    milestone already has Status: active in the same file
 - [observable]      server is idempotent: same request always returns same response
 - [observable]      server never exits with code other than 0, 1, or 2
 - [implementation]  rule execution order: RULE-01 through RULE-14, same as pcd-lint
@@ -576,6 +642,53 @@ THEN:
 
 ---
 
+EXAMPLE: set_milestone_active
+GIVEN:
+  spec file "/tmp/sitar.md" contains:
+    ## MILESTONE: 0.1.0
+    Status: pending
+    ## MILESTONE: 0.2.0
+    Status: pending
+WHEN:
+  tool set_milestone_status called with
+    spec_path="/tmp/sitar.md" milestone_name="0.1.0" new_status="active"
+THEN:
+  file "/tmp/sitar.md" has Status: active under ## MILESTONE: 0.1.0
+  file "/tmp/sitar.md" has Status: pending under ## MILESTONE: 0.2.0
+  result.previous_status = "pending"
+  result.new_status = "active"
+  no other content in the file is changed
+
+EXAMPLE: set_milestone_active_conflict
+GIVEN:
+  spec file "/tmp/sitar.md" contains:
+    ## MILESTONE: 0.1.0
+    Status: active
+    ## MILESTONE: 0.2.0
+    Status: pending
+WHEN:
+  tool set_milestone_status called with
+    spec_path="/tmp/sitar.md" milestone_name="0.2.0" new_status="active"
+THEN:
+  MCP error -32602 returned
+  message contains "MILESTONE '0.1.0' is already active"
+  file "/tmp/sitar.md" is not modified
+
+EXAMPLE: set_milestone_released
+GIVEN:
+  spec file "/tmp/sitar.md" contains:
+    ## MILESTONE: 0.1.0
+    Status: active
+WHEN:
+  tool set_milestone_status called with
+    spec_path="/tmp/sitar.md" milestone_name="0.1.0" new_status="released"
+THEN:
+  file "/tmp/sitar.md" has Status: released under ## MILESTONE: 0.1.0
+  result.previous_status = "active"
+  result.new_status = "released"
+
+---
+
 ## TOOLCHAIN-CONSTRAINTS
 
 ```
@@ -632,7 +745,7 @@ EMBED-ASSETS:
 ## DELIVERABLES
 
 COMPONENT: implementation
-  files: main.go, internal/lint/*.go, internal/store/*.go
+  files: main.go, internal/lint/*.go, internal/store/*.go, internal/milestone/*.go
   notes: >
     Split into packages: main (transport wiring), internal/lint
     (rule engine, shared with pcd-lint), internal/store (unified

@@ -71,6 +71,12 @@ DeploymentTemplate := one_of(
 // "mcp-server" added in v0.3.8 for MCP server components.
 
 BehaviorConstraint := required | supported | forbidden
+
+MilestoneStatus := pending | active | failed | released
+// Pipeline state for ## MILESTONE sections.
+// Transitions: pending → active → released (pass) or failed (fail).
+// Exactly one milestone may be active at any time (RULE-15).
+// Status is managed by the agent pipeline, not by the spec author.
 // Classifies a BEHAVIOR block. Default is `required` when absent.
 // A `forbidden` behavior must include a `reason:` annotation.
 // Validated by RULE-13.
@@ -257,6 +263,8 @@ STEPS:
 12. Apply RULE-12 (cross-section consistency: identifiers, types, file names).
 13. Apply RULE-13 (Constraint: field value on BEHAVIOR headers).
 14. Apply RULE-14 (EXECUTION section present in deployment templates).
+15. Apply RULE-15 (MILESTONE section structure and single-active constraint, if present).
+16. Apply RULE-16 (MILESTONE BEHAVIOR names exist in spec, if present).
     MECHANISM: rules are independent; a failure in one rule does not prevent
     subsequent rules from running. All diagnostics are collected before output.
 
@@ -610,6 +618,74 @@ checks are skipped. Use this for templates that produce no compiled output
 
 
 ---
+
+
+---
+
+### RULE-15: MILESTONE section structure and single-active constraint (v0.3.21+)
+
+Applies only when the spec contains one or more `## MILESTONE:` sections.
+MILESTONE sections are optional — their absence is not an error.
+
+```
+for each ## MILESTONE: section M in the spec:
+
+  // Structure check
+  if M does not contain "Included BEHAVIORs:":
+    emit Error, section=M,
+      message="MILESTONE '{n}' is missing required 'Included BEHAVIORs:' field."
+
+  if M does not contain "Deferred BEHAVIORs:":
+    emit Error, section=M,
+      message="MILESTONE '{n}' is missing required 'Deferred BEHAVIORs:' field."
+
+  if M does not contain "Acceptance criteria:":
+    emit Warning, section=M,
+      message="MILESTONE '{n}' has no 'Acceptance criteria:' field. \
+               Translators and agents cannot verify completion."
+
+  // Status check
+  if M does not contain a line matching "^Status:":
+    emit Warning, section=M,
+      message="MILESTONE '{n}' has no Status: field. \
+               Expected: pending | active | failed | released."
+  else:
+    let S = value of Status: field
+    if S not in [ "pending", "active", "failed", "released" ]:
+      emit Error, section=M,
+        message="MILESTONE '{n}' has invalid Status: value '{S}'. \
+                 Valid values: pending, active, failed, released."
+
+// Single-active constraint
+let active_milestones = [ M for M in milestones if M.Status = "active" ]
+if len(active_milestones) > 1:
+  emit Error, section="structure", line=1,
+    message="More than one MILESTONE has Status: active. \
+             Exactly one milestone may be active at a time."
+```
+
+---
+
+### RULE-16: MILESTONE BEHAVIOR names exist in spec (v0.3.21+)
+
+Applies only when the spec contains one or more `## MILESTONE:` sections.
+
+```
+let all_behavior_names = set of all BEHAVIOR and BEHAVIOR/INTERNAL names in the spec
+
+for each ## MILESTONE: section M:
+  for each name N listed under "Included BEHAVIORs:" in M:
+    if N not in all_behavior_names:
+      emit Error, section=M,
+        message="MILESTONE '{milestone}' lists BEHAVIOR '{N}' under \
+                 Included BEHAVIORs but no such BEHAVIOR exists in the spec."
+
+  for each name N listed under "Deferred BEHAVIORs:" in M:
+    if N not in all_behavior_names:
+      emit Error, section=M,
+        message="MILESTONE '{milestone}' lists BEHAVIOR '{N}' under \
+                 Deferred BEHAVIORs but no such BEHAVIOR exists in the spec."
+```
 
 ## PRECONDITIONS
 

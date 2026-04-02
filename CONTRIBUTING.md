@@ -173,7 +173,60 @@ analysis only). Untagged invariants are a `pcd-lint` warning.
 - [implementation]  [code-review-only property]
 ```
 
+#### MILESTONE Section (optional)
+
+Declares named, versioned, self-consistent subsets of the full spec that can
+be independently translated, tested, and released. Use this for large components
+where translating the entire spec in one pass exceeds the context window or is
+otherwise impractical.
+
+Each MILESTONE is a projection of the spec — it names which BEHAVIORs are
+fully implemented at this stage and which are deferred stubs. The spec itself
+remains the complete source of truth.
+
+**Status field — pipeline state machine:**
+
+| Status | Meaning |
+|---|---|
+| `pending` | Not yet attempted. Default for newly written milestones. |
+| `active` | Currently being translated. Set by the agent pipeline. Exactly one milestone may be active at a time. |
+| `failed` | Compile gate or acceptance criteria did not pass. Set by the agent pipeline. Human reviews. |
+| `released` | All gates passed. Set by the agent pipeline. Frozen — do not modify. |
+
+Exactly one MILESTONE may have `Status: active` at any time. This is validated
+by RULE-15. The pipeline agent advances the cursor; humans do not need to edit
+status fields manually.
+
+```markdown
+## MILESTONE: {version}
+Status: pending
+
+Included BEHAVIORs:
+  {behavior-name-1}, {behavior-name-2}, ...
+
+Deferred BEHAVIORs:
+  {behavior-name-3}, {behavior-name-4}, ...
+
+Acceptance criteria:
+  {one criterion per line — concrete, testable, CLI-invocable where possible}
+```
+
+**Rules:**
+- Every BEHAVIOR named in `Included BEHAVIORs` or `Deferred BEHAVIORs` must
+  exist in the spec (validated by RULE-16).
+- Together, `Included` + `Deferred` need not cover every BEHAVIOR in the spec —
+  BEHAVIORs not mentioned in any milestone are always included in full
+  (they have no phasing constraint).
+- `Acceptance criteria` are free-form but should be concrete enough for an agent
+  to evaluate: prefer CLI invocations, file existence checks, or observable outputs.
+- MILESTONE sections are non-normative for pcd-lint rule purposes — they do not
+  affect RULE-01 through RULE-14. Only RULE-15 and RULE-16 apply to them.
+- The `## DELTA` section (for single-pass work orders) and `## MILESTONE` sections
+  serve different purposes and may coexist. DELTA is ephemeral; MILESTONEs are
+  persistent across translation passes.
+
 ### 2. Template Development
+
 
 Deployment templates define how specifications are translated to code.
 

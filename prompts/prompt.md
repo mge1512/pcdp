@@ -50,6 +50,25 @@ not advisory.
 - `supported`: implement only if the resolved preset activates it.
 - `forbidden`: never implement. Do not generate code for forbidden behaviors.
 
+**Check for an active MILESTONE before translating.**
+If the spec contains one or more `## MILESTONE:` sections, find the one with
+`Status: active`. If found:
+- Implement only the BEHAVIORs listed under `Included BEHAVIORs:` in that milestone.
+- Generate stub implementations for every BEHAVIOR listed under `Deferred BEHAVIORs:`.
+  A stub must compile and satisfy the declared interface but may return an empty result,
+  a "not implemented" error, or a zero value. Document each stub in TRANSLATION_REPORT.md.
+- The compile gate and acceptance criteria are those declared in the active MILESTONE,
+  not the full spec. Verify the acceptance criteria explicitly and report pass/fail.
+- Do not implement any BEHAVIOR that is not listed in either `Included` or `Deferred`.
+  If a BEHAVIOR appears in the spec but not in the active MILESTONE, flag it in the
+  translation report as "not yet scheduled".
+
+If no MILESTONE section is present, or no milestone has `Status: active`,
+translate the full spec as normal.
+
+If more than one MILESTONE has `Status: active`, halt and report:
+  "Error: more than one MILESTONE has Status: active. Exactly one must be active."
+
 **Implement all INTERFACES declarations.**
 If the spec contains an `## INTERFACES` section, produce every declared
 implementation: production and all test doubles. Independent tests must
@@ -113,6 +132,8 @@ Produce a `TRANSLATION_REPORT.md` covering:
 - Which COMPONENT entries from spec DELIVERABLES mapped to which filenames
 - Specification ambiguities encountered
 - Rules that could not be implemented exactly as written, and why
+- Active MILESTONE (if any): name, included BEHAVIORs, deferred stubs produced,
+  acceptance criteria result (pass/fail per criterion)
 - Compile gate result (see template EXECUTION section)
 - Per-example confidence as a table:
 
