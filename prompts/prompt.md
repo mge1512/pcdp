@@ -1,3 +1,4 @@
+
 I am providing the following input files, all present in the same
 input directory alongside this prompt:
 
@@ -8,7 +9,8 @@ input directory alongside this prompt:
 2. `<spec-name>.md` — the specification for the component to implement.
 
 Additional files may be present if listed in the spec's DEPENDENCIES section
-(hints files, interface definitions). Read them before generating any code.
+or in the active MILESTONE's `Hints-file:` field (hints files, interface
+definitions). Read them before generating any code.
 
 ---
 
@@ -53,21 +55,58 @@ not advisory.
 **Check for an active MILESTONE before translating.**
 If the spec contains one or more `## MILESTONE:` sections, find the one with
 `Status: active`. If found:
-- Implement only the BEHAVIORs listed under `Included BEHAVIORs:` in that milestone.
-- Generate stub implementations for every BEHAVIOR listed under `Deferred BEHAVIORs:`.
-  A stub must compile and satisfy the declared interface but may return an empty result,
-  a "not implemented" error, or a zero value. Document each stub in TRANSLATION_REPORT.md.
-- The compile gate and acceptance criteria are those declared in the active MILESTONE,
-  not the full spec. Verify the acceptance criteria explicitly and report pass/fail.
-- Do not implement any BEHAVIOR that is not listed in either `Included` or `Deferred`.
-  If a BEHAVIOR appears in the spec but not in the active MILESTONE, flag it in the
-  translation report as "not yet scheduled".
+
+- If the active MILESTONE has `Hints-file:` set, read every listed hints file
+  before writing any code. Multiple files are comma-separated. Hints files
+  contain language-specific implementation patterns, known failure modes, and
+  verification commands informed by real translation runs. Following them
+  prevents known failure modes. Do not proceed until all listed hints files
+  have been read.
+
+- If the active MILESTONE has `Scaffold: true`:
+  This is a scaffold pass. Your sole objective is to create a complete,
+  compilable skeleton of the **entire component** — not just the active
+  milestone's BEHAVIORs. Read the complete spec to understand all types,
+  interfaces, and function signatures, then:
+  - Create all source files for the full component
+  - Define all types and interfaces declared in the spec
+  - Write stub bodies for every function declared by every BEHAVIOR
+  - Every stub must satisfy the stub contract (see below) — it must compile
+    and return the correct zero value for its declared output type
+  - Do not implement any real logic beyond what is needed for the binary
+    to compile and satisfy the acceptance criteria stated in this milestone
+  - The `Included BEHAVIORs` field covers the complete BEHAVIOR set;
+    `Deferred BEHAVIORs` is empty or omitted
+  - The compile gate is the primary acceptance criterion
+  - After this pass, all subsequent milestone translators will find a stable
+    foundation and will only replace stub bodies — they will never need to
+    create new files or define new types
+
+- If the active MILESTONE has `Scaffold: false` or omits the `Scaffold:` field:
+  - Implement only the BEHAVIORs listed under `Included BEHAVIORs:`
+  - Replace stubs for those BEHAVIORs with real implementations
+  - Do not modify any other file or function body
+  - Leave all `Deferred BEHAVIORs:` stubs exactly as the scaffold pass left them
+  - The compile gate and acceptance criteria are those declared in this milestone
+
+- Do not implement any BEHAVIOR not listed in either `Included` or `Deferred`.
+  If a BEHAVIOR appears in the spec but not in the active MILESTONE, flag it
+  in the translation report as "not yet scheduled".
 
 If no MILESTONE section is present, or no milestone has `Status: active`,
 translate the full spec as normal.
 
 If more than one MILESTONE has `Status: active`, halt and report:
   "Error: more than one MILESTONE has Status: active. Exactly one must be active."
+
+**Stub contract.**
+A stub must compile and return the correct zero value for its declared output
+type. Specifically: for any output type that serialises to a JSON object, the
+stub must return an initialised empty object — never a null reference. A null
+reference serialises to JSON `null`; an initialised empty object serialises to
+`{}` or `{"_elements":[]}`. Only the latter is schema-compatible with consumers
+that expect an object. The language-specific hints file for the target language
+gives concrete examples of what "initialised empty object" means in that language.
 
 **Implement all INTERFACES declarations.**
 If the spec contains an `## INTERFACES` section, produce every declared
@@ -132,8 +171,9 @@ Produce a `TRANSLATION_REPORT.md` covering:
 - Which COMPONENT entries from spec DELIVERABLES mapped to which filenames
 - Specification ambiguities encountered
 - Rules that could not be implemented exactly as written, and why
-- Active MILESTONE (if any): name, included BEHAVIORs, deferred stubs produced,
-  acceptance criteria result (pass/fail per criterion)
+- Active MILESTONE (if any): name, `Scaffold:` value, hints files read,
+  BEHAVIORs included and deferred, stubs produced, acceptance criteria
+  result (pass/fail per criterion)
 - Compile gate result (see template EXECUTION section)
 - Per-example confidence as a table:
 

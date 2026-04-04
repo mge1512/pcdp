@@ -1,11 +1,12 @@
 
 
+
 # pcd-lint
 
 ## META
 Deployment:  cli-tool
-Version:     0.3.13
-Spec-Schema: 0.3.13
+Version:     0.3.21
+Spec-Schema: 0.3.21
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     GPL-2.0-only
 Verification: none
@@ -71,15 +72,15 @@ DeploymentTemplate := one_of(
 // "mcp-server" added in v0.3.8 for MCP server components.
 
 BehaviorConstraint := required | supported | forbidden
+// Classifies a BEHAVIOR block. Default is `required` when absent.
+// A `forbidden` behavior must include a `reason:` annotation.
+// Validated by RULE-13.
 
 MilestoneStatus := pending | active | failed | released
 // Pipeline state for ## MILESTONE sections.
 // Transitions: pending → active → released (pass) or failed (fail).
 // Exactly one milestone may be active at any time (RULE-15).
 // Status is managed by the agent pipeline, not by the spec author.
-// Classifies a BEHAVIOR block. Default is `required` when absent.
-// A `forbidden` behavior must include a `reason:` annotation.
-// Validated by RULE-13.
 
 Severity := Error | Warning
 
@@ -138,7 +139,7 @@ STEPS:
    "error: file must have .md extension: {path}".
 2. Open and read file; on failure → exit 2 with
    "error: cannot open file: {path}".
-3. Apply RULE-01 through RULE-13 in order; collect all diagnostics.
+3. Apply RULE-01 through RULE-17 in order; collect all diagnostics.
    Rules are not short-circuited — all rules run regardless of earlier errors.
 4. Sort diagnostics by line number (monotonically non-decreasing).
 5. Write each diagnostic to stderr in the defined format.
@@ -265,6 +266,7 @@ STEPS:
 14. Apply RULE-14 (EXECUTION section present in deployment templates).
 15. Apply RULE-15 (MILESTONE section structure and single-active constraint, if present).
 16. Apply RULE-16 (MILESTONE BEHAVIOR names exist in spec, if present).
+17. Apply RULE-17 (scaffold milestone ordering and uniqueness, if present).
     MECHANISM: rules are independent; a failure in one rule does not prevent
     subsequent rules from running. All diagnostics are collected before output.
 
@@ -285,8 +287,8 @@ For each section S in REQUIRED_SECTIONS:
 Note: "## BEHAVIOR" is satisfied by the presence of one or more
 BEHAVIOR sections. The following BEHAVIOR variants are all recognised
 and valid:
-  - "## BEHAVIOR: <name>"          user-facing operation
-  - "## BEHAVIOR/INTERNAL: <name>" internal implementation logic,
+  - "## BEHAVIOR: <n>"          user-facing operation
+  - "## BEHAVIOR/INTERNAL: <n>" internal implementation logic,
                                    not directly user-facing
 
 Multiple BEHAVIOR and BEHAVIOR/INTERNAL sections are permitted and
@@ -597,7 +599,10 @@ template, not a component spec).
 if spec.META["Deployment"] = "template":
   if spec does not contain a top-level section "## EXECUTION":
     emit Warning, line=1,
-      message="Deployment template is missing ## EXECUTION section.                Translators cannot determine delivery phases without it.                Add ## EXECUTION or declare 'EXECUTION: none' in META                if this template intentionally has no execution recipe."
+      message="Deployment template is missing ## EXECUTION section.
+               Translators cannot determine delivery phases without it.
+               Add ## EXECUTION or declare 'EXECUTION: none' in META
+               if this template intentionally has no execution recipe."
   else:
     let exec = content of ## EXECUTION section
     if exec does not contain "### Delivery phases":
@@ -606,7 +611,9 @@ if spec.META["Deployment"] = "template":
     if exec does not contain "### Compile gate" and
        exec does not contain "COMPILE-GATE: none":
       emit Warning, section="EXECUTION",
-        message="## EXECUTION section has no '### Compile gate' subsection                  and does not declare 'COMPILE-GATE: none'.                  Translators will not know how to verify compilation."
+        message="## EXECUTION section has no '### Compile gate' subsection
+                 and does not declare 'COMPILE-GATE: none'.
+                 Translators will not know how to verify compilation."
     if exec does not contain "### Resume logic":
       emit Warning, section="EXECUTION",
         message="## EXECUTION section has no '### Resume logic' subsection."
@@ -615,10 +622,6 @@ if spec.META["Deployment"] = "template":
 Exception: if the template META contains `EXECUTION: none`, all RULE-14
 checks are skipped. Use this for templates that produce no compiled output
 (e.g. `project-manifest`, `python-tool`).
-
-
----
-
 
 ---
 
@@ -635,32 +638,42 @@ for each ## MILESTONE: section M in the spec:
     emit Error, section=M,
       message="MILESTONE '{n}' is missing required 'Included BEHAVIORs:' field."
 
-  if M does not contain "Deferred BEHAVIORs:":
+  if M does not contain "Deferred BEHAVIORs:" AND M does not have Scaffold: true:
     emit Error, section=M,
-      message="MILESTONE '{n}' is missing required 'Deferred BEHAVIORs:' field."
+      message="MILESTONE '{n}' is missing required 'Deferred BEHAVIORs:' field.
+               Omit this field only when Scaffold: true (scaffold milestones
+               have no deferred BEHAVIORs by definition)."
 
   if M does not contain "Acceptance criteria:":
     emit Warning, section=M,
-      message="MILESTONE '{n}' has no 'Acceptance criteria:' field. \
+      message="MILESTONE '{n}' has no 'Acceptance criteria:' field.
                Translators and agents cannot verify completion."
 
   // Status check
   if M does not contain a line matching "^Status:":
     emit Warning, section=M,
-      message="MILESTONE '{n}' has no Status: field. \
+      message="MILESTONE '{n}' has no Status: field.
                Expected: pending | active | failed | released."
   else:
     let S = value of Status: field
     if S not in [ "pending", "active", "failed", "released" ]:
       emit Error, section=M,
-        message="MILESTONE '{n}' has invalid Status: value '{S}'. \
+        message="MILESTONE '{n}' has invalid Status: value '{S}'.
                  Valid values: pending, active, failed, released."
+
+  // Scaffold field check (if present)
+  if M contains a line matching "^Scaffold:":
+    let SC = value of Scaffold: field
+    if SC not in [ "true", "false" ]:
+      emit Error, section=M,
+        message="MILESTONE '{n}' has invalid Scaffold: value '{SC}'.
+                 Valid values: true, false."
 
 // Single-active constraint
 let active_milestones = [ M for M in milestones if M.Status = "active" ]
 if len(active_milestones) > 1:
   emit Error, section="structure", line=1,
-    message="More than one MILESTONE has Status: active. \
+    message="More than one MILESTONE has Status: active.
              Exactly one milestone may be active at a time."
 ```
 
@@ -686,6 +699,33 @@ for each ## MILESTONE: section M:
         message="MILESTONE '{milestone}' lists BEHAVIOR '{N}' under \
                  Deferred BEHAVIORs but no such BEHAVIOR exists in the spec."
 ```
+
+---
+
+### RULE-17: Scaffold milestone ordering and uniqueness (v0.3.21+)
+
+Applies only when the spec contains one or more `## MILESTONE:` sections
+and at least one has `Scaffold: true`.
+
+```
+let scaffold_milestones = [ M for M in milestones if M.Scaffold = "true" ]
+
+if len(scaffold_milestones) > 1:
+  emit Error, section="structure", line=1,
+    message="More than one MILESTONE has Scaffold: true.
+             At most one scaffold milestone is permitted per spec."
+
+if len(scaffold_milestones) = 1:
+  let SM = scaffold_milestones[0]
+  let first_milestone = milestones[0]   // first in document order
+  if SM ≠ first_milestone:
+    emit Error, section=SM,
+      message="Scaffold milestone '{n}' must appear first in the spec
+               (lowest version number / earliest in document order).
+               Later milestones depend on the scaffold foundation."
+```
+
+---
 
 ## PRECONDITIONS
 
@@ -1190,6 +1230,91 @@ THEN:
   exit_code = 0
   // markers inside fenced blocks are not parsed as real structure
 
+EXAMPLE: milestone_valid_scaffold_first
+GIVEN:
+  spec contains:
+    ## MILESTONE: 0.0.0
+    Status: released
+    Scaffold: true
+    Included BEHAVIORs: collect, render, main
+    Acceptance criteria:
+      ./tool --version | grep -q "^tool "
+    ## MILESTONE: 0.1.0
+    Status: active
+    Included BEHAVIORs: collect
+    Deferred BEHAVIORs: render, main
+    Acceptance criteria:
+      ./tool collect | jq '.result | length > 0'
+  all listed BEHAVIORs exist in spec
+  invocation: pcd-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr = (empty)
+  exit_code = 0
+
+EXAMPLE: milestone_scaffold_not_first
+GIVEN:
+  spec contains:
+    ## MILESTONE: 0.1.0
+    Status: released
+    Included BEHAVIORs: collect
+    Deferred BEHAVIORs: render
+    ## MILESTONE: 0.2.0
+    Status: active
+    Scaffold: true
+    Included BEHAVIORs: collect, render
+  invocation: pcd-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "Scaffold milestone '0.2.0' must appear first"
+  exit_code = 1
+
+EXAMPLE: milestone_two_scaffold_rejected
+GIVEN:
+  spec contains two MILESTONE sections both with Scaffold: true
+  invocation: pcd-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "More than one MILESTONE has Scaffold: true"
+  exit_code = 1
+
+EXAMPLE: milestone_two_active_rejected
+GIVEN:
+  spec contains two MILESTONE sections both with Status: active
+  invocation: pcd-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "More than one MILESTONE has Status: active"
+  exit_code = 1
+
+EXAMPLE: milestone_unknown_behavior_name
+GIVEN:
+  spec contains:
+    ## MILESTONE: 0.1.0
+    Status: active
+    Included BEHAVIORs: collect, nonexistent-behavior
+    Deferred BEHAVIORs: render
+  "nonexistent-behavior" is not declared as a BEHAVIOR in the spec
+  invocation: pcd-lint spec.md
+WHEN:
+  result = lint(file, strict=false)
+THEN:
+  stderr contains one diagnostic:
+    severity = Error
+    message contains "lists BEHAVIOR 'nonexistent-behavior' under Included BEHAVIORs
+                      but no such BEHAVIOR exists in the spec"
+  exit_code = 1
+
 ---
 
 ## DEPLOYMENT
@@ -1308,4 +1433,3 @@ Signal handling note:
   behaviour (no explicit handler needed for a short-lived CLI tool
   that does not hold open file handles or sockets). Translators must
   document signal handling approach in the translation report.
-
