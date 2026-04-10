@@ -4,6 +4,7 @@
 
 
 
+
 # Post-Coding Development
 ## Human Intent, Machine Implementation
 
@@ -3056,6 +3057,202 @@ comparison report. This is itself a candidate for specification under PCD
 ---
 
 ## Changelog
+
+## A.19 Operational Guidance: Regeneration Strategy
+
+### The Question
+
+When a specification changes, should the translator start from scratch or
+update the existing generated code? This is the most common operational
+question in day-to-day PCD use, and the answer is not always obvious.
+
+### The Short Answer
+
+> **If the change affects TYPES, INTERFACES, INVARIANTS, or the scaffold
+> milestone — regenerate from scratch.**
+>
+> **If the change is limited to STEPS or EXAMPLES of one or two isolated
+> BEHAVIORs — update incrementally.**
+>
+> **If in doubt — regenerate. The spec is the investment; the translator
+> run is cheap.**
+
+### Why This Matters: LLM Randomness and Consistency Drift
+
+LLM translation is probabilistic. Two runs from the same spec with the same
+model may make different structural decisions — naming conventions, error
+handling patterns, package layout. Over multiple incremental runs,
+particularly with different models or model versions, a codebase can develop
+internal inconsistency that no individual run introduced. This is the primary
+risk of incremental update: not that any single change is wrong, but that
+the accumulation of independently-reasonable decisions produces a codebase
+that no longer has a coherent architecture.
+
+Full regeneration from a clean spec eliminates this risk entirely. The
+output is guaranteed internally consistent because it was produced in a
+single pass from a single source of truth.
+
+### Decision Framework
+
+The change should be evaluated against four dimensions:
+
+**1. Structural impact**
+
+Changes to TYPES, INTERFACES, or INVARIANTS have high structural impact —
+they touch the foundation that all BEHAVIORs build on. A changed type used
+in five BEHAVIORs requires every one of those BEHAVIORs to be reconsidered.
+A changed INTERFACE method signature propagates through every call site.
+These changes warrant full regeneration regardless of how small they appear
+in the spec diff.
+
+Changes limited to STEPS or EXAMPLES of a single BEHAVIOR are isolated by
+construction — the BEHAVIOR boundary is the unit of containment. If the
+blast radius is genuinely one BEHAVIOR, incremental update is viable.
+
+**2. Scaffold boundary**
+
+The scaffold milestone (Scaffold: true) is a hard boundary. Any change
+that touches the scaffold — new files, restructured packages, new types,
+changed interface shapes — requires full regeneration. All subsequent
+milestones were built on the scaffold's decisions; changing those
+decisions invalidates them.
+
+Conversely, if the scaffold is untouched and the change fits within one
+unreleased milestone's scope, incremental update within that milestone
+is appropriate. This is the intended use of the milestone mechanism.
+
+**3. Released milestone constraint**
+
+Released milestones are frozen — they are audit evidence. A change that
+requires touching a released milestone's scope must go through full
+regeneration. The new translation produces a new released milestone,
+with a new audit bundle, superseding the old one.
+
+**4. Codebase provenance**
+
+If the existing code was produced by a single translation run from a clean
+spec, incremental update carries lower risk. If the existing code has been
+through multiple incremental runs, or was produced by different models,
+the consistency drift risk is higher and full regeneration becomes more
+attractive even for isolated changes.
+
+### The Blast Radius Analysis
+
+Before recommending incremental update, the analyst must estimate the blast
+radius of the change: how many files, BEHAVIORs, and functions are affected?
+
+- **1–2 BEHAVIORs, no shared types changed**: low blast radius → incremental viable
+- **3–5 BEHAVIORs, or a shared type changed**: medium blast radius → judgement call
+- **5+ BEHAVIORs, or INTERFACES changed**: high blast radius → full regeneration
+
+### Automated Impact Assessment
+
+The change-impact analysis is a natural candidate for automation. Given the
+old spec, the new spec (or the diff between them), and optionally the
+existing generated code, an LLM can:
+
+- Identify which TYPES, INTERFACES, INVARIANTS, and BEHAVIORs are affected
+- Estimate the blast radius across the codebase
+- Check whether any released milestones are in scope
+- Check whether the scaffold is affected
+- Produce a structured recommendation with reasoning
+
+This analysis is available as `prompts/change-impact.md` — a prompt that
+takes a spec change description and returns a structured assessment. The
+`assess_change_impact` tool in `mcp-server-pcd` (v0.3.0+) automates this
+for pipeline use: the agent assesses the change before invoking the
+translator, choosing the appropriate strategy without human intervention.
+
+The tool can also catch a non-obvious class of problem: a change that
+*looks* small in the spec diff but has a large blast radius because the
+changed type or method is used throughout the codebase. Human reviewers
+eyeballing a diff may miss this; an LLM reading both the spec and the
+code will not.
+
+### The Decisions Hints File
+
+A clean process model requires a clean separation between what belongs in
+the spec and what belongs in the generated implementation. This creates a
+gap: when full regeneration is recommended, there may be architectural
+decisions in the existing implementation — package layout, routing patterns,
+error conventions — that are worth preserving but that are not captured in
+the spec. Writing them into the spec would couple the spec to a specific
+implementation. Ignoring them risks losing good prior decisions.
+
+The solution is a fourth layer of hints file: `<specname>.<language>.decisions.hints.md`.
+
+This file:
+
+- Lives **next to the spec** (not in `hints/`) — it is spec-scoped, not
+  template-scoped
+- Is **language-specific** and disposable — when switching target languages,
+  the old decisions hints file is discarded and a new one is produced by the
+  first translation in the new language
+- Is **generated by the translator** as a required deliverable alongside
+  `TRANSLATION_REPORT.md`, capturing any architectural decisions made during
+  the run that are not inferable from the spec alone
+- Is **read by the translator** at the start of a guided regeneration or
+  incremental update run; ignored on clean full regenerations from scratch
+- Is **not a spec artifact** — it does not affect pcd-lint validation and
+  is not part of the human-reviewed specification
+
+When `assess_change_impact` recommends full regeneration and produces a
+"decisions hints to preserve" list, that list is written into
+`<specname>.<language>.decisions.hints.md` before the regeneration run.
+The translator reads it as normative constraints — the same way it treats
+any other hints file.
+
+The three-state process model is therefore:
+
+| State | Translator reads | Decisions hints |
+|---|---|---|
+| Clean full regeneration | Spec + template only | Ignored |
+| Guided regeneration | Spec + template + decisions hints | Read as constraints |
+| Incremental update | Spec diff + existing code + decisions hints | Read as constraints |
+
+This model keeps the spec language-agnostic and permanent, the decisions
+hints language-specific and disposable, and the process clean.
+
+### Cost Considerations
+
+Full regeneration sounds more expensive, but the economics are more
+favourable than they appear:
+
+- A complete translation run for a well-specified component costs one LLM
+  session at approximately 128K output tokens — minutes, not hours
+- The spec investment (the human work) is fully reused across every
+  regeneration run and every target language
+- An incremental update that silently introduces inconsistency may cost
+  far more to diagnose and fix than a clean regeneration would have
+
+The expensive part of PCD is writing the spec. The cheap part is running
+the translator. This asymmetry should inform the default choice.
+
+### Summary Table
+
+| Change type | Blast radius | Scaffold affected | Recommendation |
+|---|---|---|---|
+| TYPES modified | Any | No | Full regeneration |
+| INTERFACES modified | Any | No | Full regeneration |
+| INVARIANTS modified | Any | No | Full regeneration |
+| Scaffold milestone modified | Any | Yes | Full regeneration |
+| BEHAVIOR added | Low | No | New milestone; incremental |
+| BEHAVIOR STEPS modified | Low (1–2) | No | Incremental |
+| BEHAVIOR STEPS modified | Medium (3–5) | No | Judgement call |
+| EXAMPLES added/fixed | Any | No | Incremental |
+| Released milestone in scope | Any | Any | Full regeneration |
+| Multiple prior incremental runs | Any | No | Prefer full regeneration |
+
+### Decisions hints file quick reference
+
+| Situation | Action |
+|---|---|
+| Full regeneration recommended | Write "decisions hints to preserve" → `<specname>.<lang>.decisions.hints.md`, then regenerate |
+| Incremental update recommended | Read existing `<specname>.<lang>.decisions.hints.md` before starting |
+| Switching target language | Discard `<specname>.<oldlang>.decisions.hints.md`; new file created by first translation run |
+| Clean full regeneration (no prior decisions) | No decisions hints file needed; translator starts clean |
+
+---
 
 | Version | Date | Changes |
 |---------|------|---------|

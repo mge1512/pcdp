@@ -1,3 +1,4 @@
+
 # Contributing to PCD
 
 Thank you for your interest in contributing to the Post-Coding Development
@@ -101,7 +102,7 @@ Templates must pass pcd-lint with zero errors.
 Hints files contain language-specific or library-specific implementation
 knowledge for translators. They live in `hints/`.
 
-**Three-layer naming convention:**
+**Four-layer naming convention:**
 
 ```
 hints/
@@ -109,7 +110,45 @@ hints/
                                                # reusable across all components
   <component>.implementation.hints.md         # component-specific, language-neutral
   <template>.<language>.<library>.hints.md    # library-specific API shapes
+
+# Decisions hints — lives next to the spec, not in hints/:
+<specname>.<language>.decisions.hints.md      # implementation decisions from
+                                               # prior translation runs;
+                                               # language-specific and disposable
 ```
+
+The first three layers live in `hints/` and are shared across components.
+The fourth layer — **decisions hints** — lives alongside the spec itself
+(in the same directory as `<specname>.md`), is named after the spec and
+the target language, and records implementation decisions that the translator
+made but that are not captured in the spec.
+
+**When to use decisions hints:**
+
+A decisions hints file is created or updated by the translator as a required
+deliverable of every translation run that makes architectural decisions not
+specified in the spec — package layout, routing patterns, error conventions,
+type-registry choices. It answers: "what did the previous translator decide
+that the next translator should know about?"
+
+**Key properties:**
+
+- Named `<specname>.<language>.decisions.hints.md` — the language qualifier
+  makes clear it is disposable when switching target languages
+- Generated alongside `TRANSLATION_REPORT.md` as a translation deliverable
+- Read by the translator at the start of a **guided regeneration** or
+  **incremental update** run; *not* read on a clean full regeneration
+- Lives next to the spec in the repository; committed to git but not
+  considered part of the spec for review or certification purposes
+- Removed or regenerated when switching target languages
+
+**Relationship to the change impact assessment:**
+
+When `assess_change_impact` recommends full regeneration and produces a
+"what to preserve" list, that list should be written into
+`<specname>.<language>.decisions.hints.md` before the translator runs.
+The translator reads the decisions hints file and treats its contents as
+normative constraints — the same way it would treat a hints file in `hints/`.
 
 Hints files are advisory only — they cannot override spec invariants or
 template constraints. Running `pcd-lint` against a hints file produces

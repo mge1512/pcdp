@@ -1,9 +1,10 @@
 
+
 # mcp-server-pcd
 
 ## META
 Deployment:        mcp-server
-Version:           0.2.0
+Version:           0.3.0
 Spec-Schema:       0.3.21
 Author:            Matthias G. Eckermann <pcd@mailbox.org>
 License:           GPL-2.0-only
@@ -84,6 +85,21 @@ SetMilestoneResult := {
   previous_status:  MilestoneStatus
   new_status:       MilestoneStatus
 }
+ChangeImpactRecommendation := "full-regeneration" | "incremental"
+
+ChangeImpactResult := {
+  recommendation:  ChangeImpactRecommendation
+  primary_factor:  string          // one-sentence reason for the recommendation
+  structural_impact: string        // high | medium | low
+  blast_radius:    string          // description of affected scope
+  scaffold_affected: boolean       // true if scaffold milestone is in scope
+  released_milestone_affected: boolean  // true if any released milestone is in scope
+  consistency_risk: string         // high | medium | low
+  if_incremental:  string          // what to change (empty if full-regeneration)
+  if_regeneration: string          // what to preserve (empty if incremental)
+  reasoning:       string          // full assessment narrative
+}
+
 ```
 
 ---
@@ -408,6 +424,81 @@ ERRORS:
 
 ---
 
+## BEHAVIOR: assess_change_impact
+Constraint: required
+
+Analyses a specification change and recommends the most appropriate
+translation strategy: full regeneration from scratch or incremental
+update of the existing generated code.
+
+Given the change description and optionally the existing spec and code,
+the tool applies the PCD regeneration strategy framework (see whitepaper
+A.19) to estimate structural impact, blast radius, scaffold involvement,
+and consistency risk.
+
+INPUTS:
+```
+change_description: string   // unified diff of the spec, or plain-language
+                             // description of what changed — required
+old_spec:           string   // full spec content before the change — optional
+                             // but recommended; improves blast radius analysis
+new_spec:           string   // full spec content after the change — optional
+existing_code:      string   // generated implementation — optional; if provided,
+                             // the tool identifies affected files and functions
+```
+
+PRECONDITIONS:
+- change_description is non-empty
+- At least change_description must be provided; all other inputs are optional
+
+STEPS:
+1. Parse change_description to identify which spec sections are affected
+   (TYPES, INTERFACES, INVARIANTS, BEHAVIOR, EXAMPLES, MILESTONE, META).
+2. If old_spec or new_spec provided: extract the full set of changed elements
+   with their section types.
+3. Evaluate structural impact:
+   a. If TYPES, INTERFACES, or INVARIANTS are affected → structural_impact = "high"
+   b. If only BEHAVIOR STEPS or EXAMPLES are affected → structural_impact = "low"
+      or "medium" depending on count
+   c. If only META is affected → structural_impact = "none"
+4. Evaluate scaffold involvement:
+   a. If any MILESTONE with Scaffold: true is in the changed scope →
+      scaffold_affected = true
+   b. Otherwise → scaffold_affected = false
+5. Evaluate released milestone involvement:
+   a. If any MILESTONE with Status: released is in the changed scope →
+      released_milestone_affected = true
+   b. Otherwise → released_milestone_affected = false
+6. Estimate blast radius:
+   a. If existing_code provided: count files and functions referencing changed elements
+   b. If not provided: estimate from spec cross-references
+   c. Classify: "1–2 BEHAVIORs" | "3–5 BEHAVIORs" | "5+ BEHAVIORs or shared types"
+7. Assess consistency risk based on codebase provenance if inferable from inputs.
+8. Apply decision rules:
+   - If structural_impact = "high" OR scaffold_affected = true OR
+     released_milestone_affected = true → recommendation = "full-regeneration"
+   - If structural_impact = "low" AND blast_radius ≤ 2 BEHAVIORs AND
+     scaffold_affected = false AND released_milestone_affected = false →
+     recommendation = "incremental"
+   - Otherwise → recommendation = "full-regeneration" (conservative default)
+9. Compose reasoning narrative and populate if_incremental or if_regeneration
+   fields as appropriate.
+10. Return ChangeImpactResult.
+
+POSTCONDITIONS:
+- result.recommendation is always set
+- result.primary_factor states the single most important deciding factor
+- result.reasoning provides a complete narrative suitable for the audit bundle
+- if result.recommendation = "incremental": result.if_incremental lists
+  the specific files/functions/sections to change
+- if result.recommendation = "full-regeneration": result.if_regeneration
+  lists decisions from the existing code worth preserving as translator notes
+
+ERRORS:
+- MCP error -32602 if change_description is empty
+
+---
+
 ## BEHAVIOR: http-transport
 Constraint: required
 
@@ -471,6 +562,8 @@ ERRORS:
 - Server never reads environment variables for behaviour control.
 - lint_content and lint_file produce identical output to pcd-lint CLI
   for identical input, including RULE-01 through RULE-17.
+- assess_change_impact applies the decision rules from whitepaper A.19
+  deterministically — same inputs always produce the same recommendation.
 - All MCP responses are valid JSON-RPC 2.0.
 
 ---
@@ -486,6 +579,8 @@ ERRORS:
                     milestone already has Status: active in the same file
 - [observable]      server is idempotent: same request always returns same response
 - [observable]      server never exits with code other than 0, 1, or 2
+- [observable]      assess_change_impact with structural_impact=high always
+                    returns recommendation=full-regeneration
 - [implementation]  rule execution order: RULE-01 through RULE-17, same as pcd-lint
 - [implementation]  resource URIs follow pcd://<type>/<n> scheme exactly
 - [implementation]  all assets (templates, hints, prompts) are embedded into the
@@ -679,6 +774,48 @@ THEN:
   response contains all templates shipped with the binary
   server does not error or exit
 
+EXAMPLE: assess_change_type_modification
+GIVEN:
+  change_description = "Changed Money type: added currency field (string, ISO 4217)"
+  old_spec contains:
+    ## TYPES
+    Money := decimal where precision = 2, value >= 0
+  new_spec contains:
+    ## TYPES
+    Money := { amount: decimal where precision = 2, value >= 0
+               currency: string where matches ISO-4217 }
+WHEN:
+  tool assess_change_impact called with those inputs
+THEN:
+  result.recommendation = "full-regeneration"
+  result.structural_impact = "high"
+  result.scaffold_affected = false
+  result.primary_factor contains "TYPES"
+  result.reasoning explains that Money is used across multiple BEHAVIORs
+
+EXAMPLE: assess_change_steps_isolated
+GIVEN:
+  change_description = "BEHAVIOR: compute-interest STEPS: added rounding
+    to nearest cent in step 1"
+  The spec has 4 BEHAVIORs; only compute-interest uses Money output
+WHEN:
+  tool assess_change_impact called with those inputs
+THEN:
+  result.recommendation = "incremental"
+  result.structural_impact = "low"
+  result.blast_radius contains "1"
+  result.if_incremental identifies compute-interest implementation function
+
+EXAMPLE: assess_change_scaffold
+GIVEN:
+  change_description = "Added new package internal/cache to M0 scaffold milestone"
+WHEN:
+  tool assess_change_impact called with that input
+THEN:
+  result.recommendation = "full-regeneration"
+  result.scaffold_affected = true
+  result.primary_factor contains "scaffold"
+
 EXAMPLE: set_milestone_active
 GIVEN:
   spec file "/tmp/sitar.md" contains:
@@ -790,7 +927,8 @@ COMPONENT: implementation
     Split into packages: main (transport wiring), internal/lint
     (rule engine applying RULE-01 through RULE-17, shared with pcd-lint),
     internal/store (unified AssetStore — templates, hints, prompts),
-    internal/milestone (set_milestone_status file editing logic).
+    internal/milestone (set_milestone_status file editing logic),
+    internal/changeimpact (assess_change_impact analysis logic).
     Reuse lint rule logic from pcd-lint if available as a library;
     otherwise inline. The lint engine must implement all 17 rules.
 
