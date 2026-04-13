@@ -8,6 +8,7 @@ Build-Depends: debhelper-compat (= 13),
                pandoc
 Standards-Version: 4.6.2
 Homepage: https://github.com/example/calc-interest
+X-PCD-Spec-SHA256: 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 
 Package: calc-interest
 Architecture: all

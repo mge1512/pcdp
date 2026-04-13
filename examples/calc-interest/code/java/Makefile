@@ -13,9 +13,10 @@
 #   STREAM-OUTPUT: stdout  STREAM-DIAGNOSTICS: stderr
 #   EXIT-CODE-OK: 0  EXIT-CODE-ERROR: 1  EXIT-CODE-INVOCATION: 2
 
-NAME    := calc-interest
-VERSION := 0.1.0
-PREFIX  ?= /usr/local
+NAME       := calc-interest
+VERSION    := 0.1.0
+PREFIX     ?= /usr/local
+SPEC_SHA256 := 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 JARDIR  := target
 JAR     := $(JARDIR)/$(NAME).jar
 

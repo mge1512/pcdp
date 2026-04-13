@@ -8,6 +8,8 @@
 #
 # Source0 references a local tarball (no network fetch — supply chain requirement).
 #
+# pcd-spec-sha256: 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
+#
 
 Name:           calc-interest
 Version:        0.1.0

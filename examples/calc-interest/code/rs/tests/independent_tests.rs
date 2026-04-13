@@ -1,3 +1,4 @@
+// generated from spec: calc-interest.spec.md sha256:609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 // independent_tests — integration tests for calc-interest (Rust)
 // Each test function corresponds to a named EXAMPLE in the spec.
 // Tests invoke the compiled binary via std::process::Command.

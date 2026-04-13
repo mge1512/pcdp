@@ -1,10 +1,11 @@
 # Makefile for calc-interest (Rust)
 # Targets: build, test, install, clean, man
 
-BINARY   := calc-interest
-MANPAGE  := $(BINARY).1
-MANSRC   := $(BINARY).1.md
-PREFIX   ?= /usr/local
+BINARY      := calc-interest
+MANPAGE     := $(BINARY).1
+MANSRC      := $(BINARY).1.md
+PREFIX      ?= /usr/local
+SPEC_SHA256 := 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 
 .PHONY: build test install clean man
 

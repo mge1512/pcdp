@@ -4,6 +4,7 @@ Release:        1%{?dist}
 Summary:        Simple interest calculator — reads principal/rate/periods from stdin
 License:        Apache-2.0
 Source0:        %{name}-%{version}.tar.gz
+# pcd-spec-sha256: 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 
 BuildRequires:  rust
 BuildRequires:  cargo

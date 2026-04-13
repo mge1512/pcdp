@@ -4,7 +4,8 @@
 **Spec-Schema:** 0.3.21  
 **Template:** cli-tool.template v0.3.20  
 **Translation date:** 2026-04-09  
-**Translator:** PCD AI Translator (Rust target)
+**Translator:** PCD AI Translator (Rust target)  
+**Spec-SHA256:** 609312967055ace0ebcd67f538f015496b8b098b0414fc187b94718dd326eac3
 
 ---
 

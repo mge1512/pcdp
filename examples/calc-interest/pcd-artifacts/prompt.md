@@ -1,4 +1,5 @@
 
+
 I am providing the following input files, all present in the same
 input directory alongside this prompt:
 
@@ -156,10 +157,38 @@ Do not invent a delivery mechanism not listed above.
 
 ---
 
+## Spec hash embedding
+
+**Every generated artifact must embed the SHA256 checksum of the spec file.**
+
+Compute `sha256sum <specname>.md` immediately before generating any output.
+Embed the result in every generated artifact as follows:
+
+- **Source files:** a comment near the top of each file:
+  `// generated from spec: <specname>.md sha256:<hash>`
+  (use the comment syntax of the target language)
+- **`TRANSLATION_REPORT.md`:** a `Spec-SHA256:` field in the header block
+- **Binary `--version` output:** include `spec:<hash>` in the version string
+- **RPM `.spec` file:** a `# pcd-spec-sha256: <hash>` comment
+- **DEB `control` file:** a `X-PCD-Spec-SHA256: <hash>` field
+- **`Containerfile`:** a `LABEL pcd.spec.sha256="<hash>"` instruction
+- **`Makefile`:** a `SPEC_SHA256` variable set to the hash
+
+The hash is the SHA256 of the spec file *as provided as input* — not of any
+transformed or post-processed version. If the spec file changes between runs,
+the embedded hash in the new artifacts will differ from the old artifacts,
+making the version boundary cryptographically verifiable.
+
+This is an invariant: any artifact that does not embed the spec hash is
+incomplete, regardless of whether all other deliverables are present.
+
+---
+
 ## Translation report
 
 Produce a `TRANSLATION_REPORT.md` covering:
 
+- **Spec-SHA256:** `<hash>` — SHA256 of `<specname>.md` as provided
 - Target language resolved, and whether any preset overrides the template default
 - Delivery mode used and why
 - How STEPS ordering was applied for each BEHAVIOR block
