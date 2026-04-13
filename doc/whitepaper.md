@@ -1,18 +1,10 @@
-
-
-
-
-
-
-
-
 # Post-Coding Development
 ## Human Intent, Machine Implementation
 
-**Status:** Draft  
-**Version:** 0.3.19  
-**Author:** Matthias G. Eckermann <pcd@mailbox.org>  
-**Date:** 2026-03-30
+**Status:** Draft
+**Version:** 0.3.22
+**Author:** Matthias G. Eckermann <pcd@mailbox.org>
+**Date:** 2026-04-13
 
 ---
 
@@ -20,214 +12,119 @@
 
 Informally known as **Piccadilly** — *the place where intent becomes implementation.*
 
-The **Post-Coding Development** fundamentally changes how software is created: **domain experts write specifications in structured natural language; AI generates verified implementations**. Engineers never write implementation code. Instead, they author precise specifications in Markdown describing what a system should do—data types, behaviors, invariants, state machines, deployment context. An AI translator converts these specifications into type-safe, memory-safe implementations, optionally through formal verification in proven meta-languages (Lean 4, F*, Dafny).
+The **Post-Coding Development** paradigm (PCD) fundamentally changes how software is created. Domain experts write specifications in structured Markdown describing what a system should do. AI translates those specifications into complete, packaged, tested implementations. Engineers never write implementation code. If the output is wrong, they fix the specification and regenerate — they never touch the code.
 
-**This is not "AI-assisted coding"** where developers write code with AI suggestions. This is **post-coding development** where domain experts write specifications and AI generates all implementation code. The human role shifts from programming to architectural specification.
+This is not AI-assisted coding. In vibe coding, humans write code and AI suggests; the code remains the primary artifact. In PCD, humans write specifications and AI generates all implementation code; the specification is the primary artifact and the source of truth.
 
-The paradigm enables AI-augmented development in **safety-critical and regulated domains** (automotive, aviation, medical devices, finance) that currently prohibit AI code generation due to auditability requirements. While the AI translation process itself is probabilistic and introduces uncertainty that cannot be eliminated by specification structure alone, the paradigm achieves verifiability through multiple complementary mechanisms: human-reviewable specifications, formal verification layers (when used), comprehensive testing against specification examples, cross-validation between multiple AI translators (for critical components), and detailed audit trails documenting all translation decisions. Optional formal proofs provide additional certification evidence when mathematical guarantees are required.
+PCD enables AI-augmented development in safety-critical and regulated domains — automotive, aviation, medical devices, finance, government — that currently prohibit AI code generation because AI-suggested code cannot be audited. The paradigm resolves this by making the specification the audit point: human-authored, human-reviewed, validated by tooling, and cryptographically linked to every generated artifact. The spec is what you certify. The code is what you verify.
 
-**The project is open source and technology-agnostic.** The semantic core (when used) is designed to be pluggable. Rather than inventing proprietary formal systems, we leverage mature, proven verification technologies (Lean 4, F*, Dafny) as optional meta-languages. The stable specification format and intermediate representation ensure teams can choose verification technologies that match their expertise and regulatory requirements—or skip formal verification entirely for lower-risk components.
+The project is open source, technology-agnostic, and self-hosting: the toolchain that validates and serves specifications was itself produced from PCD specifications, with zero hand-written implementation code.
 
-**Target language is not a specification concern.** A key design principle introduced in v0.3.0: the target programming language is a *function of the deployment context*, not a free variable that the spec author must decide. Deployment templates encode this mapping, separating architectural intent (the specification) from implementation mechanics (the generated code).
-
-Deliverables include specification schemas, deployment templates, translator prototypes, pluggable IR formats, reference backends (C, Rust, Go, WASM), CI patterns producing audit bundles, and migration guidance for gradual adoption. The `pcd-lint` validator is developed as the paradigm's own reference implementation—eating its own dog food from the first artifact.
-
-**Similar ideas:** At AWS re:Invent 2025, Amazon CTO Werner Vogels—in what he announced as his final re:Invent keynote—dedicated a significant portion of his closing address to spec-driven development, coining the phrase *"Specifications are the new code"* and introducing the concept of *"verification debt"*: the dangerous gap that opens when AI generates code faster than humans can comprehend it. -- Post-Coding Development was conceived and developed independently; the convergence confirms the direction.
+At AWS re:Invent 2025, Amazon CTO Werner Vogels dedicated a significant portion of his closing keynote to spec-driven development, coining the phrase *"Specifications are the new code"* and introducing the concept of *"verification debt"* — the dangerous gap that opens when AI generates code faster than humans can comprehend it. PCD was conceived and developed independently; the convergence confirms the direction.
 
 ### Value Proposition at a Glance
 
-| Category | Traditional Coding | AI-Assisted Coding ("Vibe Coding") | Post-Coding Development |
-|----------|-------------------|-------------------------------------|------------------------|
-| Human writes | Implementation code | Code + prompts, iterates with AI | Specifications (never code) |
-| AI role | None | Suggests/completes code | Translates specs → verified implementation |
-| Primary artifact | Source code | Source code (AI-influenced) | Specification (code is generated) |
-| Target language chosen by | Developer | Developer | Deployment template |
-| Safety guarantees | Depends on language/testing | Same as traditional | Type-safe + memory-safe by construction (when using meta-language) |
-| Auditability | Review code | Review AI-influenced code (opaque) | Review specifications + proofs + validation framework |
-| Regulatory compliance | Expensive manual audits | Prohibited (can't audit AI suggestions) | Enabled through multi-layered verification approach |
-| Domain expert role | Consults, doesn't code | Consults, doesn't code | **Authors specifications directly** |
-| Maintainability | Code rot | Code rot + AI drift | Specifications remain stable |
-
-**Bottom line:** Domain experts with architectural capacity write specifications describing system behavior and deployment context. AI generates all implementation code—either directly or through formal verification. The paradigm enables AI development in safety-critical domains through comprehensive validation mechanisms while shifting engineering effort from coding to precise specification.
+| Category | Traditional Coding | Vibe Coding | Post-Coding Development |
+|---|---|---|---|
+| Human writes | implementation code | code + prompts | specifications only |
+| AI role | none | suggests / completes | translates spec → code |
+| Primary artifact | source code | source code | specification |
+| Target language | developer decides | developer decides | deployment template |
+| If output is wrong | edit the code | edit the code | fix the spec, regenerate |
+| Regulated domains | manual audit | prohibited | enabled by design |
+| Provenance | implicit | implicit | cryptographically verifiable |
 
 ---
 
 ## 1. Introduction
 
-AI has made code synthesis cheap, but unstructured generation is brittle and unsuitable for regulated environments. Traditional formal methods provide guarantees but require specialized expertise. The Post-Coding Development bridges this gap through a fundamental shift: **humans write what the system should do (specifications); AI writes how to do it (implementation)**. Crucially, while the AI translation process introduces inherent probabilistic uncertainty, the paradigm addresses this through multiple verification layers rather than relying solely on specification structure.
+AI has made code synthesis cheap, but unstructured generation is brittle and unsuitable for regulated environments. PCD bridges this gap through a fundamental shift: humans write what a system should do; AI writes how to do it. The separation is strict and non-negotiable — a spec author never touches implementation code, and the universal translation prompt never touches implementation details. Both are enforced by design, not convention.
 
-The paradigm is built on four core principles:
+The workflow has four steps. First, a domain expert authors a specification in structured Markdown describing behaviors, types, invariants, and examples. The specification format is constrained: required sections, formal notation for types, executable examples that serve as the acceptance test. An interview prompt exists for domain experts who prefer to be guided through the process rather than authoring the format directly — any capable LLM, including small models running locally, can conduct the interview and produce the specification from their answers. Second, `pcd-lint` validates the specification structure before any translation begins; no valid specification, no code. Third, the spec author selects a deployment template — `cli-tool`, `mcp-server`, `backend-service`, `cloud-native`, and others — which encodes all implementation decisions: target language, compiler flags, packaging format, delivery phases. Fourth, an AI translator reads the specification and the template and produces a complete implementation: source code, packaging, documentation, man pages, test infrastructure, and an audit log.
 
-**1. Specifications, not code, as primary artifacts**  
-Domain experts author structured Markdown specifications describing system behavior, data types, invariants, state machines, and deployment context (backend, embedded, kernel-driver, etc.). These specifications are written in natural language with tables—no programming required, no formal syntax required. Engineers with domain expertise and architectural capacity can write valid specifications without knowing the target programming language or meta-language.
+Templates enforce the separation of intent from implementation. A specification describes what. A template describes how to build it for a specific deployment context. Neither the spec author nor the universal translation prompt ever encounters a language name, a compiler flag, or a packaging detail. These are encoded in the template and resolved automatically. This is not a convenience — it is an architectural guarantee that specifications remain stable across language changes, platform migrations, and toolchain evolution. The spec written today for a Go binary is the same spec that produces a Rust binary tomorrow if the template changes.
 
-In practice, specifications need not be written entirely by hand. A standard interview prompt (`prompts/interview-prompt.md`) instructs any capable LLM — including small models running locally without GPU acceleration — to conduct a structured interview with the domain expert and produce a complete specification from their answers. The full workflow then becomes:
+For large specifications — dozens of behaviors, thousands of lines — the milestone mechanism partitions translation into sequential passes. The first milestone is always a scaffold pass: all files, all types, all function signatures, all stubs, compile gate only. Subsequent milestones fill in real implementations one scoped set of behaviors at a time. The scaffold holds without modification through all milestones, giving every subsequent translator a stable foundation. The `sitar` system information tool — 35 behaviors, 2900-line specification — was translated to both Go and Rust in single sessions each using this pattern.
 
-1. **AI interviews** the domain expert (one question at a time)
-2. **Human reviews** the produced specification
-3. **pcd-lint validates** the specification structure
-4. **AI translates** the specification to verified code
-
-This keeps specifications human-reviewed and human-approved, while removing the need for domain experts to learn the specification format itself.
-
-**2. AI translates specifications to implementations with multi-layered validation**  
-An AI translator converts specifications to executable code. Two paths are available:
-- **Direct path:** Specification → target language (Go, C, Rust, etc.) for rapid iteration
-- **Verified path:** Specification → meta-language (Lean 4, F*, Dafny) → target language for formal guarantees
-
-The meta-language layer is **optional**. Teams choose based on risk, regulatory requirements, and timeline. Validation occurs through specification examples (which generated code must satisfy), formal proofs (when using verified path), and optional cross-validation between multiple AI translators for critical components.
-
-**3. Multiple LLMs ensure translation quality (optional)**  
-For critical components, 2-3 independent AI translators generate separate implementations from the same specification. Cross-validation catches translation errors and specification ambiguities. For lower-risk components, single-LLM translation with testing is sufficient.
-
-**4. Use proven meta-languages, don't invent new ones**  
-Rather than creating proprietary formal systems, the paradigm leverages mature verification technologies (Lean 4 for theorem proving, F* for effect tracking, Dafny for SMT-based verification) as pluggable meta-languages. This provides immediate credibility, active communities, and allows teams to choose technologies they trust—or skip formal verification entirely.
-
-**This is not "vibe coding."** In AI-assisted development, programmers write code and iterate with AI suggestions. In post-coding development, domain experts write specifications and never touch implementation code. If the generated code is incorrect, engineers refine the specification—not the code—and regenerate entirely.
-
-**Target domains** include safety-critical systems (automotive, aviation, medical devices, industrial control), regulated environments (finance, government, healthcare), and any context where formal correctness, auditability, or certification is required. The workflow also benefits general engineering by separating intent (specifications) from implementation (generated code).
+Formal verification through meta-languages (Lean 4, F*, Dafny) is a supported path for highest-assurance requirements but is not the default or the primary case. The paradigm works — and has been empirically validated — on the direct path: specification → AI → code, with validation through executable examples, independent test generation, and the audit bundle.
 
 ---
 
 ## 2. Goals
 
-- **Enable AI development in safety-critical domains:** Address the regulatory challenge—current AI code generation cannot be used in automotive (ISO 26262), aviation (DO-178C), medical devices (IEC 62304), or other safety-critical domains because AI-generated code cannot be audited in isolation. The paradigm enables AI-augmented development through a comprehensive verification framework that includes human-reviewable specifications, formal proofs (when required), validation against specification examples, and detailed audit trails, rather than relying solely on specification readability.
+PCD has three primary goals and several derived goals that follow from them.
 
-- **Shift engineering role from coding to specification:** Transform the job of software engineers from writing implementation code to authoring precise, architectural specifications. Domain experts with system knowledge become the primary authors.
+The primary goals are: enable AI code generation in regulated and safety-critical domains that currently prohibit it; shift the engineering role from writing implementation code to authoring precise specifications; and produce a cryptographically auditable chain of custody from specification to deployed artifact.
 
-- **Eliminate translation ambiguity:** Address the critical weakness—informal natural language specifications create ambiguity when translating to formal code. Use constrained specification format with formal notation, required sections, and executable examples to reduce translation variance by 80-90%.
+The regulatory goal is the most consequential. ISO 26262, DO-178C, IEC 62304, and Common Criteria require auditable development processes. AI-suggested code is opaque and fails these requirements. PCD resolves this by making the human-authored, human-reviewed specification the audit point, not the generated code. The specification is certified; the code is verified against it. Every generated artifact — source files, binary, RPM, DEB, container image — embeds the SHA256 hash of the specification it was produced from, creating a verifiable link that does not depend on trusting the build pipeline.
 
-- **Remove target language as a specification concern:** Target language selection is a deployment-time decision, not an authoring decision. Deployment templates encode the mapping from deployment context to target language, freeing spec authors from implementation choices.
+The engineering role goal requires a genuine shift in what organizations value. The expensive, difficult, intellectually demanding work in PCD is writing precise specifications — capturing behaviors, invariants, and examples accurately enough that the generated code is correct. This is harder than writing code; it requires architectural thinking, not implementation thinking. The cheap part is running the translator. A complete translation run for a well-specified component costs one LLM session. This asymmetry has a direct implication: when in doubt whether a specification change warrants full regeneration or incremental update, the answer is always full regeneration. The spec is the investment; the translator run is cheap.
 
-- **Provide flexible verification paths:** Support both direct code generation (for rapid iteration) and formal verification through meta-languages (for high-assurance requirements). Teams choose the verification level appropriate to their risk and regulatory context.
-
-- **Type and memory safety by construction:** When using the verified path, entire classes of bugs (null pointer dereferences, buffer overflows, use-after-free, data races) are prevented at compile-time through the meta-language's type system, not detected at runtime through testing.
-
-- **Incremental adoption:** Enable pilots on small, high-value components (crypto primitives, state machines, drivers) and expand without rewriting existing systems.
-
-- **Open and replaceable:** Publish specification schemas and tooling as open source. The meta-language is pluggable—teams choose Lean 4, F*, Dafny, or develop custom intermediate formats. The specification format and IR remain stable regardless of backend choice.
-
-- **Auditability and certification:** Produce human-reviewable specifications and comprehensive validation artifacts (including optional formal proofs, test validation results, and translation audit trails) suitable for regulatory audits and certification processes.
+From these primary goals follow: removing target language as a specification concern; supporting incremental adoption in mixed codebases; providing open, replaceable tooling with no vendor lock-in to any AI provider; and enabling digital sovereignty through local LLM compatibility.
 
 ---
 
 ## 3. Tenets
 
-- **Specifications are first-class artifacts:** Markdown specifications are the canonical source of truth, not implementation code. Specifications include deployment context and architectural decisions, not just functional requirements.
+**Specifications are the source of truth.** Generated code is a build artifact. If the code is wrong, the specification is fixed and the code is regenerated — the code is never edited directly. Version control the specification; treat the generated code as you would treat a compiled binary.
 
-- **Domain experts write specifications:** The target user is a domain expert with architectural capacity—someone who understands the system's purpose, deployment environment, and safety/security requirements. They write specifications in structured natural language, not code.
+**Templates enforce the separation of intent from implementation.** A specification describes behavior, types, invariants, and examples. A template describes how to realize that specification in a specific deployment context. The separation is absolute: no language name, compiler flag, or packaging detail appears in a specification. This keeps specifications stable and reusable across implementation changes.
 
-- **AI translates, humans validate through multiple mechanisms:** AI converts specifications to implementations (either directly or through meta-languages). Humans validate specifications, review proofs (if generated), validate against specification examples, and gate deployment. The paradigm acknowledges that AI translation is probabilistic and addresses this through comprehensive validation rather than assuming specification structure alone ensures correctness.
+**The spec is what you certify. The code is what you verify.** Human review, regulatory audit, and formal sign-off target the specification. Automated verification — compile gate, example tests, independent test generation, static analysis, SCA — targets the generated code. The 4-eyes principle, where required by Common Criteria or equivalent standards, applies to the specification review, not the code review. This makes certification tractable for AI-generated code in regulated domains.
 
-- **Target language is not a human decision:** The spec author declares *what* and *where* (deployment context). The *target language* is derived automatically from the deployment template. This keeps specifications technology-agnostic and stable over time.
+**Provenance is cryptographically verifiable.** Every generated artifact embeds the SHA256 hash of the specification that produced it. The claim "this artifact was produced from this specification" is not asserted — it is verifiable by anyone with access to the specification file and the artifact. This closes the audit trail without depending on build system logs or human attestation.
 
-- **Verification is optional and pluggable:** Teams choose their verification path:
-  - **No formal verification:** Spec → Go/C/Rust directly (fastest, lowest assurance)
-  - **Formal verification:** Spec → Lean 4/F*/Dafny → Go/C/Rust (slower, highest assurance)
-  - **Hybrid:** Formal verification for critical paths, direct generation for non-critical code
+**AI translation is probabilistic; verification is structural.** No specification format can eliminate the inherent uncertainty of LLM-based code generation. The paradigm addresses this through multiple complementary mechanisms: pcd-lint validates specification structure before translation; executable examples serve as acceptance tests; independent test generation by a second agent surfaces specification ambiguities; the translation report documents every decision and deviation; and the audit bundle provides full traceability. The goal is not to make AI translation deterministic — it is to make its outputs verifiable.
 
-- **Use proven technologies, don't invent new ones:** Leverage existing mature meta-languages (Lean 4, F*, Dafny) rather than creating proprietary formal systems. This provides immediate ecosystem support and allows replacement as better technologies emerge.
+**Specifications have a lifecycle.** A specification is not written once and frozen. Requirements change, behaviors are added, types evolve. When a specification changes, the impact must be assessed: does this change affect the scaffold, the type system, or the interfaces? If so, full regeneration is required. If the change is isolated to the steps of one or two behaviors, incremental update is viable. The scaffold boundary is the decision point. Implementation decisions from prior translation runs that are not captured in the specification are recorded in a decisions hints file alongside the specification — this preserves architectural memory across runs without contaminating the specification itself.
 
-- **Auditable outputs:** Generated code is intentionally simple and traceable to specifications. The paradigm produces comprehensive audit bundles including specifications, translation reports, validation results, and proofs (where applicable) to provide certification evidence.
+**Digital sovereignty is a design goal.** Any capable LLM can translate a PCD specification. The paradigm has been empirically validated on frontier cloud models, 120B open-weight models hosted at EU providers, and 30B local models running on commodity hardware. The specification format, the templates, and the prompts are all open source. No part of the workflow requires a specific vendor.
 
-- **Incrementalism:** Adopt component by component. Specifications can describe interfaces to existing hand-written code. Mixed codebases (generated + manual) are explicitly supported.
+**Openness and self-hosting validate the paradigm.** The specification format, deployment templates, prompts, and all tooling are published under open licenses. The toolchain itself — `pcd-lint`, `mcp-server-pcd` — was produced from PCD specifications with zero hand-written implementation code. A paradigm that cannot describe its own tooling has not yet proved its expressiveness.
 
 ---
 
 ## 4. State of the Business
 
-Industry shows convergence of specification-driven development, AI code generation, and formal verification. Tool vendors explore spec-to-code pipelines; research demonstrates proof-carrying code extraction; enterprises adopt AI coding assistants but hesitate where auditability and certification matter.
+The software industry is converging on specification-driven development. Werner Vogels named it at re:Invent 2025. GitHub Copilot, Cursor, and similar tools have demonstrated mass-market demand for AI code generation, while simultaneously surfacing its primary limitation: AI-generated code is opaque, non-auditable, and prohibited in regulated domains. The gap between what AI can produce and what regulated industries can accept is large and growing.
 
-**Critical gap:** Safety-critical and regulated industries (automotive, aviation, medical devices, finance, government) **cannot use** current AI code generation tools. Regulatory frameworks (ISO 26262, DO-178C, IEC 62304, Common Criteria) require auditable development processes. AI-suggested code is considered "opaque" and fails auditability requirements. This represents a massive market (automotive software alone is $50B+ annually) where AI productivity gains are currently prohibited.
+PCD occupies a position that no current commercial tool addresses: AI code generation that is auditable by design, suitable for regulated domains, and vendor-neutral. The critical differentiator is not technical sophistication — it is the explicit placement of the human review point. Every AI coding assistant places the human in the loop at the code level, which is exactly where regulators require human comprehension. PCD places the human in the loop at the specification level, which is where human comprehension is both possible and valuable, and treats the code as a generated artifact subject to automated verification.
 
-Our positioning emphasizes three differentiators:
+The empirical record supports the paradigm's claims. The same specification produced working implementations in Go, Rust, Java, and Python in independent translation runs, with language chosen at translation time from the deployment template, not from the specification. A 35-behavior, 2900-line specification for a Linux system information tool was translated to both Go and Rust in single sessions each. The `pcd-lint` validator and the `mcp-server-pcd` MCP server were both produced from their own PCD specifications. Across all runs, every AI model tested resolved the target language from the deployment template without being told explicitly — the core design claim validated empirically across eight runs, three continents, and multiple model families.
 
-1. **Comprehensive verification framework, not just readable specifications:** Regulatory compliance is achieved through multiple complementary mechanisms: human-reviewable specifications, formal proofs (when required), validation against specification examples, translation audit trails, and optional cross-validation between multiple AI translators. The paradigm acknowledges that specification readability alone cannot guarantee correctness of probabilistic AI translation.
-
-2. **Flexible verification:** Optional meta-language layer allows teams to choose verification level. Safety-critical components use formal verification; supporting infrastructure uses direct generation.
-
-3. **Pluggable architecture:** Stable specification format and IR support multiple meta-languages and direct code generation. No vendor lock-in; teams choose verification technology or skip it entirely.
-
-A concise competitor comparison is provided in Appendix A.3.
+The copyright and IP question for AI-generated code remains legally unsettled globally. PCD's position is honest: we do not know who owns AI-generated code, and neither does anyone else. What PCD does is maximize human control and make provenance explicit. The specification is human-authored. The chain of custody from specification to artifact is cryptographically verifiable. The audit bundle contains the full translation record. Software Composition Analysis tooling is recommended in the CI pipeline. This is the most defensible position available given the current state of law, and it is substantially stronger than any alternative AI coding approach.
 
 ---
 
 ## 5. Lessons Learned
 
-- **AI needs structured input:** Freeform prompts produce brittle, non-reproducible outputs. Structured specifications with explicit deployment context enable reliable translation.
+The most important lesson is that the specification is harder to write than the code. This surprises engineers who expect the AI to do the hard work. The AI does the mechanical work — syntax, packaging, boilerplate, test infrastructure. The human does the conceptual work — what are the invariants? what are the error cases? what does "correct" mean for this behavior? Writing a specification that is precise enough to produce correct code on the first translation run requires the same quality of thinking as designing a system, not just describing it. This is a feature, not a bug: the intellectual work that matters is now captured in a human-readable, version-controlled, auditable artifact.
 
-- **Translation ambiguity is the critical weakness:** The gap between informal natural language and formal code is where hallucinations occur. Constrained specification formats with formal notation and executable examples reduce translation variance dramatically.
+The target language must not be a specification concern. Early versions of this paradigm required spec authors to declare a target language. This was identified as an anti-pattern immediately: it pulls authors into implementation thinking and makes specifications brittle across language changes. Removing the language declaration from specifications and encoding it in deployment templates was the single most important design decision in the project's evolution.
 
-- **Meta-language compatibility matters:** If using formal verification, the meta-language must have sufficient LLM training data for reliable translation. Languages with small communities or unique syntax (e.g., ATS2) fail AI translation even if theoretically powerful.
+Freeform prompts produce unreliable translations. The universal translation prompt is tightly constrained: it specifies delivery phases, compile gate requirements, stub contracts, and translation report format. The deployment template's EXECUTION section specifies the language-specific details. Neither document mentions the other's concerns. This separation took several iterations to get right, but it is what makes translations reproducible across different AI models and sessions.
 
-- **Verification must be optional:** Requiring formal verification for all code blocks adoption. Teams need the flexibility to verify critical paths and generate non-critical code directly.
+The scaffold-first pattern is essential for large specifications. Without it, translators make different structural decisions across milestone runs, producing codebases with inconsistent package layouts and naming conventions. The scaffold milestone establishes the structure once; subsequent milestones fill it in. The scaffold held without modification through seven milestones in both Go and Rust translations of the `sitar` specification — exactly as designed.
 
-- **Domain context is essential:** Specifications without deployment context (backend vs. embedded vs. kernel-driver) are ambiguous. The paradigm requires architectural information, not just functional requirements.
+LLM randomness creates consistency risk across multiple translation runs. Two runs from the same specification with the same model may make different architectural decisions. Over multiple incremental updates, a codebase can develop internal inconsistency. The decisions hints file was introduced to address this: implementation decisions not inferable from the specification are recorded alongside it, read by translators on subsequent guided regeneration or incremental update runs, and discarded when switching target languages. The spec stays clean; the implementation memory lives in a separate, disposable artifact.
 
-- **Target language must not be a spec author's concern:** Early versions of this paradigm required spec authors to declare a target language. This was identified as an anti-pattern—it pulls authors back into implementation thinking. Target language is now derived entirely from deployment templates.
-
-- **Executable examples serve as test oracle:** Specifications that include concrete input/output examples enable validation of translations—generated code must pass all examples or translation is rejected.
-
-- **Openness builds trust:** Open specification formats, reproducible builds, and transparent verification toolchains are decisive for enterprise and regulatory adoption.
-
-- **Small pilots validate approach:** Targeted pilots on well-defined components (crypto primitives, state machines) create momentum and reduce organizational risk.
-
-- **Eat your own dog food:** The `pcd-lint` validator is being developed using this paradigm itself. A specification that cannot describe its own tooling has not yet proven its expressiveness.
+The hard questions must be answered honestly. Copyright ownership of AI-generated code is legally unsettled. Memorisation and reproduction risk is non-zero with any LLM. Local model quality varies. None of these are reasons to avoid the paradigm; all of them are reasons to design it carefully. PCD's answers — explicit provenance, audit bundles, SCA tooling, spec hash embedding, human specification review as the certification point — are the most defensible available. Claiming certainty where none exists would undermine the credibility of the paradigm with exactly the regulated-domain audiences it is designed to serve.
 
 ---
 
 ## 6. Strategic Priorities
 
-**Pilot and validate**  
-- Run pilots on well-scoped components (crypto primitives, register accessors, state machines, protocol implementations).
-- Use `pcd-lint` as the first reference implementation developed under the paradigm.
-- Measure defect reduction, specification review time, audit effort, and certification cost reduction.
-- For highest-assurance components, employ dual-LLM verification where independent translators cross-validate via formal equivalence.
+The toolchain is functional and self-hosting. `pcd-lint` validates specification structure against 17 rules. `mcp-server-pcd` serves templates, prompts, and hints to any MCP-capable LLM host, providing a complete translation environment in a single server connection. Nine deployment templates cover the primary deployment contexts. The empirical record spans multiple models, languages, and specification sizes. The foundation is solid.
 
-**Specification format and tooling**  
-- Define stable Markdown specification schema with required sections (Data Types, Behavior, Invariants, State Machine, Deployment Context, Security).
-- Build linters and validators for specification quality.
-- Provide deployment templates covering the standard deployment contexts (see Appendix A.11).
-- Develop IDE support (VS Code extension, specification completions).
+The immediate priority is making the paradigm accessible. The specification format has a learning curve that the interview prompt partially addresses but does not eliminate. The `user-guide.md` covers the spec author workflow; the `technical-reference.md` covers the full toolchain. Making these documents complete, accurate, and usable for engineers who have not been part of the development process is the highest-leverage activity for adoption.
 
-**Deployment template system**  
-- Define the initial set of deployment templates with language defaults and constraints.
-- Implement systemd-style preset layering (system defaults → org presets → user presets → project presets).
-- Provide documented override mechanism for cases where template defaults are insufficient.
+The specification lifecycle workflow needs tooling support. The `assess_change_impact` tool in `mcp-server-pcd` provides automated impact assessment — given a specification change, it recommends full regeneration or incremental update with reasoning. The `verify_spec_hash` tool checks whether generated artifacts are current with the specification. Together they close the loop on the lifecycle question: how do I know if my artifacts are still correct after a specification change? The answer is now automated and auditable.
 
-**Flexible verification paths**  
-- Implement both direct code generation (spec → Go/C/Rust) and formal verification (spec → meta-language → Go/C/Rust) paths.
-- Document when to use each approach (risk-based decision framework).
-- Provide migration path: start with direct generation, add formal verification to critical components as needed.
+Coding style and project integration deserve explicit guidance. When PCD-generated components are integrated into existing codebases with established conventions — OOP patterns, naming standards, framework idioms — the style hints file provides the mechanism. A `<project>.<language>.style.hints.md` alongside the specification encodes project-specific conventions; the translator reads it and produces conformant code. This is the correct answer to the objection that AI-generated code cannot adhere to coding philosophy: it can, given the right hints, and the hints mechanism is already in the framework.
 
-**Pluggable meta-language support**  
-- Define stable intermediate representation (IR) format that is meta-language agnostic.
-- Provide reference implementations for multiple meta-languages (Lean 4 as initial reference, F* and Dafny adapters).
-- Document meta-language adapter interface so teams can integrate preferred verification technology or custom IR formats.
-- The IR is the contract; the meta-language is interchangeable.
+The remaining templates — `gui-tool`, `python-tool`, `library-c-abi`, `verified-library`, `cloud-native`, `project-manifest` — need the spec hash embedding treatment applied to `cli-tool`, `mcp-server`, and `backend-service` this week. This is a mechanical update but a necessary one for consistency.
 
-**Tooling and CI integration**  
-- Build CI steps producing audit bundles (specification + IR + generated code + proofs + metadata).
-- Integrate with PR gating (specification changes trigger regeneration and verification).
-- Provide diff tools showing specification changes and their impact on generated code.
-- Support mixed codebases (specifications for new components, manual code for legacy).
-
-**Regulatory and certification support**  
-- Engage with safety standards bodies (ISO 26262, DO-178C, IEC 62304) to validate audit bundle format.
-- Develop certification guidance documentation.
-- Partner with certification authorities for pilot programs.
-- Create traceability matrix template (specification requirements → proofs → generated code).
-
-**Adoption and community**  
-- Seed with demos, specification templates, and training materials.
-- Build community hub for sharing specification patterns.
-- Engage safety-critical engineering teams (automotive, aviation, medical device) for early pilots.
-- Publish case studies showing certification cost/time reduction.
-
-**Metrics and risk management**  
-- Track: adoption velocity, defect density, specification review time, certification cost reduction, audit effort.
-- Measure: time-to-verification (spec → deployed code), specification quality (ambiguities caught), translation reliability.
-- Maintain fallback: hand-written implementations for edge cases, human override for generated code, graceful degradation if translation fails.
+Publication timing is a strategic decision that remains open. The repository is private. The whitepaper, templates, and toolchain are complete enough for an informed audience to evaluate the paradigm. The decision to publish depends on organizational positioning considerations that are outside the scope of this document. What is clear is that the paradigm is ready to be evaluated — the self-hosting claim is real, the empirical record is solid, and the hard questions have honest answers.
 
 ---
 
@@ -3252,127 +3149,6 @@ the translator. This asymmetry should inform the default choice.
 | Incremental update recommended | Read existing `<specname>.<lang>.decisions.hints.md` before starting |
 | Switching target language | Discard `<specname>.<oldlang>.decisions.hints.md`; new file created by first translation run |
 | Clean full regeneration (no prior decisions) | No decisions hints file needed; translator starts clean |
-
----
-
-## A.20 Spec Hash Embedding — Chain of Custody
-
-### The Problem
-
-A PCD translation run produces multiple artifacts: source files, packaging
-scripts, a Containerfile, a translation report, a binary. Over time, with
-multiple runs, potentially multiple models, and incremental updates, a
-critical question arises: which spec version produced this artifact?
-
-Without a verifiable answer, the audit trail is incomplete. The spec can be
-certified and the code can be verified, but the link between them is asserted
-rather than proved.
-
-### The Solution
-
-Every generated artifact embeds the SHA256 checksum of the spec file it was
-produced from. The hash is computed at translation time from the spec file
-as provided — not from any transformed version — and embedded in every
-deliverable.
-
-This creates a cryptographically verifiable chain of custody:
-
-```
-spec file → sha256sum → hash H
-                            ↓
-           embedded in: source files, binary --version,
-                        RPM .spec, DEB control,
-                        Containerfile LABEL, Makefile,
-                        TRANSLATION_REPORT.md
-```
-
-### Embedding Locations
-
-| Artifact | Embedding format |
-|---|---|
-| Source files (all languages) | Comment near top: `// generated from spec: <name>.md sha256:<H>` |
-| `TRANSLATION_REPORT.md` | Header field: `Spec-SHA256: <H>` |
-| Binary `--version` output | `spec:<H>` included in version string |
-| RPM `.spec` file | `# pcd-spec-sha256: <H>` comment |
-| DEB `control` file | `X-PCD-Spec-SHA256: <H>` field |
-| `Containerfile` | `LABEL pcd.spec.sha256="<H>"` |
-| `Makefile` | `SPEC_SHA256 := <H>` variable |
-
-The comment syntax varies by language; the translator uses the correct syntax
-for the target language in all source files.
-
-### What This Enables
-
-**Audit trail completeness.** Any artifact can be traced back to the exact
-spec that produced it. Running `sha256sum <specname>.md` against the
-current spec and comparing to the embedded hash answers: "is this artifact
-current with the current spec, or was it produced from an older version?"
-
-**Version boundary detection.** When a spec is updated and a new translation
-run is triggered, the new artifacts carry a different hash from the old
-artifacts. The version boundary is cryptographically visible without
-inspecting build logs or commit history.
-
-**Regulated domain compliance.** Common Criteria and ISO 26262 require
-traceability from requirement to implementation. The spec hash provides
-that traceability link in a form that is machine-verifiable, not just
-human-asserted. The chain becomes: certified spec → spec hash → verified
-artifact. The hash is the link that makes the chain auditable by anyone.
-
-**Change impact verification.** The `assess_change_impact` tool (A.19)
-recommends full regeneration or incremental update. After a regeneration
-run, the new spec hash in all artifacts confirms the run was complete —
-no artifact was missed.
-
-**4-eyes principle integration.** When the 4-eyes principle requires that
-code is reviewed by a human before release, the reviewer can verify that
-the artifact they are reviewing was produced from the spec they certified,
-by comparing hashes. No assumption about the build pipeline is required.
-
-**Copyright and ownership clarity.** The spec is the human-authored artifact.
-The spec hash in the generated code makes the provenance of the generated
-code explicit and machine-verifiable. The claim "this code was generated
-from this spec" is no longer an assertion — it is a verifiable fact.
-
-### Verification
-
-To verify that an artifact is current with a spec:
-
-```bash
-sha256sum <specname>.md
-# Compare output to the hash embedded in the artifact
-```
-
-To extract the embedded hash from a binary:
-
-```bash
-<binary> --version   # includes spec:<hash>
-```
-
-To extract from a container image:
-
-```bash
-docker inspect <image> | jq '.[0].Config.Labels["pcd.spec.sha256"]'
-```
-
-### Invariant
-
-> [observable] Every generated artifact embeds the SHA256 of the spec file
-> it was produced from. An artifact without an embedded spec hash is
-> incomplete regardless of whether all other deliverables are present.
-
-### Framework Integration
-
-The spec hash requirement is enforced in `prompts/prompt.md` as a universal
-principle applied to every translation run, independent of template or
-target language. The embedding locations listed above are the minimum set;
-deployment templates may specify additional embedding locations relevant to
-their artifact type.
-
-`pcd-lint` RULE-18 (planned): detect if a spec has been modified since the
-last known translation run by comparing the current spec hash to the hash
-recorded in the most recent `TRANSLATION_REPORT.md` in the adjacent code
-directory. Emit a warning if they differ.
 
 ---
 
