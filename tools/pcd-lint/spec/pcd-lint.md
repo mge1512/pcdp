@@ -1,6 +1,7 @@
 
 
 
+
 # pcd-lint
 
 ## META
@@ -267,6 +268,7 @@ STEPS:
 15. Apply RULE-15 (MILESTONE section structure and single-active constraint, if present).
 16. Apply RULE-16 (MILESTONE BEHAVIOR names exist in spec, if present).
 17. Apply RULE-17 (scaffold milestone ordering and uniqueness, if present).
+18. Apply RULE-18 (spec hash presence in TRANSLATION_REPORT, if --check-report).
     MECHANISM: rules are independent; a failure in one rule does not prevent
     subsequent rules from running. All diagnostics are collected before output.
 
@@ -724,6 +726,38 @@ if len(scaffold_milestones) = 1:
                (lowest version number / earliest in document order).
                Later milestones depend on the scaffold foundation."
 ```
+
+---
+
+### RULE-18: Spec hash presence in TRANSLATION_REPORT (v0.3.22+)
+
+Applies when a `TRANSLATION_REPORT.md` file is present adjacent to the spec
+being linted (i.e. in the same directory or in a `code/` subdirectory).
+
+```
+if TRANSLATION_REPORT.md exists adjacent to spec:
+  if TRANSLATION_REPORT.md does not contain line matching /^Spec-SHA256:\s+[0-9a-f]{64}/:
+    emit Warning, section="report", line=1,
+      message="TRANSLATION_REPORT.md is missing Spec-SHA256: field.
+               Every translation run must record the SHA256 of the spec
+               it was produced from. Run: sha256sum <specname>.md"
+
+  if Spec-SHA256 field present:
+    let recorded_hash = value of Spec-SHA256 field
+    let current_hash  = sha256(<specname>.md)
+    if recorded_hash ≠ current_hash:
+      emit Warning, section="report", line=1,
+        message="Spec has changed since last translation run.
+                 Recorded hash: {recorded_hash}
+                 Current hash:  {current_hash}
+                 Regeneration may be required. Run: pcd change-impact
+                 or use assess_change_impact via mcp-server-pcd."
+```
+
+Note: RULE-18 emits Warnings only, never Errors. The spec itself may be
+valid; the mismatch indicates a process concern, not a structural defect.
+RULE-18 is only evaluated when `--check-report` flag is passed or when
+`check-report=true` is set, to avoid false positives in spec-only workflows.
 
 ---
 

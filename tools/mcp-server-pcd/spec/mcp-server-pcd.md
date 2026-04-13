@@ -1,10 +1,11 @@
 
 
+
 # mcp-server-pcd
 
 ## META
 Deployment:        mcp-server
-Version:           0.3.0
+Version:           0.3.1
 Spec-Schema:       0.3.21
 Author:            Matthias G. Eckermann <pcd@mailbox.org>
 License:           GPL-2.0-only
@@ -85,6 +86,15 @@ SetMilestoneResult := {
   previous_status:  MilestoneStatus
   new_status:       MilestoneStatus
 }
+
+SpecHashResult := {
+  spec_path:      string    // path of the spec file
+  spec_hash:      string    // SHA256 hex digest of the spec file
+  report_hash:    string    // Spec-SHA256 value from TRANSLATION_REPORT.md, or "" if absent
+  match:          boolean   // true if spec_hash = report_hash
+  status:         string    // "current" | "stale" | "no-report" | "no-hash-in-report"
+}
+
 ChangeImpactRecommendation := "full-regeneration" | "incremental"
 
 ChangeImpactResult := {
@@ -499,6 +509,46 @@ ERRORS:
 
 ---
 
+## BEHAVIOR: verify_spec_hash
+Constraint: required
+
+Computes the SHA256 of a spec file and compares it to the `Spec-SHA256:`
+field recorded in the most recent `TRANSLATION_REPORT.md` adjacent to the
+spec. Reports whether the generated artifacts are current with the spec.
+
+INPUTS:
+```
+spec_path: string   // path to the spec .md file — required
+```
+
+PRECONDITIONS:
+- spec_path is non-empty
+- spec_path points to a readable file with .md extension
+
+STEPS:
+1. Compute SHA256 of the file at spec_path. Store as spec_hash.
+2. Look for TRANSLATION_REPORT.md in the same directory as spec_path,
+   then in a `code/` subdirectory of the spec's parent directory.
+   If not found: return SpecHashResult with status = "no-report".
+3. If found: search for a line matching `Spec-SHA256: <hex>` in the report.
+   If not found: return SpecHashResult with status = "no-hash-in-report".
+4. Extract report_hash from the `Spec-SHA256:` line.
+5. If spec_hash = report_hash:
+     return SpecHashResult with match = true, status = "current"
+   Else:
+     return SpecHashResult with match = false, status = "stale"
+
+POSTCONDITIONS:
+- result.spec_hash is always the current SHA256 of the spec file
+- result.status is one of: "current" | "stale" | "no-report" | "no-hash-in-report"
+- result.match is true only when status = "current"
+
+ERRORS:
+- MCP error -32602 if spec_path is empty or file not readable
+- MCP error -32602 if spec_path does not end in .md
+
+---
+
 ## BEHAVIOR: http-transport
 Constraint: required
 
@@ -581,6 +631,8 @@ ERRORS:
 - [observable]      server never exits with code other than 0, 1, or 2
 - [observable]      assess_change_impact with structural_impact=high always
                     returns recommendation=full-regeneration
+- [observable]      verify_spec_hash with matching hashes always returns
+                    status="current" and match=true
 - [implementation]  rule execution order: RULE-01 through RULE-17, same as pcd-lint
 - [implementation]  resource URIs follow pcd://<type>/<n> scheme exactly
 - [implementation]  all assets (templates, hints, prompts) are embedded into the
@@ -773,6 +825,30 @@ WHEN:
 THEN:
   response contains all templates shipped with the binary
   server does not error or exit
+
+EXAMPLE: verify_spec_hash_stale
+GIVEN:
+  spec_path = "tools/calc-interest/spec/calc-interest.md"
+  SHA256 of spec file = "abc123...def456"
+  TRANSLATION_REPORT.md contains: "Spec-SHA256: 000000...111111"
+WHEN:
+  tool verify_spec_hash called with spec_path
+THEN:
+  result.spec_hash = "abc123...def456"
+  result.report_hash = "000000...111111"
+  result.match = false
+  result.status = "stale"
+
+EXAMPLE: verify_spec_hash_current
+GIVEN:
+  spec_path = "tools/pcd-lint/spec/pcd-lint.md"
+  SHA256 of spec file = "aabbcc...ddeeff"
+  TRANSLATION_REPORT.md contains: "Spec-SHA256: aabbcc...ddeeff"
+WHEN:
+  tool verify_spec_hash called with spec_path
+THEN:
+  result.match = true
+  result.status = "current"
 
 EXAMPLE: assess_change_type_modification
 GIVEN:
