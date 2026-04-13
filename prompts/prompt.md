@@ -11,7 +11,10 @@ input directory alongside this prompt:
 
 Additional files may be present if listed in the spec's DEPENDENCIES section
 or in the active MILESTONE's `Hints-file:` field (hints files, interface
-definitions). Read them before generating any code.
+definitions). Also look for style hints files (`<scope>.<language>.style.hints.md`)
+in the preset hierarchy (`/etc/pcd/hints/`, `.pcd/hints/`) — these encode
+project or company coding conventions and must be applied to all generated code.
+Read all hints files before generating any code.
 
 ---
 

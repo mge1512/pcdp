@@ -34,10 +34,10 @@ section 4.
 
 ### Hints files (`hints/`)
 
-Hints files contain library-specific implementation knowledge. Four-layer
+Hints files contain library-specific implementation knowledge. Five-layer
 naming convention — see `doc/technical-reference.md` section 5 for the
-full naming rules and lifecycle of each layer including the decisions hints
-file.
+full naming rules and lifecycle of each layer, including the style hints
+file (`<scope>.<language>.style.hints.md`) and the decisions hints file.
 
 ### pcd-lint (`tools/pcd-lint/`)
 
