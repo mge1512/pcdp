@@ -147,6 +147,8 @@ STEPS:
 - [observable]   LANGUAGE is always Python; no alternative is ever resolved
 - [observable]   every .py source file carries SPDX-License-Identifier header
 - [observable]   RPM and DEB are required output formats
+- [observable]      every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 - [implementation] src/ layout is enforced; flat layout never generated
 - [implementation] cli.py contains only argparse logic; business logic in separate modules
 - [implementation] mypy --strict passes with zero errors before delivery
@@ -240,7 +242,8 @@ The translator must produce a src/ layout with the following structure:
 | DEB | required | `packaging/debian/control`, `packaging/debian/changelog`, `packaging/debian/rules`, `packaging/debian/copyright` | DEP-5 copyright. dh-python build sequence. |
 | wheel | supported | built by `uv build` | Produced by build step; not a static file. |
 | OCI | supported | `Containerfile` | Base image: `registry.opensuse.org/opensuse/leap:15.6` or current release. Never Alpine, never Debian. pip3 install --no-cache-dir. ENTRYPOINT as exec form. |
-| report | required | `TRANSLATION_REPORT.md` | Last deliverable. Must include: toolchain gate result (uv sync, flake8, mypy, pytest). |
+| report | required | `TRANSLATION_REPORT.md` | Last deliverable. Must include: `Spec-SHA256:` header field, toolchain gate result (uv sync, flake8, mypy, pytest). |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Deliverable Content Requirements
 

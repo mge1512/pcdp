@@ -1,5 +1,6 @@
 
 
+
 # mcp-server.template
 
 ## META
@@ -132,7 +133,8 @@ must be produced. Supported OUTPUT-FORMATs are produced if active in preset.
 | RPM | required | `{n}.spec` | OBS RPM spec. Must include systemd service unit for http transport mode. |
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | DEP-5 copyright. Must include systemd service unit. |
 | OCI | required | `Containerfile` | Multi-stage build. Builder FROM registry.suse.com/bci/golang:latest. Final stage FROM scratch. Expose port 8080 for http transport. ENTRYPOINT default to http mode. Never use unqualified image names. |
-| report | required | `TRANSLATION_REPORT.md` | Must include: framework choice rationale, transport implementation notes, tool list with descriptions, compilation result. |
+| report | required | `TRANSLATION_REPORT.md` | Must include: `Spec-SHA256:` header field, framework choice rationale, transport implementation notes, tool list with descriptions, compilation result. |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, binary `--version` output, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Containerfile` `LABEL pcd.spec.sha256=`, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Systemd Service Unit
 
@@ -324,6 +326,8 @@ POSTCONDITIONS:
 - [observable]      configuration via key=value only — no environment variables
 - [observable]      TRANSLATION_REPORT.md documents the Go framework choice
 - [observable]      template version recorded in every audit bundle
+- [observable]  every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 
 ---
 

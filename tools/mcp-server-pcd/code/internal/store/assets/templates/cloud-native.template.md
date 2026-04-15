@@ -252,6 +252,8 @@ correct equivalent — the file must always be present.
   whether or not the spec author is aware of them
 - [observable]      template version is recorded in every audit bundle that references it
 - [observable]      BASE-IMAGE=Scratch is only valid when LANGUAGE ∈ {Go, Rust}
+- [observable]      every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 - [observable]      containers must always run as non-root user
 - [observable]      health checks are mandatory for all cloud-native applications
 - [observable]      deploy/ directory must contain all required Kubernetes manifests
@@ -381,7 +383,8 @@ Deliverables must be produced in the following order:
 | OPERATOR | supported | `deploy/crd.yaml`, `controllers/` | Kubernetes operator with Custom Resource Definitions. Controllers directory contains operator logic. The operator's own deployment manifest is `deploy/deployment.yaml` (already produced by the MANIFEST row); no separate `deploy/operator.yaml` is required. |
 | independent-tests | required | `independent_tests/INDEPENDENT_TESTS.go` | Specification verification tests using declared INTERFACES test doubles. For LANGUAGE=Go: test functions must reside in a companion `independent_tests/independent_tests_test.go` file (Go requires `_test.go` suffix for test execution); `INDEPENDENT_TESTS.go` serves as the package documentation file. |
 | workflow-diagram | required | `translation_report/translation-workflow.pikchr` | Pikchr diagram documenting the translation process and decisions. |
-| report | required | `TRANSLATION_REPORT.md` | AI translator self-evaluation with cloud-native specific considerations. |
+| report | required | `TRANSLATION_REPORT.md` | AI translator self-evaluation with cloud-native specific considerations.  Must include `Spec-SHA256:` header field. |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, binary `--version` output, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Containerfile` `LABEL pcd.spec.sha256=`, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Naming Convention
 

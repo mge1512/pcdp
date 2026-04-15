@@ -1,3 +1,4 @@
+
 # backend-service.template
 
 ## META
@@ -171,6 +172,8 @@ STEPS:
 - [observable]  BINARY-TYPE=dynamic is only valid when LANGUAGE ∈ {C, C++, C#}
 - [observable]  BINARY-TYPE=static is the only valid value when LANGUAGE ∈ {Go, Rust}
 - [observable]  services log to stdout/stderr rather than private log files
+- [observable]  every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 
 ---
 
@@ -250,7 +253,8 @@ declared as `required` or active `supported`.
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | Debian package metadata. Must install the service unit. |
 | OCI | supported | `Containerfile` | Multi-stage build. Builder stage: `FROM registry.suse.com/bci/golang:latest AS builder` for Go — never unqualified names (supply chain security requirement). Final stage: `FROM scratch`. Expose only ports declared in spec DEPLOYMENT. |
 | binary | supported | none | Raw binary only. |
-| report | required | `TRANSLATION_REPORT.md` | Must include service startup/shutdown notes, config-loading notes, and compile gate result. |
+| report | required | `TRANSLATION_REPORT.md` | Must include: `Spec-SHA256:` header field, service startup/shutdown notes, config-loading notes, and compile gate result. |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, binary `--version` output, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Containerfile` `LABEL pcd.spec.sha256=`, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Systemd Service Unit
 

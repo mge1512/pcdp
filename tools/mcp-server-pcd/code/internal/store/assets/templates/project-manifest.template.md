@@ -83,7 +83,8 @@ are documentation and build orchestration artifacts.
 | build-config | required | `Makefile` | Orchestrates per-component translation in build order. |
 | interface-index | required | `interfaces/index.md` | Lists all exported interfaces, their versions, and importers. |
 | project-audit-bundle | required | `audit_bundle/project/` | Aggregates all component audit bundles. Includes system invariant documentation. |
-| report | required | `TRANSLATION_REPORT.md` | Documents decomposition decisions, dependency analysis, and system invariant coverage. |
+| report | required | `TRANSLATION_REPORT.md` | Documents decomposition decisions, dependency analysis, and system invariant coverage. Must include `Spec-SHA256:` header field. |
+| spec-hash | required | embedded in audit bundle | SHA256 of the spec file embedded in `TRANSLATION_REPORT.md` `Spec-SHA256:` field and `metadata.json`. Computed once before any output is written. |
 
 ---
 
@@ -153,6 +154,8 @@ POSTCONDITIONS:
 - [observable]      a breaking interface change (major version bump) requires all importers
   to explicitly update their minimum version requirement
 - [observable]      project Safety-Level = max(Safety-Level of all components)
+- [observable]      every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 - [observable]      template version is recorded in the project audit bundle
 
 ---

@@ -1,5 +1,6 @@
 
 
+
 # cli-tool.template
 
 ## META
@@ -201,6 +202,8 @@ emit Error: "Key <K> is forbidden in cli-tool specs."
 - [observable]  template version is recorded in every audit bundle that references it
 - [observable]  BINARY-TYPE=dynamic is only valid when LANGUAGE ∈ {C, C++, C#}
 - [observable]  BINARY-TYPE=static is the only valid value when LANGUAGE ∈ {Go, Rust}
+- [observable]  every generated artifact embeds the SHA256 of the spec file
+  it was produced from; an artifact without an embedded spec hash is incomplete
 
 ---
 
@@ -314,6 +317,7 @@ Deliverables must be produced in the following order:
 | PKG | supported | `<n>.pkgbuild` | macOS installer package descriptor. Required when PLATFORM includes macOS. Minimal skeleton acceptable; document in translation report. |
 | binary | supported | none | Raw binary only. No packaging descriptor required. |
 | report | required | `TRANSLATION_REPORT.md` | AI translator self-evaluation. Must be Markdown. Must include: language resolution rationale, delivery mode, template constraints compliance table, ambiguities, deviations, per-example confidence levels with reasoning, parsing approach, signal handling approach. Written last after all other files verified on disk. |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, binary `--version` output, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Containerfile` `LABEL pcd.spec.sha256=`, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Naming Convention
 
@@ -358,6 +362,7 @@ in the specification title (first `#` heading). It must be:
 
 **TRANSLATION_REPORT.md:**
 - Must be a Markdown file (not .txt or other format)
+- Must include a `Spec-SHA256:` field in the header (SHA256 of the spec file as provided)
 - Must include a template constraints compliance table
 - Must include per-example confidence levels with reasoning
 - Must document parsing approach chosen

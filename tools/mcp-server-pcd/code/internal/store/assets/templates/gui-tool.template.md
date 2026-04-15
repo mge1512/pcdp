@@ -250,6 +250,8 @@ STEPS:
 - [observable]      Mobile platform targets always resolve to Flutter
 - [observable]      embedded-linux targets always resolve to Qt6
 - [observable]      RPM and DEB are produced whenever Linux is in PLATFORM
+- [observable]      every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 - [implementation]  Framework selection logic is deterministic given PLATFORM set
 - [implementation]  TYPE-BINDINGS table is applied without translator discretion
 
@@ -375,7 +377,8 @@ LANGUAGE, and PLATFORM set. The following logical components apply:
 | docs | always | README.md — installation, usage, platform notes. |
 | man | always | `<n>.1.md`, `<n>.1` — Markdown source converted to troff via `pandoc`. Section 1. Install via RPM/DEB packaging. |
 | tests | always | Independent test suite using declared test doubles. No live display required. |
-| report | always | TRANSLATION_REPORT.md — always last. |
+| report | always | TRANSLATION_REPORT.md — always last. Must include `Spec-SHA256:` header field. |
+| spec-hash | required | embedded in all artifacts | SHA256 of the spec file embedded in: source file header comments, `TRANSLATION_REPORT.md` `Spec-SHA256:` field, binary `--version` output, RPM `.spec` comment, DEB `control` `X-PCD-Spec-SHA256:` field, `Containerfile` `LABEL pcd.spec.sha256=`, `Makefile` `SPEC_SHA256` variable. Computed once before any output is written. |
 
 ### Deliverable Content Requirements
 

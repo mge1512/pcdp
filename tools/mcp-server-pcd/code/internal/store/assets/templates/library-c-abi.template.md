@@ -76,7 +76,10 @@ Required deliverables will include:
   `pandoc` in DEB `Build-Depends`. Install to `%{_mandir}/man3/` (RPM)
   and `usr/share/man/man3/` (DEB).
 - RPM spec, Debian package files
-- `TRANSLATION_REPORT.md`
+- `TRANSLATION_REPORT.md` (must include `Spec-SHA256:` header field)
+- spec-hash embedded in: source file header comments, RPM `.spec` comment,
+  DEB `control` `X-PCD-Spec-SHA256:` field, `Makefile` `SPEC_SHA256` variable,
+  shared library SONAME comment. Computed once before any output is written.
 
 ### CPS File Note
 
@@ -138,6 +141,8 @@ ERRORS:
 - [observable]      for safety/security-critical libraries use verified-library
 - [observable]      CPS file is always a required deliverable
 - [observable]      template version is recorded in every audit bundle
+- [observable]      every generated artifact embeds the SHA256 of the spec
+  file it was produced from; an artifact without an embedded spec hash is incomplete
 
 ---
 
