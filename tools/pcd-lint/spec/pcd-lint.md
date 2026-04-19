@@ -6,8 +6,8 @@
 
 ## META
 Deployment:  cli-tool
-Version:     0.3.21
-Spec-Schema: 0.3.21
+Version:     0.3.22
+Spec-Schema: 0.3.22
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     GPL-2.0-only
 Verification: none

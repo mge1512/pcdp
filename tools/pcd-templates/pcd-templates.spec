@@ -1,5 +1,5 @@
 Name:           pcd-templates
-Version:        0.3.19
+Version:        0.3.22
 Release:        1
 Summary:        Deployment templates and library hints for the Post-Coding Development
 BuildArch:      noarch
@@ -54,11 +54,15 @@ install -m 0644 templates/mcp-server.template.md       %{buildroot}%{_datadir}/p
 install -m 0644 templates/project-manifest.template.md %{buildroot}%{_datadir}/pcd/templates/
 install -m 0644 templates/python-tool.template.md      %{buildroot}%{_datadir}/pcd/templates/
 install -m 0644 templates/verified-library.template.md %{buildroot}%{_datadir}/pcd/templates/
+install -m 0644 templates/spack-package.template.md    %{buildroot}%{_datadir}/pcd/templates/
 
 # Hints
 install -m 0644 hints/cloud-native.go.go-libvirt.hints.md       %{buildroot}%{_datadir}/pcd/hints/
 install -m 0644 hints/cloud-native.go.golang-crypto-ssh.hints.md %{buildroot}%{_datadir}/pcd/hints/
 install -m 0644 hints/mcp-server.go.mcp-go.hints.md             %{buildroot}%{_datadir}/pcd/hints/
+install -m 0644 hints/cli-tool.go.milestones.hints.md            %{buildroot}%{_datadir}/pcd/hints/
+install -m 0644 hints/cli-tool.rs.milestones.hints.md            %{buildroot}%{_datadir}/pcd/hints/
+install -m 0644 hints/python-tool.hints.md                       %{buildroot}%{_datadir}/pcd/hints/
 
 %files
 %license LICENSE
@@ -76,12 +80,20 @@ install -m 0644 hints/mcp-server.go.mcp-go.hints.md             %{buildroot}%{_d
 %{_datadir}/pcd/templates/project-manifest.template.md
 %{_datadir}/pcd/templates/python-tool.template.md
 %{_datadir}/pcd/templates/verified-library.template.md
+%{_datadir}/pcd/templates/spack-package.template.md
 
 # Hints
 %{_datadir}/pcd/hints/cloud-native.go.go-libvirt.hints.md
 %{_datadir}/pcd/hints/cloud-native.go.golang-crypto-ssh.hints.md
 %{_datadir}/pcd/hints/mcp-server.go.mcp-go.hints.md
+%{_datadir}/pcd/hints/cli-tool.go.milestones.hints.md
+%{_datadir}/pcd/hints/cli-tool.rs.milestones.hints.md
+%{_datadir}/pcd/hints/python-tool.hints.md
 
 %changelog
+* Sat Apr 19 2026 Matthias G. Eckermann <pcd@mailbox.org> - 0.3.22-1
+- Add spack-package deployment template (10th template)
+- Add cli-tool.go.milestones.hints.md, cli-tool.rs.milestones.hints.md
+- Add python-tool.hints.md
 * Fri Mar 27 2026 Matthias G. Eckermann <pcd@mailbox.org> - 0.3.19-1
 - Initial release: all deployment templates and library hints

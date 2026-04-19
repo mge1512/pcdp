@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 BINARY   := pcd-lint
-VERSION  := 0.3.21
+VERSION  := 0.3.22
 PREFIX   := /usr/local
 BINDIR   := $(PREFIX)/bin
 MANDIR   := $(PREFIX)/share/man/man1
@@ -31,3 +31,8 @@ install: build man
 
 clean:
 	rm -f $(BINARY) $(BINARY).1
+
+# Generate vendor tarball for OBS/RPM builds — run once per release.
+vendor-tarball:
+	go mod vendor
+	tar -czf $(BINARY)-$(VERSION)-vendor.tar.gz vendor/
