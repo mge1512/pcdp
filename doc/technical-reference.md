@@ -1,9 +1,9 @@
 # PCD Technical Reference
 
 **Status:** Draft
-**Version:** 0.4.4
+**Version:** 0.5.0
 **Author:** Matthias G. Eckermann <pcd@mailbox.org>
-**Date:** 2026-06-10
+**Date:** 2026-07-07
 **License:** CC-BY-4.0
 
 This document explains the architectural and process decisions behind the
@@ -34,6 +34,8 @@ For the paradigm's goals, evidence, and strategic context, see `doc/whitepaper.m
 17. License Compliance and Software Composition Analysis
 18. Related Work and What Is Genuinely Novel
 19. Empirical Testing Record
+20. The Shared Engine: libpcd and Artefact Dependencies
+21. Tabular TYPES and Deterministic Schema Emission
 
 ---
 
@@ -841,6 +843,13 @@ package and binary.
 The full design — merge rules, hash computation, lint rules, worked
 example — is in `doc/spec-composition.md`.
 
+Spec composition solves *rule sharing* at the spec layer. It does not,
+by itself, decide where the shared behaviour is *translated*. Section
+20 (v0.5.0) refines the "Why not shared Go packages?" answer above:
+the shared rules are now composed into a single library component,
+libpcd, which the front ends consume as a pinned build-time artefact
+rather than re-translating the merged rules into each front end.
+
 ---
 
 ## 15. Formal Verification: When and Why
@@ -1130,6 +1139,178 @@ produced correct, compiling implementations. Language was chosen at translation
 time from the deployment template in all cases. This validates the claim that
 the same specification can produce idiomatic implementations in multiple languages
 without any specification change.
+
+---
+
+## 20. The Shared Engine: libpcd and Artefact Dependencies
+
+Section 14 established spec composition: shared rules live in an
+includable fragment, and each host re-translates the merged spec into
+its own self-contained implementation. That was the right first step -
+it removed rule *duplication at the spec layer*. It left a second kind
+of duplication in place: every front end that included the rules
+re-translated them, producing a fresh rule implementation per tool.
+Three front ends (`pcd-lint`, `pcd-emit-types`, `mcp-server-pcd`) would
+mean three independently generated copies of the same rule engine, each
+needing its own audit.
+
+v0.5.0 factors the shared behaviour into **libpcd**: one component,
+`Deployment: library`, that is the single translation unit for every
+PCD-specific behaviour - spec loading and include resolution,
+merged-hash computation, the lint rules, TYPE-table parsing and schema
+emission, milestone editing, and change-impact assessment. The rule
+fragments (`shared/spec/lint-rules.md`, `types-table-rules.md`,
+`types-emit-rules.md`) are composed into libpcd via `Includes:`; libpcd
+is where they become code, exactly once. The front ends shed all rule
+logic and become what their names say: a CLI validator, a CLI schema
+emitter, and an MCP adapter.
+
+**Dependencies, not Includes.** The distinction is load-bearing.
+`Includes:` means *merge this content into my spec and translate it as
+part of me* - the including component must implement the included
+behaviour. A front end must not do that; it must *call* the engine, not
+re-implement it. So the front ends bind to libpcd through their
+`DEPENDENCIES` section as `kind: pcd-artifact`, pinning the library
+version and recording its merged spec hash. `Includes:` is compile-time
+composition of specification text; a PCD-artifact dependency is a
+build-time link against a separately translated component. Using
+`Includes:` where a dependency is meant would re-introduce exactly the
+per-tool duplication libpcd exists to remove.
+
+**Refining section 14's "Why not shared Go packages?".** Section 14
+rejected a shared Go package on three grounds. libpcd is not that
+package, and each objection is answered rather than contradicted:
+
+- *Language neutrality.* The rejected solution baked a language into
+  the spec layer - a `pcd-rules` Go package cannot serve a Rust host.
+  libpcd does not live in the spec layer. It is a PCD component with no
+  declared language: `Deployment: library` resolves its realisation
+  language per binding, from the template and hints, like any other
+  spec. A Go front end links a Go build of libpcd; a Rust front end
+  links a Rust build of the same spec. The shared *specification*
+  stays language-neutral; only a given *binding* is concrete.
+- *Build coupling.* The coupling that section 14 warned about was
+  implicit and ambient - "building one tool requires another tool's
+  package to be present," discovered at build time. Here the coupling
+  is explicit and declared: it appears in the front end's DEPENDENCIES
+  with a pinned version and a recorded spec hash. The build service
+  builds libpcd from source and enforces version alignment across all
+  consumers. Coupling that is written down, pinned, and enforced is a
+  dependency; coupling that is ambient is the hazard.
+- *Audit surface.* Section 14 worried that a runtime-distributed shared
+  library adds an unaudited dependency surface. libpcd is not
+  distributed as an opaque runtime blob: it is specified in PCD,
+  translated under the same discipline as every other component, and
+  its provenance is recorded in each consumer. The front end's
+  `TRANSLATION_REPORT.md` carries `Dependency-libpcd-Version:` and
+  `Dependency-libpcd-Spec-SHA256:`, extending the translation-input
+  tuple across the component boundary. The audit surface is *smaller*
+  than three re-translated rule engines, not larger, and it is covered
+  by provenance lines rather than left implicit.
+
+**Contract mirrors.** A front end still needs to name the types it
+exchanges with the engine - `Diagnostic`, `Severity`, the result
+records. Each front end declares these in its own TYPES with a comment
+marking them as mirrors of libpcd's authoritative definitions, kept so
+the front-end spec is self-contained for translation while the library
+definition governs. A future lint rule could verify mirror fidelity
+mechanically by comparing a mirrored type against its libpcd origin;
+until then the comment plus the shared spec hash is the discipline.
+
+**Cross-language differential self-test.** Because libpcd's emission is
+byte-deterministic (section 21) and its rule set is fixed by the merged
+spec, two independent translations of libpcd - say Go and Rust - must
+produce identical diagnostics on the same spec and byte-identical
+schema output for the same TYPE tables. Running both against a shared
+fixture set and diffing the results is a self-test the paradigm gets
+for free: divergence is a translation defect in one of the two, caught
+without a human oracle. This is the same property section 14's
+per-host re-translation could not offer, because there was no single
+authoritative behaviour to differentiate against.
+
+**One realisation per language.** The rule against re-translating the
+engine per front end generalises: for a given language, there is one
+libpcd build, and all same-language front ends link it. Regenerating a
+front end does not regenerate the engine; regenerating the engine
+invalidates every consumer's link and is a deliberate, version-gated
+event.
+
+---
+
+## 21. Tabular TYPES and Deterministic Schema Emission
+
+PCD specs describe data structures in the `## TYPES` section. The
+free-form notation (`Name := { field: type, ... }`) is expressive and
+human-readable, but it is not mechanically derivable: a translator
+interprets it, and two translators may interpret it differently. For
+the subset of type definitions that are pure data contracts - records,
+tagged unions, enumerations - PCD v0.5.0 adds a **tabular notation**
+whose instances are closed enough to validate mechanically and lower
+deterministically.
+
+**The table is the certifiable artefact.** A TYPE table is a GFM table
+inside `## TYPES`, introduced by `### TYPE: <Name>` and a `Kind:` line
+(record, variant, or enum). Its columns are fixed per kind; its cells
+draw from closed vocabularies - a small constraint language (`len
+A..B`, numeric ranges, `pattern:`, `one-of(...)`), TypeRefs, and
+optional lifecycle columns (Since, Deprecated, Replaced-by). The
+notation is deliberately small: new requirements become vocabulary
+entries or separate invariants, not new columns. This is the data
+dictionary reborn as a first-class, reviewable spec artefact - the
+thing a certifier signs, rather than a comment beside the code.
+
+**Rules 22 through 25.** The tabular notation is validated by four new
+lint rules, defined in `shared/spec/types-table-rules.md` and enforced
+by the engine like every other rule: RULE-22 (block and table
+structure), RULE-23 (cell vocabulary), RULE-24 (references resolve;
+names unique across tables and against prose TYPES), and RULE-25
+(lifecycle discipline; the only Warning of the four). Specs with no
+TYPE tables are wholly unaffected - the rules fire only when a `###
+TYPE:` heading is present.
+
+**Deterministic lowering.** A validated table set lowers to a JSON
+Schema 2020-12 document by the normative mapping in
+`shared/spec/types-emit-rules.md`. Two properties make the output
+trustworthy as a build artefact. First, *standard keywords carry all
+structure*: records become objects with `required` and
+`additionalProperties: false`; variants become `oneOf` over closed
+objects discriminated by a `const` tag; enums become `enum` or an
+annotated `oneOf`. PCD's own metadata rides along only in
+annotation-only `x-pcd-*` members that validators ignore by design, so
+an unmodified off-the-shelf JSON Schema generator can consume the
+output and emit language types. Second, the output is
+*byte-deterministic*: member order, indentation, escaping, and line
+discipline are all specified, so the same tables always produce the
+same bytes.
+
+**Spec hash alone, consistent with section 12.** The emitted document
+embeds the merged spec hash as `x-pcd-spec-sha256` and nothing else -
+no tool name, no tool version, no timestamp. This is the same
+chain-of-custody policy section 12 defines for generated source
+artefacts: the artefact points back to the exact specification it came
+from, and its bytes do not churn when the emitting tool is upgraded.
+The mapping's own version travels in the fragment's Version, which
+participates in libpcd's merged spec hash - so a change to the mapping
+is itself a spec change with a hash consequence.
+
+**Why byte-determinism earns its keep.** Two payoffs. In CI, the
+emitted schema can be committed and then re-emitted on each change and
+byte-diffed; any drift between the tables and the committed schema is a
+failing check, not a silent divergence. Across languages, two
+independent translations of the emitter (section 20) must produce
+identical bytes for the same tables - the differential self-test that
+substitutes for a human oracle. Neither payoff is available to a
+best-effort pretty-printer; both fall out of specifying the output form
+as strictly as the input grammar.
+
+**Where it stops.** The tabular notation covers the declarative
+data-contract layer only. Behavioural specification - what the
+`BEHAVIOR` bodies *do* - stays in prose STEPS and is emphatically not
+in scope for deterministic emission; that is the boundary that keeps
+PCD a specification paradigm rather than a fourth-generation
+programming language. The emission path is exposed two ways: the
+`pcd-emit-types` CLI and the `emit_types` MCP tool, both thin front
+ends over the same engine behaviour.
 
 ---
 

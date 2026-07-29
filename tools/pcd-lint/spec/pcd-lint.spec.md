@@ -6,14 +6,25 @@
 
 ## META
 Deployment:  cli-tool
-Version:     0.4.1
+Version:     0.5.0
 Spec-Schema: 0.4.0
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     GPL-2.0-only
 Verification: none
 Safety-Level: QM
 Module:       github.com/mge1512/pcd/tools/pcd-lint
-Includes:     ../../shared/spec/lint-rules.md
+
+---
+
+pcd-lint is a thin CLI front end over the shared PCD engine (libpcd,
+see DEPENDENCIES). All rule semantics - RULE-01 through RULE-25,
+include resolution, hashing, TYPE-table validation - live in libpcd's
+merged specification (lint-rules.md, types-table-rules.md,
+types-emit-rules.md via libpcd's Includes). This spec adds argument
+handling, diagnostic rendering, exit codes, the template listing, and
+packaging - nothing else. Until v0.4.x this spec included
+lint-rules.md directly; the inclusion moved to libpcd.spec.md with
+the v0.5.0 restructuring (doc/technical-reference.md, section 20).
 
 ---
 
@@ -52,6 +63,19 @@ LintResult := {
   diagnostics: List<Diagnostic>,
   exit_code:   ExitCode
 }
+
+// Contract mirrors - authoritative definitions live in libpcd's merged
+// specification (lint-rules.md). Kept here so this spec is
+// self-contained for translation; the library definition governs.
+Severity := Error | Warning
+
+Diagnostic := {
+  severity: Severity,
+  section:  string,
+  line:     u32 where line > 0,
+  message:  string,
+  rule:     string
+}
 ```
 
 Note: Multiple BEHAVIOR and BEHAVIOR/INTERNAL sections are permitted.
@@ -75,6 +99,7 @@ markers.
 - `cockpit-module` — default language: —
 - `gui-tool` — default language: CPP
 - `kubectl-style-cli` — default language: Go
+- `library` — default language: —
 - `library-c-abi` — default language: C
 - `mcp-server` — default language: Go
 - `project-manifest` — default language: —
@@ -85,11 +110,34 @@ markers.
 
 ---
 
+## INTERFACES
+
+```
+SpecEngine {
+  // Provided by libpcd (see DEPENDENCIES). Subset consumed by this
+  // front end; signatures per libpcd.spec.md INTERFACES.
+  required-methods:
+    LoadSpec(path)         -> (SpecModel, error)
+    Lint(model, options)   -> []Diagnostic
+    SchemaVersion()        -> string
+  implementations-required:
+    production:  libpcd (pinned; see DEPENDENCIES)
+    test-double: FakeEngine {
+      configurable: Models map[string]SpecModel,
+                    Diags map[string][]Diagnostic,
+                    Errs map[string]error
+    }
+}
+```
+
+---
+
 ## BEHAVIOR: lint
 Constraint: required
 
 The primary operation. Validates a specification file against the
-structural rules defined in this specification.
+structural rules defined in libpcd's merged specification
+(RULE-01 through RULE-25).
 
 INPUTS:
 ```
@@ -114,9 +162,10 @@ STEPS:
    "error: file must have .md extension: {path}".
 2. Open and read file; on failure → exit 2 with
    "error: cannot open file: {path}".
-3. Apply the lint-validation-rules BEHAVIOR (defined in the included
-   lint-rules.md spec), which runs RULE-01 through RULE-21 in order, and
-   collect all diagnostics.
+3. Load the spec via LoadSpec(file) and collect all diagnostics from
+   Lint(model, options): RULE-01 through RULE-21 in order, plus
+   RULE-22 through RULE-25 when the merged TYPES section contains
+   TYPE tables. check_report maps to RULE-18.
    Rules are not short-circuited — all rules run regardless of earlier errors.
 4. Sort diagnostics by line number (monotonically non-decreasing).
 5. Write each diagnostic to stderr in the defined format.
@@ -192,7 +241,7 @@ POSTCONDITIONS:
 - each line format: "<template-name>  →  <default-language>"
 
 <!-- BEGIN AUTO: known-templates-count -->
-exactly 13 lines, one per known DeploymentTemplate value
+exactly 14 lines, one per known DeploymentTemplate value
 <!-- END AUTO: known-templates-count -->
 
 - for enhance-existing: "<template-name>  →  (declare Language: in META)"
@@ -504,7 +553,7 @@ GIVEN:
 WHEN:
   list-templates is invoked
 THEN:
-  stdout contains exactly 17 lines
+  stdout contains exactly 18 lines
   each line contains template name and default language annotation
   for templates without a companion *.template.md file in the
     search path, annotation is "(template file not found)"
@@ -888,43 +937,41 @@ THEN:
 
 ---
 
+## DEPENDENCIES
+
+- name: libpcd
+  kind: pcd-artifact
+  spec: ../../libpcd/spec/libpcd.spec.md
+  version: 0.1.0
+  do-not-fabricate: true
+  provenance: >
+    Build-time dependency on a PCD-built library. The
+    TRANSLATION_REPORT of this tool must record
+    `Dependency-libpcd-Version:` and `Dependency-libpcd-Spec-SHA256:`
+    (the merged spec hash of the libpcd spec at the pinned version),
+    extending the translation-input provenance chain across the two
+    translation units. The build service enforces version alignment
+    across all libpcd consumers.
+  notes: >
+    Public interface: SpecEngine (see INTERFACES here and
+    libpcd.spec.md). Per-language import path and linkage are
+    hints-layer concerns.
+
+---
+
 ## DEPLOYMENT
 
-Runtime: command-line tool, single static binary, no runtime dependencies
+Runtime: command-line tool, single static binary; libpcd is linked at
+build time
 
 Parsing approach:
-  The specification describes validation rule semantics only, not the
-  internal parsing implementation. Translators are free to choose any
-  parsing strategy — line-by-line state machine, AST, regex, or other.
-  The EXAMPLES section is the acceptance test: a correct implementation
-  must satisfy all examples regardless of internal parsing approach.
-  Common strategies observed in practice:
-  - Line-by-line state machine: simple, sufficient for v1 rules
-  - Markdown AST parser: more robust for edge cases, higher complexity
-  Translators should document their parsing approach in the translation
+  Spec parsing, include resolution, hashing, and rule evaluation are
+  provided by libpcd (see DEPENDENCIES). The parsing conventions -
+  fence-depth code-fence exclusion and column-0 marker recognition -
+  are normative in libpcd's merged specification and bind the engine,
+  not this front end. This front end parses only its own command
+  line. Translators document the engine binding in the translation
   report.
-
-  Code-fence exclusion: all content between opening and closing
-  code-fence markers (lines where TrimSpace(L) begins with ``` or ~~~)
-  is excluded from all structural parsing. No PCD markers, section
-  headers, EXAMPLE:, GIVEN:, WHEN:, THEN:, BEHAVIOR patterns, STEPS:,
-  Constraint:, or INVARIANTS entries are recognised inside fenced
-  blocks. Translators must implement this as a fence-depth counter
-  (not a boolean toggle) in the main parsing loop. The depth increments
-  on any fence-open marker and decrements on any fence-close marker;
-  content is excluded when depth > 0. This correctly handles nested
-  fences (e.g. a GIVEN block containing a fenced example that itself
-  contains a fenced inner block).
-
-  Column-0 requirement: all structural markers are only recognised
-  when they appear at column 0 (no leading whitespace). This applies
-  to section headers (## X), EXAMPLE:, GIVEN:, WHEN:, THEN:, STEPS:,
-  and Constraint:. A line such as "    ## BEHAVIOR/PRIVATE: foo"
-  appearing inside a GIVEN block description is content, not a section
-  boundary. Translators must check the original untrimmed line for
-  the presence of these markers, not the TrimSpace'd form.
-  Exception: fence detection uses TrimSpace(L) (step 2a above) so
-  that indented fences inside GIVEN blocks are correctly recognised.
 
 Template search path:
   All four directories are searched; later entries take precedence (last-wins).
@@ -967,6 +1014,7 @@ Commands (bare words, no file argument):
                   "(template file not found)" is emitted for that entry.
   version         Print pcd-lint version, Spec-Schema version, and
                   embedded SPDX list version, then exit 0.
+                  The Spec-Schema version is obtained from SchemaVersion().
                   Format: pcd-lint {version} (schema {spec-schema}) spdx/{spdx-version}
 
 Output streams:

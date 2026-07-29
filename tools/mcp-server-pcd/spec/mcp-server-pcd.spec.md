@@ -5,13 +5,25 @@
 
 ## META
 Deployment:        mcp-server
-Version:           0.4.0
+Version:           0.5.0
 Spec-Schema:       0.4.0
 Author:            Matthias G. Eckermann <pcd@mailbox.org>
 License:           GPL-2.0-only
 Verification:      none
 Safety-Level:      QM
-Includes:          ../../shared/spec/lint-rules.md
+
+---
+
+mcp-server-pcd is a thin MCP front end over the shared PCD engine
+(libpcd, see DEPENDENCIES), plus the AssetStore that serves embedded
+templates, hints, and prompts. All PCD semantics - RULE-01 through
+RULE-25, include resolution, hashing, milestone editing, change
+impact, TYPE-table emission - live in libpcd's merged specification.
+This spec adds the MCP tool and resource surface, transports, asset
+embedding, and packaging - nothing else. Until v0.4.x this spec
+included lint-rules.md directly; the inclusion moved to
+libpcd.spec.md with the v0.5.0 restructuring
+(doc/technical-reference.md, section 20).
 
 ---
 
@@ -46,9 +58,23 @@ ResourceURI := string
 //   pcd://hints/cloud-native.go.go-libvirt
 //   pcd://hints/cli-tool.go.milestones
 
-// Diagnostic and Severity are provided by the included lint-rules.md spec
-// (shared rule-domain types). The lint_content and lint_file tools serialise
-// Diagnostic.severity as the lowercase JSON strings "error" and "warning".
+// Contract mirrors - authoritative definitions live in libpcd's merged
+// specification (lint-rules.md). Kept here so this spec is
+// self-contained for translation; the library definition governs.
+// The lint_content and lint_file tools serialise Diagnostic.severity
+// as the lowercase JSON strings "error" and "warning".
+Severity := Error | Warning
+
+Diagnostic := {
+  severity: Severity,
+  section:  string,
+  line:     u32 where line > 0,
+  message:  string,
+  rule:     string
+}
+
+MilestoneStatus := pending | active | failed | released
+// Contract mirror of lint-rules.md's MilestoneStatus.
 
 LintResult := {
   valid:        boolean
@@ -70,6 +96,10 @@ ResourceRecord := {
   content:  string
 }
 
+// The result records below (SetMilestoneResult, SpecHashResult,
+// ChangeImpactRecommendation, ChangeImpactResult) mirror libpcd's
+// authoritative definitions (libpcd.spec.md TYPES). They are this
+// server's JSON response contracts and must stay field-identical.
 SetMilestoneResult := {
   spec_path:        string          // path of the modified spec file
   milestone_name:   string          // e.g. "0.1.0"
@@ -79,10 +109,18 @@ SetMilestoneResult := {
 
 SpecHashResult := {
   spec_path:      string    // path of the spec file
-  spec_hash:      string    // SHA256 hex digest of the spec file
+  spec_hash:      string    // SHA256 of the merged spec text (equals
+                            // the host file hash when no Includes)
   report_hash:    string    // Spec-SHA256 value from TRANSLATION_REPORT.md, or "" if absent
   match:          boolean   // true if spec_hash = report_hash
   status:         string    // "current" | "stale" | "no-report" | "no-hash-in-report"
+}
+
+EmitTypesResult := {
+  spec_path:    string     // path of the spec file
+  spec_sha256:  string     // merged Spec-SHA256 embedded in the schema
+  schema:       string     // canonical JSON Schema text (libpcd,
+                           // types-emit-rules.md)
 }
 
 ChangeImpactRecommendation := "full-regeneration" | "incremental"
@@ -116,6 +154,7 @@ markers.
 - `cockpit-module` — default language: —
 - `gui-tool` — default language: CPP
 - `kubectl-style-cli` — default language: Go
+- `library` — default language: —
 - `library-c-abi` — default language: C
 - `mcp-server` — default language: Go
 - `project-manifest` — default language: —
@@ -129,17 +168,28 @@ markers.
 ## INTERFACES
 
 ```
-Filesystem {
-  // Used by lint_file and set_milestone_status.
+SpecEngine {
+  // Provided by libpcd (see DEPENDENCIES). Subset consumed by this
+  // front end; signatures per libpcd.spec.md INTERFACES.
   required-methods:
-    ReadFile(path)              -> (content: string, error)
-    WriteFile(path, content)    -> error
+    LoadSpec(path)                          -> (SpecModel, error)
+    LoadSpecContent(content, filename)      -> (SpecModel, error)
+    Lint(model, options)                    -> []Diagnostic
+    SpecHash(model)                         -> (merged, host)
+    VerifySpecHash(path)                    -> (SpecHashResult, error)
+    SetMilestoneStatus(path, name, status)  -> (SetMilestoneResult, error)
+    AssessChangeImpact(change_description,
+                       old_spec, new_spec,
+                       existing_code)       -> (ChangeImpactResult, error)
+    EmitTypesSchema(model)                  -> (text, []Diagnostic, error)
+    SchemaVersion()                         -> string
   implementations-required:
-    production:  OSFilesystem
-    test-double: FakeFilesystem {
-      configurable: Files map[string]string,
-                    ReadErr map[string]error,
-                    WriteErr map[string]error
+    production:  libpcd (pinned; see DEPENDENCIES)
+    test-double: FakeEngine {
+      configurable: Models map[string]SpecModel,
+                    Diags map[string][]Diagnostic,
+                    Results per method,
+                    Errs map[string]error
     }
 }
 
@@ -319,9 +369,9 @@ ERRORS:
 ## BEHAVIOR: lint_content
 Constraint: required
 
-Validates a PCD specification given as a string. Applies the
-lint-validation-rules BEHAVIOR (from the included lint-rules.md spec),
-RULE-01 through RULE-21, identical to the pcd-lint CLI.
+Validates a PCD specification given as a string via the engine's
+run-lint behaviour: RULE-01 through RULE-21, plus RULE-22 through
+RULE-25 when TYPE tables are present. Identical to the pcd-lint CLI.
 
 INPUTS:
 ```
@@ -336,10 +386,10 @@ PRECONDITIONS:
 STEPS:
 1. If filename does not end in ".md" →
    MCP error -32602 with message "filename must have .md extension: {filename}".
-2. Run the embedded lint engine on content with filename.
-   The lint engine applies the lint-validation-rules BEHAVIOR (from the
-   included lint-rules.md spec), RULE-01 through RULE-21, in order.
-   All rules run regardless of earlier failures.
+2. model = LoadSpecContent(content, filename);
+   diagnostics = Lint(model, options with check_report = false).
+   RULE-01 through RULE-25 as applicable; all rules run regardless of
+   earlier failures.
 3. Return LintResult.
 
 POSTCONDITIONS:
@@ -361,10 +411,10 @@ path: string    // absolute path to spec file on disk
 ```
 
 STEPS:
-1. Read file via Filesystem.ReadFile(path); on error →
+1. model = LoadSpec(path); on error →
    MCP error -32602 with message "cannot open file: {path}".
-2. Extract filename = basename(path).
-3. Run lint_content(content, filename).
+2. diagnostics = Lint(model, options with check_report = false).
+3. Return LintResult assembled from diagnostics.
 
 POSTCONDITIONS:
 - Same as lint_content postconditions.
@@ -383,7 +433,8 @@ none
 ```
 
 STEPS:
-1. Return the Spec-Schema version this binary was built against.
+1. Return SchemaVersion() from the engine - the Spec-Schema version
+   the linked libpcd was built against.
 
 POSTCONDITIONS:
 - response is a semantic version string (e.g. "0.3.21")
@@ -414,24 +465,16 @@ PRECONDITIONS:
 - new_status is a valid MilestoneStatus value
 
 STEPS:
-1. Read spec_path from disk via Filesystem.ReadFile; on error →
-   MCP error -32602 with message "cannot open file: {spec_path}".
-2. Locate the `## MILESTONE: {milestone_name}` section; on not found →
-   MCP error -32602 with message
-   "MILESTONE '{milestone_name}' not found in {spec_path}".
-3. If new_status = "active": scan all other MILESTONE sections in the file.
-   If any other section already has `Status: active` →
-   MCP error -32602 with message
-   "Cannot set MILESTONE '{milestone_name}' to active: MILESTONE '{other}'
-    is already active. Set it to released or failed first."
-4. Record previous_status (current Status: value, or "pending" if absent).
-5. Replace or insert the `Status: {value}` line within the located MILESTONE section.
-   MECHANISM: the Status: line must be the first non-blank line after the
-   ## MILESTONE: header line. If no Status: line is present, insert one.
-   Do not modify any other content in the file.
-6. Write the modified content back to spec_path via Filesystem.WriteFile;
-   on error → MCP error -32603.
-7. Return SetMilestoneResult.
+1. result = SetMilestoneStatus(spec_path, milestone_name, new_status).
+2. Map engine errors to MCP errors:
+   "cannot open file"   → MCP error -32602;
+   "not found"          → MCP error -32602;
+   "is already active"  → MCP error -32602;
+   "cannot write file"  → MCP error -32603.
+3. Return SetMilestoneResult.
+   The editing semantics - Status: line placement, byte-for-byte
+   preservation of all other content, single-active enforcement - are
+   normative in libpcd (BEHAVIOR: set-milestone-status).
 
 POSTCONDITIONS:
 - spec_path on disk has exactly the Status: value changed for the named milestone
@@ -476,38 +519,14 @@ PRECONDITIONS:
 - At least change_description must be provided; all other inputs are optional
 
 STEPS:
-1. Parse change_description to identify which spec sections are affected
-   (TYPES, INTERFACES, INVARIANTS, BEHAVIOR, EXAMPLES, MILESTONE, META).
-2. If old_spec or new_spec provided: extract the full set of changed elements
-   with their section types.
-3. Evaluate structural impact:
-   a. If TYPES, INTERFACES, or INVARIANTS are affected → structural_impact = "high"
-   b. If only BEHAVIOR STEPS or EXAMPLES are affected → structural_impact = "low"
-      or "medium" depending on count
-   c. If only META is affected → structural_impact = "none"
-4. Evaluate scaffold involvement:
-   a. If any MILESTONE with Scaffold: true is in the changed scope →
-      scaffold_affected = true
-   b. Otherwise → scaffold_affected = false
-5. Evaluate released milestone involvement:
-   a. If any MILESTONE with Status: released is in the changed scope →
-      released_milestone_affected = true
-   b. Otherwise → released_milestone_affected = false
-6. Estimate blast radius:
-   a. If existing_code provided: count files and functions referencing changed elements
-   b. If not provided: estimate from spec cross-references
-   c. Classify: "1–2 BEHAVIORs" | "3–5 BEHAVIORs" | "5+ BEHAVIORs or shared types"
-7. Assess consistency risk based on codebase provenance if inferable from inputs.
-8. Apply decision rules:
-   - If structural_impact = "high" OR scaffold_affected = true OR
-     released_milestone_affected = true → recommendation = "full-regeneration"
-   - If structural_impact = "low" AND blast_radius ≤ 2 BEHAVIORs AND
-     scaffold_affected = false AND released_milestone_affected = false →
-     recommendation = "incremental"
-   - Otherwise → recommendation = "full-regeneration" (conservative default)
-9. Compose reasoning narrative and populate if_incremental or if_regeneration
-   fields as appropriate.
-10. Return ChangeImpactResult.
+1. If change_description is empty → MCP error -32602.
+2. result = AssessChangeImpact(change_description, old_spec,
+   new_spec, existing_code).
+3. Return ChangeImpactResult.
+   The assessment semantics - section classification, structural
+   impact, scaffold and released-milestone involvement, blast
+   radius, decision rules - are normative in libpcd
+   (BEHAVIOR: assess-change-impact), applying whitepaper A.19.
 
 POSTCONDITIONS:
 - result.recommendation is always set
@@ -526,9 +545,11 @@ ERRORS:
 ## BEHAVIOR: verify_spec_hash
 Constraint: required
 
-Computes the SHA256 of a spec file and compares it to the `Spec-SHA256:`
-field recorded in the most recent `TRANSLATION_REPORT.md` adjacent to the
-spec. Reports whether the generated artifacts are current with the spec.
+Computes the merged spec hash (equal to the file hash when the spec
+declares no Includes) and compares it to the `Spec-SHA256:` field
+recorded in the most recent `TRANSLATION_REPORT.md` adjacent to the
+spec. Reports whether the generated artifacts are current with the
+spec. Delegates to the engine's verify-spec-hash behaviour.
 
 INPUTS:
 ```
@@ -540,26 +561,66 @@ PRECONDITIONS:
 - spec_path points to a readable file with .md extension
 
 STEPS:
-1. Compute SHA256 of the file at spec_path. Store as spec_hash.
-2. Look for TRANSLATION_REPORT.md in the same directory as spec_path,
-   then in a `code/` subdirectory of the spec's parent directory.
-   If not found: return SpecHashResult with status = "no-report".
-3. If found: search for a line matching `Spec-SHA256: <hex>` in the report.
-   If not found: return SpecHashResult with status = "no-hash-in-report".
-4. Extract report_hash from the `Spec-SHA256:` line.
-5. If spec_hash = report_hash:
-     return SpecHashResult with match = true, status = "current"
-   Else:
-     return SpecHashResult with match = false, status = "stale"
+1. result = VerifySpecHash(spec_path); on precondition failure →
+   MCP error -32602 (empty path, non-.md extension, unreadable file).
+2. Return SpecHashResult.
+   Report discovery (same directory, then a `code/` subdirectory),
+   merged-hash recomputation, and status classification are normative
+   in libpcd (BEHAVIOR: verify-spec-hash)
 
 POSTCONDITIONS:
-- result.spec_hash is always the current SHA256 of the spec file
+- result.spec_hash is always the current merged spec hash of the spec
 - result.status is one of: "current" | "stale" | "no-report" | "no-hash-in-report"
 - result.match is true only when status = "current"
 
 ERRORS:
 - MCP error -32602 if spec_path is empty or file not readable
 - MCP error -32602 if spec_path does not end in .md
+
+---
+
+## BEHAVIOR: emit_types
+Constraint: required
+
+Emits the canonical JSON Schema for the TYPE tables of a specification
+file, delegating to the engine's emit-types behaviour (mapping and
+canonical output form: types-emit-rules.md via libpcd).
+
+INPUTS:
+```
+spec_path: string   // path to the spec .md file - required
+```
+
+PRECONDITIONS:
+- spec_path is non-empty and points to a readable .md file
+
+STEPS:
+1. If spec_path is empty or does not end in ".md" →
+   MCP error -32602 with message
+   "spec path must reference a .md file: {spec_path}".
+2. model = LoadSpec(spec_path); on error →
+   MCP error -32602 with message "cannot open file: {spec_path}".
+3. (text, diagnostics, error) = EmitTypesSchema(model).
+   a. On error "no TYPE tables found" → MCP error -32602 with message
+      "no TYPE tables found in {spec_path}".
+   b. On error "TYPE tables have errors; emission refused" →
+      MCP error -32602 with message
+      "TYPE tables have errors; run lint_file for diagnostics".
+4. (spec_sha256, host) = SpecHash(model).
+5. Return EmitTypesResult with spec_path, spec_sha256, and
+   schema = text. RULE-25 Warnings do not block emission; they are
+   surfaced via lint_file.
+
+POSTCONDITIONS:
+- result.schema is byte-identical across runs for identical input
+- result.spec_sha256 equals the x-pcd-spec-sha256 embedded in
+  result.schema
+- no file on disk is modified
+
+ERRORS:
+- MCP error -32602 if spec_path is empty, not .md, or not readable
+- MCP error -32602 if the spec contains no TYPE tables
+- MCP error -32602 if TYPE tables carry RULE-22 through RULE-24 Errors
 
 ---
 
@@ -625,7 +686,7 @@ ERRORS:
 - Server never makes outbound network calls.
 - Server never reads environment variables for behaviour control.
 - lint_content and lint_file produce identical output to pcd-lint CLI
-  for identical input, including RULE-01 through RULE-21.
+  for identical input, including RULE-01 through RULE-25.
 - assess_change_impact applies the decision rules from whitepaper A.19
   deterministically — same inputs always produce the same recommendation.
 - All MCP responses are valid JSON-RPC 2.0.
@@ -636,7 +697,7 @@ ERRORS:
 
 - [observable]      stdio transport: stdout contains only MCP JSON-RPC messages
 - [observable]      lint_content result is identical to pcd-lint CLI on same input
-                    for RULE-01 through RULE-21
+                    for RULE-01 through RULE-25
 - [observable]      set_milestone_status never modifies any content in the spec
                     other than the Status: line of the named milestone
 - [observable]      set_milestone_status with new_status=active fails if any other
@@ -647,7 +708,10 @@ ERRORS:
                     returns recommendation=full-regeneration
 - [observable]      verify_spec_hash with matching hashes always returns
                     status="current" and match=true
-- [implementation]  rule execution order: RULE-01 through RULE-21, same as pcd-lint
+- [observable]      emit_types output is byte-identical across runs for identical
+                    input and embeds the merged spec hash
+- [implementation]  rule execution order: RULE-01 through RULE-25, provided by the
+                    shared engine (libpcd) - parity with pcd-lint by construction
 - [implementation]  resource URIs follow pcd://<type>/<n> scheme exactly
 - [implementation]  all assets (templates, hints, prompts) are embedded into the
                     binary at build time using a single unified asset embedding
@@ -1001,6 +1065,30 @@ THEN:
   response.content begins with "# PCD Translation Tie-Breaker Prompt"
   response.mime_type = "text/markdown"
 
+### EXAMPLE: emit_types_returns_schema
+GIVEN:
+  probe.md is a structurally valid spec whose ## TYPES section contains
+  one record TYPE table (see libpcd.spec.md, emit_record_golden, for
+  the normative byte-level pair)
+WHEN:
+  emit_types is called with spec_path = "probe.md"
+THEN:
+  result.spec_path = "probe.md"
+  result.spec_sha256 matches the merged Spec-SHA256 of probe.md
+  result.schema begins with "{" and contains
+    "\"x-pcd-spec-sha256\": \"" + result.spec_sha256 + "\""
+  result.schema is byte-identical on a repeated call
+
+### EXAMPLE: emit_types_no_tables
+GIVEN:
+  plain.md is a structurally valid spec whose ## TYPES section contains
+  only prose declarations
+WHEN:
+  emit_types is called with spec_path = "plain.md"
+THEN:
+  MCP error -32602
+  error message = "no TYPE tables found in plain.md"
+
 ---
 
 ## TOOLCHAIN-CONSTRAINTS
@@ -1058,6 +1146,24 @@ EMBED-ASSETS:
 
 ## DEPENDENCIES
 
+- name: libpcd
+  kind: pcd-artifact
+  spec: ../../libpcd/spec/libpcd.spec.md
+  version: 0.1.0
+  do-not-fabricate: true
+  provenance: >
+    Build-time dependency on a PCD-built library. The
+    TRANSLATION_REPORT of this tool must record
+    `Dependency-libpcd-Version:` and `Dependency-libpcd-Spec-SHA256:`
+    (the merged spec hash of the libpcd spec at the pinned version),
+    extending the translation-input provenance chain across the two
+    translation units. The build service enforces version alignment
+    across all libpcd consumers.
+  notes: >
+    Public interface: SpecEngine (see INTERFACES here and
+    libpcd.spec.md). Per-language import path and linkage are
+    hints-layer concerns.
+
 - name: github.com/mark3labs/mcp-go
   purpose: MCP stdio and streamable-http transport implementation
   do-not-fabricate: true
@@ -1071,15 +1177,15 @@ EMBED-ASSETS:
 ## DELIVERABLES
 
 COMPONENT: implementation
-  files: main.go, internal/lint/*.go, internal/store/*.go, internal/milestone/*.go
+  files: main.go, internal/tools/*.go, internal/store/*.go
   notes: >
-    Split into packages: main (transport wiring), internal/lint
-    (rule engine applying RULE-01 through RULE-21, shared with pcd-lint),
-    internal/store (unified AssetStore — templates, hints, prompts),
-    internal/milestone (set_milestone_status file editing logic),
-    internal/changeimpact (assess_change_impact analysis logic).
-    Reuse lint rule logic from pcd-lint if available as a library;
-    otherwise inline. The lint engine must implement all 17 rules.
+    Split into packages: main (transport wiring), internal/tools
+    (MCP tool adapters mapping SpecEngine calls and results to MCP
+    JSON responses), internal/store (unified AssetStore — templates,
+    hints, prompts). All PCD semantics — lint rules, hashing,
+    milestone editing, change impact, TYPE-table emission — come from
+    libpcd (see DEPENDENCIES); this component contains no rule or
+    mapping logic of its own.
 
 COMPONENT: module
   files: go.mod
@@ -1122,11 +1228,12 @@ COMPONENT: license
 COMPONENT: tests
   files: independent_tests/INDEPENDENT_TESTS.go
   notes: >
-    All tests use FakeStore, FakeFilesystem.
+    All tests use FakeStore and FakeEngine.
     No filesystem access. No network calls. No live pcd-lint binary.
-    Must include TestLintMatchesCLI (verifies lint_content invariant).
-    Must include TestSetMilestoneStatus (verifies file editing invariants).
-    FakeFilesystem must support both ReadFile and WriteFile.
+    Must include TestLintMatchesCLI (verifies the lint parity
+    invariant against recorded fixtures).
+    Must include TestSetMilestoneStatus (verifies the error mapping
+    and the response contract).
 
 COMPONENT: documentation
   files: README.md

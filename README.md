@@ -88,7 +88,7 @@ Use `prompts/prompt.md` as the system prompt with any capable LLM. Provide the s
 
 ### pcd-lint
 
-The reference validator. Validates specification structure against 17 rules before any translation begins. Self-specified: `tools/pcd-lint/spec/pcd-lint.md` → generated Go binary.
+The reference validator - a thin CLI front end over the shared engine (`libpcd`). Validates specification structure against 25 rules before any translation begins. Self-specified: `tools/pcd-lint/spec/pcd-lint.spec.md` → generated binary.
 
 ```bash
 pcd-lint myspec.md              # validate
@@ -108,11 +108,26 @@ mcpServers:
     args: [stdio]
 ```
 
-**Tools:** `list_templates`, `get_template`, `lint_content`, `lint_file`, `get_schema_version`, `set_milestone_status`, `assess_change_impact`, `verify_spec_hash`, `list_resources`
+**Tools:** `list_templates`, `get_template`, `lint_content`, `lint_file`, `get_schema_version`, `set_milestone_status`, `assess_change_impact`, `verify_spec_hash`, `emit_types`, `list_resources`
 
 **Resources:** `pcd://templates/{name}`, `pcd://prompts/translator`, `pcd://prompts/interview`, `pcd://prompts/reverse`, `pcd://prompts/change-impact`, `pcd://prompts/reviewer`, `pcd://prompts/security-reviewer`, `pcd://prompts/tiebreaker`, `pcd://hints/{key}`
 
-Self-specified: `tools/mcp-server-pcd/spec/mcp-server-pcd.md` → generated Go binary.
+Self-specified: `tools/mcp-server-pcd/spec/mcp-server-pcd.spec.md` → generated binary.
+
+### libpcd
+
+The shared PCD engine behind all three front ends: spec loading and include resolution, merged-hash computation, the lint rules, TYPE-table parsing and JSON Schema emission, milestone editing, and change-impact assessment. A language-parameterised library (`Deployment: library`, no executable) that composes the rule fragments under `tools/shared/spec/` and is consumed by the front ends as a pinned build-time dependency. Lint parity across the CLIs and the MCP server holds by construction - one engine, one rule implementation. Self-specified: `tools/libpcd/spec/libpcd.spec.md` → generated library.
+
+### pcd-emit-types
+
+A thin CLI front end that lowers a spec's TYPE tables to a canonical JSON Schema 2020-12 document - deterministic (same table, same bytes), embedding the merged spec hash. Feeds off-the-shelf schema generators and the CI byte-diff gate.
+
+```bash
+pcd-emit-types myspec.md                  # schema to stdout
+pcd-emit-types out=types.schema.json myspec.md
+```
+
+Self-specified: `tools/pcd-emit-types/spec/pcd-emit-types.spec.md` → generated binary.
 
 ---
 
@@ -139,6 +154,7 @@ pcd/
 │   ├── cloud-native.template.md
 │   ├── gui-tool.template.md
 │   ├── python-tool.template.md
+│   ├── library.template.md
 │   ├── library-c-abi.template.md
 │   ├── verified-library.template.md
 │   └── project-manifest.template.md
@@ -153,13 +169,23 @@ pcd/
 │   ├── account-transfer/
 │   └── calc-interest/                 ← COBOL → PCD → Rust / Java demo
 │
-└── tools/
-    ├── pcd-lint/                      ← GPL-2.0-only
-    │   ├── spec/pcd-lint.md
+└── tools/                             ← GPL-2.0-only (except pcd-templates)
+    ├── libpcd/                        ← shared engine (library)
+    │   ├── spec/libpcd.spec.md
     │   └── code/
-    ├── mcp-server-pcd/                ← GPL-2.0-only
-    │   ├── spec/mcp-server-pcd.md
+    ├── pcd-lint/
+    │   ├── spec/pcd-lint.spec.md
     │   └── code/
+    ├── pcd-emit-types/
+    │   ├── spec/pcd-emit-types.spec.md
+    │   └── code/
+    ├── mcp-server-pcd/
+    │   ├── spec/mcp-server-pcd.spec.md
+    │   └── code/
+    ├── shared/spec/                   ← rule fragments (composed into libpcd)
+    │   ├── lint-rules.md
+    │   ├── types-table-rules.md
+    │   └── types-emit-rules.md
     └── pcd-templates/                 ← CC-BY-4.0 (packaging)
 ```
 

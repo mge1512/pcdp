@@ -24,6 +24,7 @@ Rust binary in 2045 by changing only the template, not the spec.
 | [`gui-tool`](gui-tool.template.md) | OS-dependent | Qt6, Tauri, Flutter | A desktop GUI application; default language depends on host platform |
 | [`cockpit-module`](cockpit-module.template.md) | HTML + JS + CSS | — | A plugin for the Cockpit web administration interface (`cockpit-project.org`) |
 | [`python-tool`](python-tool.template.md) | Python | — | A Python tool, automation script, or data pipeline. QM safety level only — not for safety-critical components |
+| [`library`](library.template.md) | — | Go, Rust, C, C++ | A general-purpose library linked natively by consumers in their own language. No default language; no executable. Contrast `library-c-abi` (stable C ABI) and `verified-library` (formal verification) |
 | [`library-c-abi`](library-c-abi.template.md) | C | Rust (via `cbindgen`) | A general-purpose C-ABI shared library with stable ABI |
 | [`verified-library`](verified-library.template.md) | C | Rust | A safety- or security-critical C-ABI library requiring formal verification (ASIL-B/C/D, DAL-A/B, EAL4+/EUCC) |
 | [`spack-package`](spack-package.template.md) | Python (Spack DSL) | — | A Spack package recipe (`package.py`) for HPC and scientific software distribution |

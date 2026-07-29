@@ -2,7 +2,7 @@
 
 ## META
 Deployment:   none
-Version:      0.4.2
+Version:      0.4.3
 Spec-Schema:  0.4.0
 Author:       Matthias G. Eckermann <pcd@mailbox.org>
 License:      CC-BY-4.0
@@ -70,7 +70,7 @@ SpecVersion := string where matches
 DeploymentTemplate := one_of(
   "wasm" | "ebpf" | "kernel-module" | "verified-library" |
   "cli-tool" | "gui-tool" | "cloud-native" | "backend-service" |
-  "library-c-abi" | "enterprise-software" | "academic" |
+  "library-c-abi" | "library" | "enterprise-software" | "academic" |
   "python-tool" | "enhance-existing" | "manual" | "template" |
   "mcp-server" | "project-manifest"
 )
@@ -82,6 +82,8 @@ DeploymentTemplate := one_of(
 // specification, not a translatable component.
 // "project-manifest" added in v0.3.8 for multi-component projects.
 // "mcp-server" added in v0.3.8 for MCP server components.
+// "library" added in v0.4.3: a general-purpose, language-parameterised
+// library with no executable entry point (templates/library.template.md).
 
 BehaviorConstraint := required | supported | forbidden
 // Classifies a BEHAVIOR block. Default is `required` when absent.
@@ -789,6 +791,10 @@ is no depth cap; practical specs are expected to have inclusion depth of
 
 ## CHANGELOG
 
+- 2026.07.07.01 - DeploymentTemplate gains "library": a general-purpose,
+  language-parameterised library with no executable entry point, resolved
+  by templates/library.template.md. First consumer: libpcd, the shared
+  PCD engine. No rule logic change.
 - 2026.06.10.02 - RULE-02c accepts dated versions (maintainer decision D-8,
   consistency-check task T-29): spec META Version may be semantic
   MAJOR.MINOR.PATCH or dated YYYY.MM.DD.VV. New SpecVersion type carries the
