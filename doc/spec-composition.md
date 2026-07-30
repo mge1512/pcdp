@@ -6,6 +6,20 @@
 **Date:** 2026-05-18
 **License:** CC-BY-4.0
 
+> **Reading note (2026-07-29).** This document records the v0.4.0 design of
+> the `Includes:` mechanism as it was argued and adopted. Sections 1 to 7 and
+> 10 still describe the mechanism as built. Sections 8 and 9 do not: their
+> worked example has `pcd-lint` and `mcp-server-pcd` each including
+> `lint-rules.md` directly, which was the arrangement from 2026-06-09 until
+> the v0.5.0 restructuring. Since then the rule fragments compose into a
+> single specification, `libpcd`, and the front ends bind to the built
+> library through `DEPENDENCIES` with a pinned version and merged spec hash.
+> Composition itself is unchanged; only the host that does the composing
+> moved. For the current arrangement see `doc/technical-reference.md`,
+> section 20. Counts and filenames in the body are as of 2026-05-18 and have
+> not been restated: there were eighteen rules then and specifications had
+> not yet been renamed to `.spec.md` (decision D-6, 2026-06-10).
+
 ---
 
 ## 1. Problem

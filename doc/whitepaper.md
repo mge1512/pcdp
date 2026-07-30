@@ -2,9 +2,9 @@
 ## Human Intent, Machine Implementation
 
 **Status:** Draft
-**Version:** 0.4.0
+**Version:** 0.4.5
 **Author:** Matthias G. Eckermann <pcd@mailbox.org>
-**Date:** 2026-05-18
+**Date:** 2026-07-29
 
 ---
 
@@ -116,7 +116,7 @@ The hard questions must be answered honestly. Copyright ownership of AI-generate
 
 ## 6. Strategic Priorities
 
-The toolchain is functional and self-hosting. `pcd-lint` validates specification structure against 17 rules. `mcp-server-pcd` serves templates, prompts, and hints to any MCP-capable LLM host, providing a complete translation environment in a single server connection. Nine deployment templates cover the translator deployment contexts. The empirical record spans multiple models, languages, and specification sizes. The foundation is solid.
+The toolchain is functional and self-hosting. `pcd-lint` validates specification structure against 25 rules. `mcp-server-pcd` serves templates, prompts, and hints to any MCP-capable LLM host, providing a complete translation environment in a single server connection. Fourteen deployment templates cover the translator deployment contexts. The empirical record spans multiple models, languages, and specification sizes. The foundation is solid.
 
 The immediate priority is making the paradigm accessible. The specification format has a learning curve that the interview prompt partially addresses but does not eliminate. The `user-guide.md` covers the spec author workflow; the `technical-reference.md` covers the full toolchain. Making these documents complete, accurate, and usable for engineers who have not been part of the development process is the highest-leverage activity for adoption.
 
@@ -2814,7 +2814,7 @@ mcpServers:
 ### Implementation and self-hosting
 
 `mcp-server-pcd` is specified in PCD format at
-`tools/mcp-server-pcd/spec/mcp-server-pcd.md` with `Deployment: mcp-server`.
+`tools/mcp-server-pcd/spec/mcp-server-pcd.spec.md` with `Deployment: mcp-server`.
 The implementation is generated from that spec. Self-hosting applies.
 
 The `mcp-server` deployment template (`templates/mcp-server.template.md`) defines
@@ -3575,6 +3575,7 @@ rule definitions (RULE-19, RULE-20, RULE-21), worked example — is in
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 0.4.5 | 2026-07-29 | Section 6 (Strategic Priorities): corrected two stale counts. pcd-lint validates against 25 rules, not 17 (RULE-01 to RULE-21 in lint-rules.md, RULE-22 to RULE-25 in types-table-rules.md); the repository ships fourteen deployment templates, not nine. Section A.17: corrected the mcp-server-pcd spec path to `.spec.md` (decision D-6). Header Version and Date brought forward per decision D-5, having been left at 0.4.0/2026-05-18 while rows 0.4.1 to 0.4.4 were added. No argument changed. |
 | 0.4.4 | 2026-06-15 | Section 4 (State of the Business): added external-evidence grounding for the "writing code was never the bottleneck" premise - Demirer/Musolff/Yang (NBER w35275: 180% commit gain attenuating to 30% releases, substitution elasticity 0.25) and Brooks' essential/accidental complexity. A.12: added *Coding Agents as Normal Technology* (Narayanan and Kapoor, analysis, 2026) to *Closest Existing Approaches*, mapping the decide-execute-deliver sandwich onto PCD's human-review-point placement and stating the deliver-layer accountability objection with PCD's relocation answer; cross-referenced from *A Note on the Name*. New references \[Narayanan2026\], \[Demirer2026\], \[Brooks1986\]. Whitepaper only; no technical-reference mirror (the analysis is positioning, not normative). |
 | 0.4.3 | 2026-06-01 | Translation-input provenance: TRANSLATION_REPORT (and TEST_REPORT) now records a labelled SHA256 of every file consumed as a translation input - spec (merged + host), per-language decisions/milestones/style/library hints, and the deployment template - not the spec hash alone. Corrected reproducibility unit: the tuple (spec, resolved language, hints/template set); the spec hash attests intended behaviour but does not by itself determine the binary. Report-only (binary and source headers still embed the spec hash alone); no combined build-inputs hash. Motivation: same-spec-hash builds diverged because language-specific hints differed. Applied to prompt.md ## Reports, all deployment templates with a report contract, and technical-reference section 12. |
 | 0.4.2 | 2026-05-27 | A.12: Quint (Informal Systems, 2026) added to *Closest Existing Approaches* (between TLA+/Alloy and F*/HACL*) and to *Comparative Summary*. New reference \[Quint2026\]. Mirror update applied to `doc/technical-reference.md` §18 Related Work section and References. |

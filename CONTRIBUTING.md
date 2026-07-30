@@ -96,13 +96,15 @@ snippets rather than explained as prose.
 ### pcd-lint (`tools/pcd-lint/`)
 
 The reference validator. The spec lives in
-[`tools/pcd-lint/spec/pcd-lint.md`](tools/pcd-lint/spec/pcd-lint.md);
+[`tools/pcd-lint/spec/pcd-lint.spec.md`](tools/pcd-lint/spec/pcd-lint.spec.md);
 the full rule reference is in [`tools/README.md`](tools/README.md).
 
 To add or change a validation rule:
 
 1. Add or modify the rule definition under the `### RULE-N:` pattern in
-   the spec.
+   the shared fragment that owns it: `tools/shared/spec/lint-rules.md`
+   for RULE-01 to RULE-21, `tools/shared/spec/types-table-rules.md` for
+   RULE-22 to RULE-25. The front-end specs carry no rule definitions.
 2. Add EXAMPLES covering both the positive and negative paths. RULE-10
    itself requires this for any BEHAVIOR with error exits.
 3. Update the STEPS list in `BEHAVIOR: lint-validation-rules`.
@@ -118,7 +120,7 @@ the linter.
 ### mcp-server-pcd (`tools/mcp-server-pcd/`)
 
 Spec lives in
-[`tools/mcp-server-pcd/spec/mcp-server-pcd.md`](tools/mcp-server-pcd/spec/mcp-server-pcd.md).
+[`tools/mcp-server-pcd/spec/mcp-server-pcd.spec.md`](tools/mcp-server-pcd/spec/mcp-server-pcd.spec.md).
 Same rule: fix the spec, regenerate. Asset embedding (templates, hints,
 prompts) happens at build time via the Makefile's `embed-assets` target;
 the embedded inventory must stay in sync with the repository root
