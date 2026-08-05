@@ -130,7 +130,8 @@ must be produced. Supported OUTPUT-FORMATs are produced if active in preset.
 | docs | required | `README.md` | Must document: installation (zypper/apt/dnf), invocation (stdio and http modes), tool list with descriptions, configuration. |
 | man | required | `mcp-server-{n}.1.md`, `mcp-server-{n}.1` | Markdown source converted to troff via `pandoc`. Section 1 (user commands). Install to `%{_mandir}/man1/` (RPM) and `usr/share/man/man1/` (DEB). |
 | license | required | `LICENSE` | SPDX identifier from spec META + authoritative URL to the full license text. Never reproduce the full license text. |
-| RPM | required | `{n}.spec` | OBS RPM spec. Must include systemd service unit for http transport mode. |
+| RPM | required | `{n}.spec` | OBS RPM spec. Installs the unit named below; does not carry its text. |
+| unit | required | `mcp-server-{n}.service` | The systemd unit for http transport mode, as a file. Installed by the RPM, by `debian/rules` and by `make install`, all three referring to this one file. A unit that is not a deliverable gets emitted inline by each packaging path, so its text exists three times and drifts. |
 | DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | DEP-5 copyright. Must include systemd service unit. |
 | OCI | required | `Containerfile` | Multi-stage build. Builder FROM registry.suse.com/bci/golang:latest. Final stage FROM scratch. Expose port 8080 for http transport. ENTRYPOINT default to http mode. Never use unqualified image names. |
 | report | required | `TRANSLATION_REPORT.md` | Must include: `Spec-SHA256:` header field, framework choice rationale, transport implementation notes, tool list with descriptions, compilation result. |
