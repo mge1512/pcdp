@@ -2,7 +2,7 @@
 
 ## META
 Deployment:  cli-tool
-Version:     0.1.0
+Version:     0.1.1
 Spec-Schema: 0.4.0
 Author:      Matthias G. Eckermann <pcd@mailbox.org>
 License:     GPL-2.0-only
@@ -59,8 +59,10 @@ TypeName := string
 
 InvariantBinding := list of BehaviorName
 // An invariant line may end with "(binds: name, name)". A bound
-// invariant belongs to exactly the named behaviors' bundles. An
-// invariant without the suffix is global and belongs to the preamble.
+// invariant belongs to every named behavior's bundle: it is assigned
+// once, to the first named behavior, and emission replicates it into
+// each further named bundle. An invariant without the suffix is
+// global and belongs to the preamble.
 // The suffix is recognized only at end of line, outside code fences.
 
 Assignment := one_of("behavior", "preamble", "excluded", "unassigned")
@@ -92,16 +94,26 @@ The recognized structure of a specification, normative for this tool:
   definition lines `Name := ...` with attached comment and
   continuation lines as defined under TypeName.
 - `## BEHAVIOR: <name>` and `## BEHAVIOR/INTERNAL: <name>` open a
-  behavior block, which extends to the next `## ` heading. Everything
+  behavior block, which extends to the next `## ` or `# ` heading;
+  `### ` and deeper never end it. Everything
   inside, including `### ` subsections and nested `### EXAMPLE`
   blocks, belongs to the behavior.
 - `## INVARIANTS` holds one invariant per list item; bindings as
   defined under InvariantBinding.
 - `## EXAMPLES` (top-level, Spec-Schema form) holds `### EXAMPLE:
-  <name>` blocks. An example is attributed to the behavior whose name
-  appears as the invoked identifier on its `WHEN:` line, or, failing
-  that, as a whole word in the example's name. An example attributable
-  to no behavior is a finding.
+  <name>` blocks. An example heading may end with an attribution
+  suffix `(of: <behavior>)` or `(of: shared)`. Attribution runs a
+  ladder, first rung that fires wins:
+  1. nesting - an example inside a behavior block belongs to it;
+  2. the heading suffix - `(of: shared)` assigns to the preamble;
+  3. the identifier invoked on the `WHEN:` line;
+  4. a behavior name appearing as a whole word anywhere in the
+     example's GIVEN, WHEN or THEN text, if exactly one distinct
+     behavior name appears there.
+  An example the ladder cannot place, and a rung-4 tie between two or
+  more behavior names, are findings; the tie's message lists the
+  candidates in alphabetical order. Residue is never assigned by
+  default: a strict classification is the point of the ladder.
 - A changelog is the section whose `## ` heading contains the word
   "Changelog" in any case, extending to end of file. It is excluded
   from every output and exempt from the completeness rule.
@@ -115,7 +127,8 @@ BehaviorName as a whole word opens a block attributed to that
 behavior, extending to the next heading of the same or shallower
 depth. Hints content before the first attributable heading, and any
 block that names no behavior is hints preamble. A heading that looks like
-an attribution but names no known behavior is a finding.
+an attribution but names no known behavior is a finding. A depth-1
+`# ` heading closes an attributed block and never opens one.
 
 ---
 
@@ -185,15 +198,16 @@ summary:  one line to stdout:
 
 STEPS:
 1. Parse as in list; exit 2 on unreadable input.
-2. undefined-type: a whole-word occurrence of an identifier of type
-   shape is not checked; only the reverse holds - every TypeName in a
-   computed closure must have a definition. A behavior referencing a
-   name that matches no definition is not detectable without a
-   language model and is out of scope; this rule fires only when a
-   type definition references a TypeName that is defined nowhere.
+2. undefined-type: fires only inside type definitions. The reference
+   shape is normative: an identifier with two or more camel humps,
+   each containing at least one lowercase letter, outside `//`
+   comments, excluding the defining name itself. This deliberately
+   under-reports (an all-capital name is never flagged) rather than
+   firing on prose; behavior text is never scanned by this rule.
 3. unknown-binding: an invariant binding names no known behavior.
-4. unassignable-example: a top-level example attributable to no
-   behavior.
+4. unassignable-example: a top-level example the attribution ladder
+   cannot place, or a rung-4 tie; the tie message names the candidate
+   behaviors in alphabetical order.
 5. unassignable-hints: a hints heading that names something of
    behavior shape but no known behavior. Hints preamble is not a
    finding.
@@ -205,8 +219,11 @@ STEPS:
 9. stale-output, only when out= is given and exists: recompute the
    provenance header values for the current sources and compare with
    the headers of the files present; any difference, and any expected
-   file missing or unexpected file present, is one finding that names the
-   file.
+   file missing or unexpected file present, is one finding per file.
+   MANIFEST.tsv carries no provenance line - it is not markdown - and
+   is compared by full content against the recomputed manifest; a
+   directory without MANIFEST.tsv is stale in full. An absent out
+   directory produces no stale findings.
 10. Write findings sorted by file then line; write the summary; exit 1
     if any finding, else 0.
 
@@ -252,8 +269,8 @@ out/MANIFEST.tsv         one line per emitted file: name, sha256;
 ```
 
 STEPS:
-1. Run check (without out=); if it finds anything -> print its
-   findings, write nothing, exit 1.
+1. Run check (without out=); if it finds anything -> print the
+   finding lines to stderr, nothing to stdout, write nothing, exit 1.
 2. Compute all outputs in memory. Behavior file names are the
    BehaviorName with "/" replaced by "-"; a collision after
    replacement is a duplicate-behavior finding.
@@ -266,8 +283,9 @@ STEPS:
    identical inputs produce identical files. Ordering rules: sections
    in source order, closures alphabetical, manifest sorted.
 5. Create OutDir if absent. Remove files the manifest would not list
-   only if they carry a pcd-slice provenance line; refuse with exit 2
-   if OutDir contains a foreign file, and name the file.
+   only if they carry a pcd-slice provenance line. Any other entry -
+   a file without the provenance first line, or any subdirectory - is
+   foreign: refuse with exit 2 and name the entry.
 6. Write every file, then the manifest. On any write error -> exit 2;
    files already written in this run are removed.
 7. Print to stdout: "pcd-slice: {n} bundles, preamble, manifest ->
@@ -276,8 +294,10 @@ STEPS:
 POSTCONDITIONS:
 - out contains exactly the manifest's files plus MANIFEST.tsv
 - each file's sha256 equals its manifest entry
-- the concatenation of all assignments covers every spec line outside
-  the changelog exactly once, across preamble and bundles
+- every spec line outside the changelog receives exactly one
+  assignment, and every output line traces to exactly one source
+  line; the sole replication is a bound invariant's line, which
+  appears once per named bundle and nowhere else
 - the source specification and hints files are byte-identical to
   before the run
 
@@ -303,9 +323,10 @@ SIDE-EFFECTS:
 - Determinism: identical inputs produce byte-identical outputs;
   no output contains a timestamp, hostname, user name, or absolute
   path other than those given on the command line. (binds: slice)
-- Completeness: every specification line outside the changelog is
-  assigned to exactly one output; the changelog appears in no output.
-  (binds: slice)
+- Completeness: every specification line outside the changelog
+  receives exactly one assignment; the changelog appears in no
+  output; the only line emitted more than once is a bound invariant,
+  once per binding. (binds: slice)
 - Provenance: every emitted markdown file's first line is the
   provenance comment, and stale outputs are detectable from it alone.
   (binds: check, slice)
@@ -402,7 +423,7 @@ THEN:
 GIVEN:
   a valid spec and one hints file
 WHEN:
-  slice runs twice into two fresh directories
+  result = slice(spec, out1); result = slice(spec, out2)
 THEN:
   every pair of same-named files is byte-identical
   MANIFEST.tsv is byte-identical
@@ -427,6 +448,55 @@ THEN:
   notes.txt is untouched
   exit_code = 2
 
+### EXAMPLE: of_suffix_attributes_and_shared_goes_to_preamble
+GIVEN:
+  "## EXAMPLES" holds "### EXAMPLE: audit_trail_holds (of: check)"
+    and "### EXAMPLE: end_to_end_story (of: shared)"
+WHEN:
+  result = slice(spec, out)
+THEN:
+  the first example is appended to check.md
+  the second is in preamble.md and in no bundle
+
+### EXAMPLE: unique_text_match_attributes
+GIVEN:
+  a top-level example with no suffix whose WHEN line is prose and
+    whose THEN text mentions "verify" once and no other behavior
+  behavior "verify" exists
+WHEN:
+  result = slice(spec, out)
+THEN:
+  the example is appended to verify.md
+
+### EXAMPLE: rung_four_tie_is_a_finding
+GIVEN:
+  a top-level example with no suffix whose text mentions both
+    "reset" and "purge", both behaviors exist
+  invocation: pcd-slice check spec=spec.md
+WHEN:
+  result = check(spec)
+THEN:
+  stderr contains "unassignable-example" and "purge, reset"
+  exit_code = 1
+
+### EXAMPLE: bound_invariant_replicates_once_per_binding
+GIVEN:
+  INVARIANTS holds "- Nothing is lost. (binds: check, slice)"
+WHEN:
+  result = slice(spec, out)
+THEN:
+  the line appears in check.md and in slice.md, once each
+  it appears in no other file
+
+### EXAMPLE: foreign_subdirectory_refuses
+GIVEN:
+  spec.d exists and contains a subdirectory notes/
+WHEN:
+  result = slice(spec, out)
+THEN:
+  stderr contains "error: foreign file in out: spec.d/notes"
+  exit_code = 2
+
 ## DEPENDENCIES
 
 None at build time beyond the target language's standard library.
@@ -440,9 +510,14 @@ model. Revisit when the dialects converge; the seam is LoadSpec.
 Runtime: command-line tool, single static binary.
 
 Invocation:
+  pcd-slice version
   pcd-slice list  spec=<file> [hints=<file>]...
   pcd-slice check spec=<file> [hints=<file>]... [out=<dir>]
   pcd-slice slice spec=<file> [hints=<file>]... out=<dir>
+
+version prints the tool name and version on one line and
+"spec:<sha256-of-this-specification>" on a second; POSIX-style flags
+are not accepted.
 
 Key=value options:
   spec=<file>   required for every verb

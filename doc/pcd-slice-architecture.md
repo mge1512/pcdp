@@ -1,6 +1,6 @@
 # pcd-slice architecture
 
-Status: describes pcd-slice 0.1.0. The specification at
+Status: describes pcd-slice 0.1.1. The specification at
 tools/pcd-slice/spec/pcd-slice.spec.md is normative; where this
 document and the specification disagree, the specification wins.
 
@@ -73,11 +73,20 @@ Five stages, one pass over the input:
 3. Close. Type definitions are collected from the TYPES fence;
    references are whole-word matches; the closure is transitive over
    definitions.
-4. Attribute. Nested examples belong to their enclosing behavior.
-   Top-level examples attach by the identifier invoked on their WHEN
-   line, then by behavior name in the example's own name. Hints
-   blocks attach when their heading names a behavior as a whole word.
-   What attaches nowhere is a finding, never a silent drop.
+4. Attribute. A four-rung ladder, first rung wins: nesting; an
+   explicit heading suffix `(of: behavior)` or `(of: shared)`; the
+   identifier invoked on the WHEN line; a unique whole-word behavior
+   name anywhere in the example's own text. Hints blocks attach when
+   their heading names a behavior as a whole word. What attaches
+   nowhere, and a rung-four tie, is a finding, never a silent drop:
+   0.1.1 chose strict classification over shared-by-default, because
+   an example that rides in the preamble instead of its bundle, with
+   nothing saying so, is the silent-degradation class this project spends review
+   rounds hunting. The first translation of 0.1.0 proved the need on
+   the target corpus itself - 66 of the METEORA planner's top-level
+   examples were unattributable under the two-rung grammar - and the
+   suffix is the escape hatch for genuinely cross-behavior
+   narratives.
 5. Emit. All outputs are computed in memory, then written: preamble,
    one file per behavior, MANIFEST.tsv last as the commit marker.
    Every markdown file begins with one provenance comment carrying
@@ -167,7 +176,16 @@ Findings, one per line on stderr, each with a rule name:
 
 Exit 0 is clean, 1 is findings, 2 is invocation trouble.
 
-### 7.4 Tag invariants, incrementally
+### 7.4 Tag examples that the ladder cannot place
+
+check names every unplaced or tied example. For each: a scenario that
+exercises one behavior gets `(of: that-behavior)` on its EXAMPLE
+heading; a genuinely cross-behavior narrative gets `(of: shared)` and
+lands in the preamble. The edit is mechanical, and each edited
+specification moves its version - one row - per the repository's
+bytes-move-version rule.
+
+### 7.5 Tag invariants, incrementally
 
 Untagged invariants are global and land in the preamble, so an
 untagged specification slices today with no edits. Tightening is one
@@ -179,7 +197,7 @@ suffix at a time:
 Tag the invariants that constrain one or two behaviors; leave the
 genuinely global ones untagged. check catches tag typos immediately.
 
-### 7.5 Slice
+### 7.6 Slice
 
     pcd-slice slice spec=... hints=... out=tools/mytool/spec/spec.d
 
@@ -193,7 +211,7 @@ slice runs check first and writes nothing on findings. It refuses an
 out directory containing any file it did not write - move your notes
 elsewhere.
 
-### 7.6 Point the harness at it
+### 7.7 Point the harness at it
 
 For the behavior under work, the translation prompt names two files
 instead of the specification:
@@ -205,7 +223,7 @@ instead of the specification:
 Keep the preamble first in every call so its bytes are a stable prefix
 for prompt caching.
 
-### 7.7 Keep it current
+### 7.8 Keep it current
 
 After any edit to the specification or a hints file:
 
@@ -218,7 +236,7 @@ the repository to durable artifacts and regenerates in CI. Either
 way the provenance headers make a stale tree detectable, and only the
 source specification is ever edited by hand.
 
-### 7.8 When something looks wrong
+### 7.9 When something looks wrong
 
 - A bundle is missing content you expected: run list; if the count is
   zero, the attribution heading or WHEN line does not name the
