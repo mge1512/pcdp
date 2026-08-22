@@ -1,0 +1,28 @@
+Source: pcd-slice
+Section: devel
+Priority: optional
+Maintainer: Matthias G. Eckermann <pcd@mailbox.org>
+Build-Depends: debhelper-compat (= 13),
+               golang-go (>= 2:1.22),
+               pandoc,
+               make
+Standards-Version: 4.6.2
+Homepage: https://github.com/mge1512/pcd/tools/pcd-slice
+Rules-Requires-Root: no
+
+Package: pcd-slice
+Architecture: any
+Depends: ${misc:Depends}
+Description: derive per-behavior translation bundles from a PCD specification
+ pcd-slice computes the semantic form of a Post-Coding Development
+ specification once, deterministically. For each behavior it emits one bundle
+ holding that behavior's block, the examples that exercise it, the invariants
+ bound to it, the hints written for it, and the names of the types it needs;
+ plus one preamble holding what every bundle shares.
+ .
+ The source specification is never modified. Every emitted file carries the
+ SHA-256 of the sources it was derived from, so a bundle is verifiable against
+ the reproducibility tuple and stale bundles are detectable. The tool makes no
+ network calls, reads no configuration file, and honours no environment
+ variable.
+X-PCD-Spec-SHA256: bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04

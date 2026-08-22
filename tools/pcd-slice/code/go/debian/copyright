@@ -1,0 +1,25 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pcd-slice
+Upstream-Contact: Matthias G. Eckermann <pcd@mailbox.org>
+Source: https://github.com/mge1512/pcd/tools/pcd-slice
+Comment: Generated from pcd-slice.spec.md
+ sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+
+Files: *
+Copyright: 2026 Matthias G. Eckermann <pcd@mailbox.org>
+License: GPL-2.0-only
+
+License: GPL-2.0-only
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 as published by
+ the Free Software Foundation.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in "/usr/share/common-licenses/GPL-2".
+ The authoritative text is published at
+ https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
