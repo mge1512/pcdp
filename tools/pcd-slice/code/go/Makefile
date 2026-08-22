@@ -1,66 +1,71 @@
-# Makefile for pcd-slice
-# generated from spec: pcd-slice.spec.md sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+# generated from spec: pcd-slice.spec.md sha256:c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f
+#
+# pcd-slice build orchestration. Every target runs unprivileged; no target
+# invokes sudo and no target fetches from the network (the implementation
+# uses the Go standard library only).
 
-NAME        := pcd-slice
+BINARY_NAME := pcd-slice
 VERSION     := $(shell cat VERSION)
-SPEC_SHA256 := bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
-MODULE      := github.com/mge1512/pcd/tools/pcd-slice
-TESTDIR     := independent_tests/claude-opus-5
+SPEC_SHA256 := c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f
+LLM_NAME    := claude-opus-5
 
-PREFIX  ?= /usr/local
-BINDIR  ?= $(PREFIX)/bin
-MANDIR  ?= $(PREFIX)/share/man/man1
-DESTDIR ?=
+GO          ?= go
+PREFIX      ?= /usr/local
+BINDIR      ?= $(PREFIX)/bin
+MANDIR      ?= $(PREFIX)/share/man/man1
+DESTDIR     ?=
 
-GO       ?= go
-LDFLAGS  := -X main.version=$(VERSION)
-DISTDIR  := $(NAME)-$(VERSION)
+LDFLAGS     := -s -w -X main.version=$(VERSION)
+DISTDIR     := $(BINARY_NAME)-$(VERSION)
+DISTFILES   := cmd internal independent_tests debian translation_report \
+               go.mod Makefile VERSION README.md LICENSE \
+               $(BINARY_NAME).1.md $(BINARY_NAME).spec
 
-.PHONY: all build test install clean man dist vendor check-fmt
+.PHONY: all build test install clean man dist vendor
 
 all: build
 
-## build: static binary at the project root, per BINARY-LOCATION: project-root
+## build: static binary at the project root (BINARY-LOCATION: project-root)
 build:
-	CGO_ENABLED=0 $(GO) build -ldflags "$(LDFLAGS)" -o $(NAME) ./cmd/$(NAME)
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags '$(LDFLAGS)' \
+	    -o $(BINARY_NAME) ./cmd/$(BINARY_NAME)
 
-## test: run the translator test suite against the built binary
+## test: run the test suite; exits non-zero on any failure
 test: build
-	$(GO) test ./$(TESTDIR)/...
-
-check-fmt:
-	@test -z "$$(gofmt -l cmd internal $(TESTDIR))" || { gofmt -l cmd internal $(TESTDIR); exit 1; }
-	$(GO) vet ./...
+	$(GO) test ./independent_tests/$(LLM_NAME)/...
 
 ## man: troff man page from its markdown source
-man: $(NAME).1
+man: $(BINARY_NAME).1
 
-$(NAME).1: $(NAME).1.md
-	pandoc $(NAME).1.md -s -t man -o $(NAME).1
+$(BINARY_NAME).1: $(BINARY_NAME).1.md
+	pandoc $(BINARY_NAME).1.md -s -t man -o $(BINARY_NAME).1
 
+## install: binary and man page under $(DESTDIR)$(PREFIX)
 install: build man
-	install -D -m 0755 $(NAME) $(DESTDIR)$(BINDIR)/$(NAME)
-	install -D -m 0644 $(NAME).1 $(DESTDIR)$(MANDIR)/$(NAME).1
+	install -D -m 0755 $(BINARY_NAME) $(DESTDIR)$(BINDIR)/$(BINARY_NAME)
+	install -D -m 0644 $(BINARY_NAME).1 $(DESTDIR)$(MANDIR)/$(BINARY_NAME).1
 
-clean:
-	rm -f $(NAME) $(NAME).1
-	rm -rf $(DISTDIR) $(DISTDIR).tar.gz $(DISTDIR)-vendor.tar.gz vendor
-
-## vendor: dependency tree for offline package builds. pcd-slice uses the
-## standard library only, so the vendor tree is empty but must carry a
-## modules.txt for -mod=vendor builds inside OBS.
+## vendor: materialise the dependency tree (empty: standard library only)
 vendor:
 	$(GO) mod vendor
-	mkdir -p vendor
-	test -f vendor/modules.txt || : > vendor/modules.txt
 
-## dist: release source tarball plus the companion vendor tarball
+## clean: remove every build output; the source tree is left untouched
+clean:
+	rm -f $(BINARY_NAME) $(BINARY_NAME).1
+	rm -f $(BINARY_NAME)-*.tar.gz
+	rm -rf build
+
+## dist: release source tarball with a single top-level directory
 dist: clean
-	mkdir -p $(DISTDIR)
-	cp -a VERSION Makefile README.md LICENSE go.mod \
-	      $(NAME).1.md $(NAME).spec $(DISTDIR)/
-	cp -a cmd internal debian independent_tests translation_report $(DISTDIR)/
-	tar czf $(DISTDIR).tar.gz $(DISTDIR)
-	$(MAKE) vendor
-	tar czf $(DISTDIR)-vendor.tar.gz vendor
-	rm -rf $(DISTDIR) vendor
+	mkdir -p build/$(DISTDIR)
+	cp -a $(DISTFILES) build/$(DISTDIR)/
+	tar --exclude='.git' --exclude='build' --exclude='vendor' \
+	    -czf $(DISTDIR).tar.gz -C build $(DISTDIR)
+	@if [ -d vendor ]; then \
+	    tar -czf $(BINARY_NAME)-$(VERSION)-vendor.tar.gz vendor; \
+	    echo "wrote $(BINARY_NAME)-$(VERSION)-vendor.tar.gz"; \
+	else \
+	    echo "no vendor/ tree: pcd-slice depends on the standard library only"; \
+	fi
+	rm -rf build/$(DISTDIR)
+	@echo "wrote $(DISTDIR).tar.gz"

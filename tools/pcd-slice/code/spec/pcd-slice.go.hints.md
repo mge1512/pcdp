@@ -29,7 +29,11 @@ becomes a slice scan instead of an argument. Outputs are then pure
 projections of assign: preamble.md is the lines stamped preamble, in
 order; each bundle is the lines stamped with its behavior, in order,
 plus the appended attributed material. Projection from one array keeps
-"exactly once" true by construction.
+"exactly once" true by construction. The one stated exception is a
+bound invariant: it is assigned to its first named behavior, and the
+emitter appends the same line to each further named bundle - the
+replication lives in the emitter, never in the assignment array, so
+the completeness scan stays a scan.
 
 ## 3. Type closure
 
@@ -46,10 +50,17 @@ Alphabetize only at output time.
 
 ## 4. Attribution
 
-Top-level examples: the WHEN line's invoked identifier is
+Top-level examples run the spec's four-rung ladder. Rung 2: the
+heading suffix matches `\(of:\s*([a-z][a-z0-9_-]+|shared)\)\s*$` on
+the EXAMPLE heading; strip it before emitting the heading into the
+bundle, and treat `shared` as preamble. Rung 3: the WHEN line's
+invoked identifier is
 `^\s*(?:result\s*=\s*)?([a-z][a-z0-9_-]*)\(` - match group against
-behavior names; on no match, fall back to whole-word behavior name in
-the example's own name; on no match again, finding. Hints headings:
+behavior names. Rung 4: reuse the behavior-name alternation from the
+closure matcher over the example's GIVEN, WHEN and THEN text; count
+distinct names; exactly one attributes, two or more is the tie
+finding with the candidates sorted, zero falls through to the
+finding. The tie message is deterministic because the sort is. Hints headings:
 test each behavior name as a whole word against the heading text;
 bold markers and backticks are stripped before the test
 (strings.ReplaceAll for `**` and the backtick, nothing cleverer).
@@ -115,7 +126,17 @@ Golden files for preamble.md and one bundle keep refactors honest;
 regenerate goldens only through the tool itself and diff-review the
 change.
 
-## 10. What not to build
+## 10. The undefined-type shape
+
+The normative reference shape from check step 2: two or more camel
+humps, each with at least one lowercase letter. One regex per
+candidate token: `^([A-Z][a-z0-9]*){2,}$` after splitting the
+definition text on non-identifier characters, comments stripped
+first, the defining name excluded. Do not scan behavior text with
+this - the rule is scoped to definitions, and widening it drowns the
+finding in prose.
+
+## 11. What not to build
 
 No configuration file, no environment variables, no color, no
 concurrency - the inputs are a few hundred kilobytes and one pass is

@@ -1,46 +1,58 @@
-# translation-workflow.pikchr
-# generated from spec: pcd-slice.spec.md sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+# generated from spec: pcd-slice.spec.md sha256:c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f
 #
-# The translation workflow of pcd-slice: from the specification and its
-# hints to the verified, packaged binary.
+# Translation workflow for pcd-slice: inputs consumed, phases executed,
+# artefacts produced. Render with pikchr(1).
 
 scale = 0.9
 
-Spec:    box "pcd-slice.spec.md" "Spec-SHA256 bb31cb27..." fit fill 0xeef7ff
-move right 0.4
-Hints:   box "pcd-slice.go.hints.md" "cli-tool.go.milestones.hints.md" fit fill 0xeef7ff
-move right 0.4
-Tmpl:    box "cli-tool.template.md" "v0.4.1" fit fill 0xeef7ff
+box "pcd-slice.spec.md" "v0.1.1" fit fill 0xeef7ff
+move right 0.35
+box "cli-tool.template.md" "v0.4.1" fit fill 0xeef7ff
+move right 0.35
+box "go hints x2" "ROLE.md" fit fill 0xeef7ff
 
 down
-move to (Hints.x, Hints.y - 0.8)
-Tests:   box "Phase 1  Tests First" "independent_tests/claude-opus-5/" "44 black-box tests via exec.Command" fit fill 0xfff7e6
+move to 1st box.s
+move down 0.45
+Inputs: box "merged spec text" "sha256 c200af55…" fit fill 0xfff8e1 with .n at 1st box.s + (1.6,-0.45)
 
-arrow from Spec.s down 0.35 then to Tests.nw ->
-arrow from Hints.s to Tests.n ->
-arrow from Tmpl.s down 0.35 then to Tests.ne ->
+arrow from 1st box.s to Inputs.nw chop
+arrow from 2nd box.s to Inputs.n chop
+arrow from 3rd box.s to Inputs.ne chop
 
-move to (Tests.x, Tests.y - 0.75)
-Impl:    box "Phase 2  Implementation" "cmd/pcd-slice/main.go  (CLI dispatch)" \
-             "internal/pcd-slice/  (parse, closure, hints," "check, render, verbs, write)" fit fill 0xe9ffe9
-arrow from Tests.s to Impl.n -> "guard: tests exist" ljust
+P1: box "Phase 1 — tests first" "independent_tests/claude-opus-5/" fit \
+    fill 0xe8f5e9 with .n at Inputs.s + (0,-0.4)
+arrow from Inputs.s to P1.n
 
-move to (Impl.x, Impl.y - 0.75)
-Pack:    box "Phase 3  Build and packaging" "Makefile, pcd-slice.spec, debian/, LICENSE" fit fill 0xf3e9ff
-arrow from Impl.s to Pack.n ->
+P2: box "Phase 2 — implementation" "cmd/pcd-slice + internal/pcdslice" fit \
+    fill 0xe8f5e9 with .n at P1.s + (0,-0.35)
+arrow from P1.s to P2.n
 
-move to (Pack.x, Pack.y - 0.6)
-Docs:    box "Phase 4-5  Auxiliary and docs" "this diagram, pcd-slice.1(.md), README.md" fit fill 0xf3e9ff
-arrow from Pack.s to Docs.n ->
+P3: box "Phase 3 — packaging" "Makefile, pcd-slice.spec, debian/" fit \
+    fill 0xe8f5e9 with .n at P2.s + (0,-0.35)
+arrow from P2.s to P3.n
 
-move to (Docs.x, Docs.y - 0.7)
-Gate:    box "Phase 6  Compile gate" "go mod tidy / go build ./... / go vet ./..." "make test: 44 passed, 0 failed, 0 skipped" fit fill 0xffe9e9
-arrow from Docs.s to Gate.n ->
+P5: box "Phase 5 — docs" "README.md, pcd-slice.1" fit \
+    fill 0xe8f5e9 with .n at P3.s + (0,-0.35)
+arrow from P3.s to P5.n
 
-move to (Gate.x, Gate.y - 0.7)
-Report:  box "Phase 7  TRANSLATION_REPORT.md" "written last, after the gate" fit fill 0xffffff
-arrow from Gate.s to Report.n ->
+P6: box "Phase 6 — compile gate" "go build / go vet / make test" fit \
+    fill 0xffe0b2 with .n at P5.s + (0,-0.35)
+arrow from P5.s to P6.n
 
-# The spec hash travels into every artefact.
-arrow from Spec.w left 0.3 then down 4.55 then right 0.3 to Report.w -> \
-      "spec hash" "embedded in" "every artefact" ljust
+P7: box "Phase 7 — TRANSLATION_REPORT.md" fit \
+    fill 0xf3e5f5 with .n at P6.s + (0,-0.35)
+arrow from P6.s to P7.n
+
+# the verbs the produced binary offers
+right
+V: box "pcd-slice" "list | check | slice | version" fit fill 0xe1f5fe \
+   with .w at P6.e + (0.8,0)
+arrow from P6.e to V.w
+
+box "out/preamble.md" fit fill 0xffffff with .w at V.e + (0.6,0.45)
+arrow from V.e to last box.w chop
+box "out/<behavior>.md" fit fill 0xffffff with .w at V.e + (0.6,0)
+arrow from V.e to last box.w chop
+box "out/MANIFEST.tsv" fit fill 0xffffff with .w at V.e + (0.6,-0.45)
+arrow from V.e to last box.w chop

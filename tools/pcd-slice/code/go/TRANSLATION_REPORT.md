@@ -1,374 +1,471 @@
 # TRANSLATION_REPORT.md — pcd-slice
 
-**Spec-SHA256:** `bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04`
-**Spec-SHA256 (host):** `bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04`
+**Spec-SHA256:** `c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f`
+**Spec-SHA256 (host):** `c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f`
 
-**Included-Specs:**
+**Included-Specs:** none — the host spec's META declares no `Includes:`
+directives, so the merged spec text is byte-identical to the host spec file
+and the merged hash equals the host hash.
 
 | Path | SHA256 |
 |------|--------|
-| *(none — the host spec declares no `Includes:`)* | — |
-
-The host spec's META declares `Spec-Schema: 0.4.0` and no `Includes:`
-directive, so the merged spec text is byte-identical to the host file and the
-merged hash equals the host hash. That single hash is embedded in every
-generated artefact.
+| *(none)* | — |
 
 **LLM-Name:** `claude-opus-5`
 **Mode:** `translator`
-**Run mode:** single-LLM (no `independent_tests/<other-llm>/` and no
-`TEST_REPORT.md` were present in the input directory)
+**Spec-Schema:** 0.4.0 (host META) — include resolution implemented; no includes present
+**Component version:** 0.1.1 (spec META `Version:`, mirrored in `VERSION`)
+**Date:** 2026-08-22
 
 ---
 
 ## Translation Inputs (provenance)
 
-| Label | File | SHA256 |
-|---|---|---|
-| `Spec-SHA256 (merged):` | `pcd-slice.spec.md` (merged text) | `bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04` |
-| `Spec-SHA256 (host):` | `pcd-slice.spec.md` | `bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04` |
-| `Decisions-Hints-SHA256:` | `pcd-slice.go.hints.md` | `77fdb887623323a6c0c630661aac955fe74b32fbbd20097716024e9ca80a97a4` |
-| `Milestones-Hints-SHA256:` | `cli-tool.go.milestones.hints.md` | `fe73f2ab89be21a0fd0eb37a818e586b68a338a8392a8f14725c611a2d33b249` |
-| `Template-SHA256:` | `cli-tool.template.md` | `13cbe57a345e6be7f6b91f0ee3a6d5d5bfc82a957143e1668325a76bfcac13fa` |
-| `Prompt-SHA256:` | `prompt.md` | `2317d61f6e5631af52943243aee40cc5dc0ed29c55984d997dcf72397930d912` |
-| `Role-File-SHA256:` | `ROLE.md` | `c1a484b969f2516a1f34ae2baa73e34b8c8e38afa6cbfaba782711406c2b7c66` |
-| `Style-Hints-SHA256:` | none | — |
-| `Library-Hints-SHA256:` | none | — |
-| `Upgrade-Brief-SHA256:` | none | — |
-| `Directive-SHA256:` | none | — |
+Every file consumed as a translation input, hashed exactly as read from the
+input directory at translation time.
 
-No preset hierarchy was present in this environment (`/etc/pcd/hints/`,
-`.pcd/hints/`, `/usr/share/pcd/presets/`, `~/.config/pcd/presets/`,
-`<project>/.pcd/` all absent), so no project or company style hints applied
-and no preset overrode a template default.
+- `Spec-SHA256 (merged):` `c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f`
+- `Spec-SHA256 (host):` `c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f`
+- `Decisions-Hints-SHA256:` `pcd-slice.go.hints.md` `c1b2685bbc5b395700a2024d0015395325ef0d2e348e6c43671d352a7c818d72`
+- `Milestones-Hints-SHA256:` `cli-tool.go.milestones.hints.md` `fe73f2ab89be21a0fd0eb37a818e586b68a338a8392a8f14725c611a2d33b249`
+- `Template-SHA256:` `cli-tool.template.md` `13cbe57a345e6be7f6b91f0ee3a6d5d5bfc82a957143e1668325a76bfcac13fa`
+- `Prompt-SHA256:` `prompt.md` `2317d61f6e5631af52943243aee40cc5dc0ed29c55984d997dcf72397930d912`
+- `Role-SHA256:` `ROLE.md` `c1a484b969f2516a1f34ae2baa73e34b8c8e38afa6cbfaba782711406c2b7c66`
+- `Style-Hints-SHA256:` `none` (no `<scope>.<language>.style.hints.md` in the input directory, `/etc/pcd/hints/` or `.pcd/hints/`)
+- `Library-Hints-SHA256:` `none`
+- `Upgrade-Brief-SHA256:` `none`
+- `Directive-SHA256:` `none`
 
 ---
 
 ## Tests-First-Compliance
 
-**`yes`.**
+**`yes`.** The complete test suite
+(`independent_tests/claude-opus-5/pcd_slice_test.go`, 41 190 bytes, 39 test
+functions plus 11 sub-tests) was written and committed to disk **before any
+implementation source file existed**. The structural guard at step 3 of the
+translator flow was satisfied: after writing the suite, the directory
+`independent_tests/claude-opus-5/` was verified to exist and contain a test
+file; only then was `internal/pcdslice/types.go` — the first implementation
+file — written.
 
-Order of writing, verifiable from the filesystem timestamps of this run:
+Order of writes (observable from the run):
 
-1. `independent_tests/claude-opus-5/helpers_test.go`
-2. `independent_tests/claude-opus-5/fixtures_test.go`
-3. `independent_tests/claude-opus-5/pcd_slice_test.go`
-4. *structural guard checked: the directory exists and holds three test files*
-5. `internal/pcd-slice/*.go`, `cmd/pcd-slice/main.go`, `go.mod`, `VERSION`
-6. packaging, documentation, compile gate, this report
+1. `independent_tests/claude-opus-5/pcd_slice_test.go`
+2. `internal/pcdslice/{types,parse,closure,attribute,hints,emit,check,list,slice,run}.go`
+3. `cmd/pcd-slice/main.go`, `go.mod`
+4. packaging, documentation, report
 
-No implementation source file was written before the guard passed. The full
-expected output of every verb — the exact list line format, the finding line
-format, the summary lines, the provenance line grammar, the
-`Requires-Types:` line, the manifest format — was fixed by the tests first
-and the implementation was written to satisfy them.
+The suite passed on its first execution against the implementation; no test
+was edited after any test run (see **Test Refinements**).
 
 ## Continuity-Check
 
-*Not applicable — no test-author input.* No `independent_tests/<other-llm>/`
-directory and no `TEST_REPORT.md` were present in `/tmp/pcd-input`, so this
-is a single-LLM run, which the prompt declares a fully supported invocation.
+**Not applicable — no test-author input.** The input directory
+(`/tmp/pcd-input/`) contained only `ROLE.md`, `prompt.md`,
+`pcd-slice.spec.md`, `cli-tool.template.md`, `pcd-slice.go.hints.md` and
+`cli-tool.go.milestones.hints.md`. There is no
+`independent_tests/<other-role-llm-name>/` directory and no `TEST_REPORT.md`,
+so this is a **single-LLM run**, which the prompt declares a fully supported
+invocation. Steps 6 and 7 of the translator flow's dual-LLM path did not
+apply and no test-author suite was executed.
 
 ---
 
-## Target language and template resolution
+## Resolution and constraints
 
-**Resolved language: Go** — the `cli-tool` template's `LANGUAGE` row declares
-Go as the `default`, and no preset (system, user or project) was present to
-override it. No deviation from the default; no language decision was taken
-from the evaluation environment.
+### Target language
 
-**Active MILESTONE:** none. The specification contains no `## MILESTONE:`
-section, so the full spec was translated as one pass (no scaffold pass, no
-deferred BEHAVIORs, no stubs). The generic scaffold-first hints file was read
-in full; its non-milestone guidance (static binary with `CGO_ENABLED=0`,
-signal handling in `main()`, `filepath.Join` for path construction,
-format-string discipline under `go vet`, "no os.Exit below main") was applied.
-The hints sections that are specific to scaffold milestones, JSON scope
-wrappers, renderers and `OSCommandRunner` do not apply: pcd-slice emits
-markdown and TSV, not JSON, and invokes no external command.
+**Go**, the `LANGUAGE` default of `cli-tool.template.md` (TEMPLATE-TABLE row
+`LANGUAGE | Go | default`). No preset files were present in the input
+directory, in `/etc/pcd/presets/`, `~/.config/pcd/presets/` or a project
+`.pcd/` directory, so no override applied. Both hints files supplied are
+Go-specific, confirming the default. No deviation from the template default.
 
-**Module identity:** `github.com/mge1512/pcd/tools/pcd-slice`, resolved from
-**authoritative source 1**, the spec META `Module:` field. Sources 2–4 were
-not consulted for a value beyond confirmation: the Go hints file names no
-module, there was no pre-existing manifest in the output directory, and the
-spec-title fallback was not needed. No conflict, so no halt. The identity is
-propagated to `go.mod`, the import path in `cmd/pcd-slice/main.go`, the RPM
-`URL:`, the DEB `Homepage:` and `Source:` fields, `debian/copyright`, the man
-page HOMEPAGE section and the README.
+### Module identity resolved
 
-**TYPE-BINDINGS:** the `cli-tool` template contains no `## TYPE-BINDINGS`
-section, so no mechanical type mapping applied. The spec's logical types were
-bound to natural Go types (see *Type bindings chosen* below).
+**`github.com/mge1512/pcd/tools/pcd-slice`**, from **authoritative source 1**:
+the spec's META `Module:` field. Sources 2–4 were not consulted for a
+competing value (the Go hints file declares no module name; no prior
+manifest existed in the output directory; the spec-title fallback was not
+needed), so no conflict arose and `MODULE-IDENTITY: conflict-halts` did not
+fire. The identity is propagated to `go.mod`, the internal import path in
+`cmd/pcd-slice/main.go`, and — as the project home — to the RPM `URL:`,
+`debian/control` `Homepage:` and the README.
 
-**GENERATED-FILE-BINDINGS:** the template contains no
-`## GENERATED-FILE-BINDINGS` section; no generated infrastructure filenames
-were invented.
+### Delivery mode
 
-**Spec DELIVERABLES / COMPONENT entries:** the specification has no
-`DELIVERABLES` section with `COMPONENT:` entries, so no component-to-filename
-mapping was required. The produced file set comes from the template's
-`## DELIVERABLES` table alone.
+**Mode 1 — filesystem.** All artefacts were written directly to
+`/tmp/pcd-output/` with the filesystem write tool. Nothing was emitted to the
+terminal as a deliverable. No VCS repository was present, so nothing was
+committed.
 
-**INTERFACES:** the specification has no `## INTERFACES` section, so no
-production/test-double pairs were declared or produced. The tests need none:
-they are black-box tests of the binary.
+### Active MILESTONE
 
-**Delivery mode:** mode 1, *filesystem*. All files were written to
-`/tmp/pcd-output` with the filesystem tool. No repository was available to
-commit to.
+**None.** The specification contains no `## MILESTONE:` section, so the full
+spec was translated as normal (no scaffold pass, no deferred BEHAVIORs). All
+three BEHAVIORs are implemented for real; there are no stubs in the tree.
 
----
+### BEHAVIOR constraints
 
-## Deliverables produced
+| BEHAVIOR | Constraint | Treatment |
+|----------|-----------|-----------|
+| `list`   | required  | Implemented unconditionally (`internal/pcdslice/list.go`) |
+| `check`  | required  | Implemented unconditionally (`internal/pcdslice/check.go`) |
+| `slice`  | required  | Implemented unconditionally (`internal/pcdslice/slice.go` + `emit.go`) |
 
-Derived from the template's `## DELIVERABLES` table, in the mandated delivery
-order.
+No BEHAVIOR carries `Constraint: supported` or `forbidden`; no BEHAVIOR is
+"not yet scheduled".
 
-| OUTPUT-FORMAT | Constraint | Files produced | Status |
-|---|---|---|---|
-| source | required | `cmd/pcd-slice/main.go` (entry point), `internal/pcd-slice/{types,source,parse,closure,hints,check,render,verbs,write}.go`, `go.mod` | done |
-| public-api | required | `## Public API Surface` in this report | done |
-| build | required | `Makefile` (`build`, `test`, `install`, `clean`, `man`, `dist`, plus `vendor`, `check-fmt`) | done |
-| docs | required | `README.md` | done |
-| man | required | `pcd-slice.1.md`, `pcd-slice.1` (pandoc 2.18) | done |
-| license | required | `LICENSE` (SPDX `GPL-2.0-only` + authoritative URL, text not reproduced) | done |
-| RPM | required | `pcd-slice.spec` | done |
-| DEB | required | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` | done |
-| OCI | supported | — | **not produced**: no preset activates OCI in this run |
-| PKG | supported | — | **not produced**: `PLATFORM` resolves to Linux only; macOS not declared |
-| binary | supported | — | no descriptor required by the table |
-| report | required | `TRANSLATION_REPORT.md` (this file) | done |
-| spec-hash | required | embedded in every source header, `Makefile` `SPEC_SHA256`, RPM `# pcd-spec-sha256:`, DEB `X-PCD-Spec-SHA256:`, `pcd-slice version` output, this report | done |
-| *(EXECUTION phase 4)* | required | `translation_report/translation-workflow.pikchr` | done |
+### INTERFACES / TYPE-BINDINGS / GENERATED-FILE-BINDINGS / spec DELIVERABLES
 
-Nothing else was written. In particular no `.gitignore`, no `go.sum` (the
-module has no dependencies, and the template does not name a lock file), no
-`CHANGELOG.md`, no CI configuration, no IDE files and no `build/` directory.
-The binary `pcd-slice` at the project root is the compile gate's output at
-the location `BINARY-LOCATION: project-root` mandates; `make clean` removes
-it and `make dist` excludes it from the tarball.
+- The spec has **no `## INTERFACES` section**, so no production/test-double
+  pairs were generated. The test suite is black-box over the CLI, which is
+  the interface the DEPLOYMENT section declares.
+- The template contains **no `## TYPE-BINDINGS` section**; the spec's logical
+  types were bound by hand to idiomatic Go equivalents (see *Type mapping*).
+- The template contains **no `## GENERATED-FILE-BINDINGS` section**.
+- The spec has **no `## DELIVERABLES` section with COMPONENT: entries**; the
+  produced file set derives from the template's DELIVERABLES table alone.
 
----
+### Type mapping (spec TYPES → Go)
 
-## Template constraints compliance
+| Spec type | Go binding | Notes |
+|-----------|------------|-------|
+| `SpecFile`, `HintsFile` | `string` path + `readMarkdown()` precondition check | existence, readability and the `.md` extension are validated on load; violation is exit 2 |
+| `OutDir` | `string` path | created with `os.MkdirAll`; nothing is written outside it |
+| `BehaviorName` | `string` (`Behavior.Name`) | uniqueness enforced by the `duplicate-behavior` rule |
+| `TypeName` | `string` (`TypeDef.Name`) | definition body captured as `TypeDef.Body` / `.Text` |
+| `InvariantBinding` | `Invariant.Binds []string` | `Owner` is the first named behavior; replication happens in the emitter only |
+| `Assignment` | `Kind` (`unassigned`/`preamble`/`behavior`/`excluded`) + `Behavior` + emission `Role` | one entry per source line in `Spec.Assign` |
+| `Finding` | `Finding{Rule, File string; Line int; Message string}` | `String()` renders `{rule}: {file}:{line}: {message}` |
+| `ExitCode` | `ExitOK`/`ExitFindings`/`ExitInvocation` = 0/1/2 | returned by `Run`, applied by the single `os.Exit` in `main` |
 
-| Key | Constraint | How it is satisfied |
-|---|---|---|
-| VERSION | required | `VERSION` file `0.1.0` (spec META `Version:`), single source for the binary, RPM, DEB and tarball name |
-| SPEC-SCHEMA | required | `0.4.0`; include resolution implemented (no includes present) |
-| AUTHOR / LICENSE | required | Matthias G. Eckermann; SPDX `GPL-2.0-only` in `LICENSE`, RPM, DEP-5 copyright |
-| LANGUAGE | default Go | Go; no preset override present |
-| BINARY-TYPE | static (default) | `CGO_ENABLED=0` in `Makefile`, RPM `%build` and `debian/rules`; `file ./pcd-slice` reports *statically linked* |
-| PERSISTENCE | none (default) | no persistent state of any kind |
-| SOURCE-PARTITIONING | modular, one-entry-one-implementation | entry point `cmd/pcd-slice/main.go` does argument parsing, error reporting and dispatch only; nine files in `internal/pcd-slice/` hold the behaviours, partitioned by domain (source loading, parsing, closure, hints, checking, rendering, verbs, disk writing, types) |
-| MODULE-IDENTITY | host-specified, propagated, conflict-halts | source 1 (spec META `Module:`); propagated to every artefact; no conflict |
-| PUBLIC-API-SURFACE | recorded-in-report | `## Public API Surface` below |
+### Template constraints compliance
+
+| Key | Required value | How satisfied |
+|-----|----------------|---------------|
+| VERSION | MAJOR.MINOR.PATCH | `0.1.1` from spec META, single source in `VERSION`, injected via `-ldflags -X main.version` |
+| LANGUAGE | Go (default) | Go 1.22 module, standard library only |
+| BINARY-TYPE | static | `CGO_ENABLED=0` in `Makefile`, RPM `%build` and `debian/rules`; verified: `file ./pcd-slice` → "statically linked" |
+| PERSISTENCE | none | no state is kept between runs; no config file |
+| SOURCE-PARTITIONING | modular, one-entry-one-implementation | entry point `cmd/pcd-slice/main.go` (dispatch + signals only, 33 lines); 10 implementation files in `internal/pcdslice/` |
+| SOURCE-PARTITIONING | by-behaviour-domain (supported) | applied: `parse.go`, `closure.go`, `attribute.go`, `hints.go`, `emit.go` (domains) and `list.go`, `check.go`, `slice.go` (one per BEHAVIOR) |
+| MODULE-IDENTITY | host-specified, propagated | spec META `Module:`; propagated to `go.mod`, import path, packaging |
+| PUBLIC-API-SURFACE | recorded-in-report | see `## Public API Surface` below |
 | BINARY-COUNT | 1 | one binary, `pcd-slice` |
-| BINARY-LOCATION | project-root | `make build` emits `./pcd-slice` next to `go.mod`; tests address it as `../../pcd-slice` |
-| RUNTIME-DEPS | none | standard library only; RPM/DEB declare no runtime dependency |
-| CLI-ARG-STYLE | key=value (+ bare-words, subcommand) | verbs `list`/`check`/`slice` plus bare words `version`/`help`; options `spec=`, `hints=`, `out=`; no POSIX flag is accepted (`--version` is an unknown command, exit 2) |
-| EXIT-CODE-OK / ERROR / INVOCATION | required | 0 / 1 / 2 exactly as the spec's `ExitCode` type defines them |
-| STREAM-DIAGNOSTICS / STREAM-OUTPUT | required | findings and errors on stderr, summaries and listings on stdout |
-| SIGNAL-HANDLING | SIGTERM, SIGINT | handler in `main()`; removes any file the current `slice` run wrote, then exits cleanly — no partial output |
-| OUTPUT-FORMAT | RPM, DEB required | both produced; OCI/PKG not active in the resolved preset |
-| INSTALL-METHOD | OBS required, curl forbidden | README documents zypper/dnf/apt from OBS; no curl anywhere |
-| PLATFORM | Linux required | Linux only, as the spec's DEPLOYMENT section states |
-| CONFIG-ENV-VARS | forbidden | the tool reads no environment variable at all; no test-injection variable was needed because the tests use per-test working directories and relative paths |
-| NETWORK-CALLS | forbidden | no `net` import anywhere; no network at build time either (no dependencies) |
-| FILE-MODIFICATION (input files) | forbidden | inputs are opened read-only; `TestInvariantSourcesAreReadOnly` hashes spec and hints before and after every verb |
-| IDEMPOTENT | required | byte-identical outputs across runs; `TestSliceIsIdempotent`, `TestExampleTwoRunsAreByteIdentical` |
-| PRESET-SYSTEM | systemd-style | no preset file was present; resolution order honoured, template defaults used |
+| BINARY-LOCATION | project-root | `make build` writes `./pcd-slice` next to `go.mod`; the test suite invokes `../../pcd-slice` and builds it there in `TestMain` from `../../cmd/pcd-slice` |
+| RUNTIME-DEPS | none | static binary, standard library only; RPM/DEB declare no runtime dependency beyond `${shlibs:Depends}`/`${misc:Depends}` |
+| CLI-ARG-STYLE | key=value | `spec=`, `hints=`, `out=`; any argument starting with `-` is rejected with exit 2 |
+| CLI-ARG-STYLE | bare-words / subcommand (supported) | verbs `version`, `help`, `list`, `check`, `slice` as bare first words, per the spec's DEPLOYMENT invocation grammar |
+| EXIT-CODE-OK / ERROR / INVOCATION | 0 / 1 / 2 | `ExitOK`, `ExitFindings`, `ExitInvocation`; matches the spec's `ExitCode` type |
+| STREAM-DIAGNOSTICS | stderr | findings and `error:` lines only |
+| STREAM-OUTPUT | stdout | listing, check summary, slice summary, version, help |
+| SIGNAL-HANDLING | SIGTERM, SIGINT | handler in `main()`; calls `pcdslice.Abort()` (removes files written by the run) then exits — no partial output |
+| OUTPUT-FORMAT | RPM, DEB (required) | `pcd-slice.spec`; `debian/{control,changelog,rules,copyright}` |
+| OUTPUT-FORMAT | OCI, PKG, binary (supported) | **not produced**: no preset activates OCI or PKG, and `PLATFORM: macOS` is not declared (spec DEPLOYMENT says "Linux only in v1"). `binary` requires no descriptor. |
+| INSTALL-METHOD | OBS (required), curl (forbidden) | README documents zypper/apt/dnf only; no curl anywhere |
+| PLATFORM | Linux | spec DEPLOYMENT declares Linux only in v1 |
+| CONFIG-ENV-VARS | forbidden | no environment variable is read anywhere in the implementation (`os.Getenv` appears nowhere) |
+| TEST-INJECTION | single-declared-env-var (supported) | **not used** — the tool needs no test-injection variable; tests are hermetic through `key=value` paths and per-test temporary directories |
+| NETWORK-CALLS | forbidden | no `net`, `net/http` or exec of network tools; imports are `bytes crypto/sha256 encoding/hex fmt io os os/signal path/filepath regexp sort strconv strings sync syscall` |
+| FILE-MODIFICATION | input-files forbidden | sources are opened read-only (`os.ReadFile`); verified by `TestSourcesAreReadOnly` |
+| IDEMPOTENT | true | verified by `TestReSliceIntoSameDirectoryIsIdempotent` and `TestExampleTwoRunsAreByteIdentical` |
+| PRESET-SYSTEM | systemd-style | no preset consumed; resolution order honoured (none present at any layer) |
+| spec-hash | embedded everywhere | see below |
+
+### Spec-hash embedding
+
+`c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f` appears in:
+every Go source file header comment (11 files) and the test file header,
+`SpecSHA256` in `internal/pcdslice/types.go` (printed by `pcd-slice version`
+as `spec:<hash>`), `SPEC_SHA256` in the `Makefile`, `# pcd-spec-sha256:` in
+`pcd-slice.spec`, `X-PCD-Spec-SHA256:` in `debian/control`, the header
+comments of `debian/rules`, `pcd-slice.1.md`, `README.md` and
+`translation_report/translation-workflow.pikchr`, and the `Spec-SHA256:`
+field of this report. No `Containerfile` was produced (OCI inactive), so the
+`LABEL pcd.spec.sha256=` row does not apply. No placeholder value appears in
+any artefact.
 
 ---
 
-## How STEPS ordering was applied
+## STEPS ordering — how each BEHAVIOR was implemented
 
-**BEHAVIOR: list** — steps 1–5 in order, in `List()` (`internal/pcd-slice/verbs.go`):
-`LoadSources` (step 1; extension, existence and readability predicates first,
-`error: cannot read {path}` and exit 2 on failure) → `Analyze` computes the
-transitive closure per behavior (step 2, `closure.go`) and attributes
-invariants, examples and hints blocks (step 3, `parse.go`/`hints.go`) → one
-tab-separated line per behavior in specification order plus
-`total: {n} behaviors` (step 4) → return 0 unconditionally (step 5): `list`
-never fails on findings, which `TestListNeverFailsOnFindings` pins.
+### BEHAVIOR: list (`internal/pcdslice/list.go`, driven from `run.go`)
 
-**BEHAVIOR: check** — steps 1–10 in order, in `Check()` and
-`Analysis.Findings()`: parse as in list (1); `undefined-type` on the
-definition side only (2); `unknown-binding` (3); `unassignable-example` (4);
-`unassignable-hints`, hints preamble exempt (5); `duplicate-behavior` (6);
-`no-behaviors` (7); the completeness scan over the assignment array, which
-would report rule `unassigned` (8); `stale-output`, only when `out=` is given
-*and* the directory exists (9); findings sorted by file then line to stderr,
-summary to stdout, exit 1 if any finding else 0 (10).
+1. **Parse spec against the section grammar; exit 2 on unreadable input** —
+   `readMarkdown()` enforces the `.md` extension and readability and emits
+   `error: cannot read {path}`; `ParseSpec()` runs the one-pass classifier.
+2. **Transitive type closure per behavior** — `computeClosures()` →
+   `closureOf()`: a worklist over the behavior block text, then over each
+   newly added definition's text, matching whole words through one
+   longest-first alternation regexp.
+3. **Attribute invariants, examples and hints blocks** —
+   `collectInvariants()`, `collectExamples()` + `attributeExample()`,
+   `ParseHints()`.
+4. **One line per behavior in specification order + total line** — behaviors
+   are held in a slice in source order (never a map), printed as
+   `name\ttypes\tinvariants\texamples\thints_blocks`, then
+   `total: {n} behaviors`.
+5. **Exit 0** — `List` always returns `ExitOK`; findings are not consulted
+   (`TestListExitsZeroEvenWithFindings`).
 
-**BEHAVIOR: slice** — steps 1–7 in order, in `Slice()` (`write.go`):
-run check without `out=` and refuse on any finding, printing them and writing
-nothing (1); compute every output in memory, bundle file names with `/`
-replaced by `-` and a collision reported as `duplicate-behavior` (2); one
-provenance line per markdown file with the exact field order the spec gives
-(3); determinism by construction — sections in source order, closure
-alphabetical, manifest sorted, no map iteration in any emitting path (4);
-create `out` if absent, refuse with exit 2 on a foreign file *before* the
-first write, remove only files carrying a pcd-slice provenance line (5);
-write every file then the manifest, removing this run's files on any write
-error (6); one summary line on stdout, exit 0 (7).
+Postconditions: no file is created or modified (`TestListAndCheckNeverWriteFiles`);
+output order equals heading order.
 
-## MECHANISM notes and hints applied
+### BEHAVIOR: check (`internal/pcdslice/check.go`)
 
-The Go hints file was followed closely, and its guidance is visible in the
-code:
+1. **Parse as in list; exit 2 on unreadable input** — same loader.
+2. **undefined-type** — `undefinedTypeFindings()` scans *only* type
+   definition bodies, strips `//` comments, excludes the defining name, and
+   applies the normative reference shape (`isReferenceShape`: ≥2 camel humps,
+   each with at least one lowercase letter). Behavior text is never scanned
+   (`TestUndefinedTypeIsAFindingInsideDefinitionsOnly`).
+3. **unknown-binding** — raised in `collectInvariants()` at the binding line;
+   the message is the unknown name verbatim.
+4. **unassignable-example** — raised by the ladder in `attributeExample()`;
+   a rung-4 tie lists candidates alphabetically (`sort.Strings`).
+5. **unassignable-hints** — raised in `ParseHints()` when a heading's
+   stripped text is a single lowercase identifier that names no known
+   behavior. Hints preamble is never a finding.
+6. **duplicate-behavior** — raised in `collectBehaviors()`, including the
+   file-name collision after `/`→`-` replacement (slice step 2, hoisted into
+   check so slice never reaches an inconsistent state).
+7. **no-behaviors** — raised in `CheckFindings()` when the behavior slice is
+   empty.
+8. **Completeness** — `unassignedFindings()` scans the assignment array; any
+   line still carrying the sentinel is reported with rule `unassigned`.
+9. **stale-output** — `StaleFindings()`, only when `out=` is given and the
+   directory exists: recomputes the provenance line and manifest for the
+   current sources and compares; missing expected file, unexpected file,
+   unexpected subdirectory, provenance difference and manifest content
+   difference are one finding per file. A directory without `MANIFEST.tsv`
+   is stale in full. An absent directory yields no findings.
+10. **Write findings sorted by file then line; summary; exit 1 if any** —
+    `SortFindings()` (file, line, rule, message), findings to stderr, summary
+    `pcd-slice check: {n} findings` / `pcd-slice check: clean` to stdout.
 
-- *One pass, one classifier* — `os.ReadFile`, split on `"\n"` without
-  normalising, and a small state machine (`fenceMap` + section walk). No
-  markdown library: the spec's SECTION GRAMMAR is the whole grammar.
-- *Assignment before output* — `Spec.Assign` is one entry per source line,
-  initialised to the `unassigned` sentinel. Outputs are pure projections of
-  that array, which makes the completeness invariant a slice scan instead of
-  an argument.
-- *Type closure* — definitions collected inside the TYPES fence, one
-  `\b(A|B|C)\b` alternation compiled from the names sorted longest-first with
-  `regexp.QuoteMeta`, worklist over the behavior text and then over each
-  newly added definition; alphabetised only at output time.
-- *Attribution* — the WHEN line's invoked identifier
-  (`^\s*(?:result\s*=\s*)?([a-z][a-z0-9_-]*)\(`), then the example's own
-  name; hints headings tested after stripping `**` and back quotes.
-- *Determinism mechanics* — never range over a map when emitting;
-  `sort.Strings` for closures, `sort.Slice` for the file list;
-  `crypto/sha256` over the raw bytes as read; `hex.EncodeToString`; the tool
-  version is `main.version`, set with `-ldflags "-X main.version=..."`,
-  defaulting to `dev`.
-- *Line endings* — a trailing `\r` stays attached to its line for assignment
-  and for verbatim projection; only the lines pcd-slice adds itself always
-  end in `\n`.
-- *Atomic out-directory handling* — everything computed first, foreign-file
-  refusal before the first write, files written this run tracked and removed
-  on error, the manifest written last as the commit marker.
-- *Errors and exits* — a single `os.Exit` at the top of `main`; the verbs
-  return an int. Exit-2 messages start with `error: ` and name the path.
-- *What not to build* — no configuration file, no environment variables, no
-  colour, no concurrency, no YAML front matter.
+### BEHAVIOR: slice (`internal/pcdslice/slice.go`, emission in `emit.go`)
 
-## Type bindings chosen (no TYPE-BINDINGS table in the template)
+1. **Run check without out=; on any finding print to stderr, nothing to
+   stdout, write nothing, exit 1** — first statement of `Slice()`
+   (`TestExampleSliceRefusesOnFindingsAndWritesNothing`).
+2. **Compute all outputs in memory** — `BuildOutput()`; behavior file names
+   are the name with `/`→`-`; collisions were already caught in step 1.
+3. **Provenance line first in every emitted markdown file** —
+   `ProvenanceLine()`: one `fmt.Sprintf` with fixed field order, paths as
+   given, lowercase hex hashes, hints comma-separated in input order, no
+   timestamp.
+4. **Byte content fully determined by inputs** — sections in source order,
+   closures alphabetical, manifest sorted; no map is ever ranged over during
+   emission.
+5. **Create OutDir if absent; remove only pcd-slice's own files; refuse
+   foreign entries with exit 2** — the directory scan runs *before the first
+   write*; a subdirectory, or a file whose first line is not
+   `<!-- pcd-slice `, aborts with `error: foreign file in out: {path}`.
+6. **Write every file, then the manifest; on write error exit 2 and remove
+   files written in this run** — the run tracks written paths; `fail()`
+   removes them; the manifest is written last and doubles as the commit
+   marker.
+7. **Summary to stdout, exit 0** —
+   `pcd-slice: {n} bundles, preamble, manifest -> {out}`.
 
-| Spec type | Go binding |
-|---|---|
-| `SpecFile`, `HintsFile` | `string` path + `*Source` after loading; the refinement predicate (exists, readable, `.md`) is checked in `LoadSource` |
-| `OutDir` | `string` in `Options.Out`; created with `os.MkdirAll` |
-| `BehaviorName` | `Behavior.Name string` |
-| `TypeName` | `TypeDef.Name string`, indexed by `map[string]*TypeDef` |
-| `InvariantBinding` | `Invariant.Bindings []string` + resolved `Targets []int` |
-| `Assignment` | `AssignKind` enum (`unassigned`, `preamble`, `behavior`, `excluded`) + behavior index |
-| `Finding` | `struct{ Rule, File string; Line int; Message string }` |
-| `ExitCode` | `ExitCode int` with `ExitClean`/`ExitFindings`/`ExitInvocation` |
-
-## BEHAVIOR constraints
-
-All three BEHAVIORs (`list`, `check`, `slice`) carry `Constraint: required`
-and are implemented unconditionally. The spec declares no `supported` and no
-`forbidden` BEHAVIOR, so no behaviour was gated on a preset and none was
-suppressed. No BEHAVIOR is missing from the implementation, and none had to
-be flagged "not yet scheduled".
+---
 
 ## Parsing approach
 
-A single linear pass over the source lines with three pieces of state: fence
-depth, current `##`-level section, and current behavior. Structure is
-recognised by prefix and suffix tests plus a handful of anchored regular
-expressions; fenced content is never interpreted as structure. Sections are
-materialised as half-open line ranges, then sub-parsed: the TYPES fences into
-definitions (a definition owning its comment and continuation lines), the
-INVARIANTS section into list items (a binding suffix is recognised only at
-end of line), the top-level EXAMPLES section into `### EXAMPLE` blocks.
-Attribution then stamps the per-line assignment array, and every output file
-is a projection of that array plus the attributed material appended under a
-heading that names its source. Hints files get the same treatment with the
-heading-attribution rule of the grammar.
+A single pass with a small explicit state machine, exactly as the Go hints
+file prescribes, and deliberately **no markdown library**: a parser library
+would recognise more structure than the spec's SECTION GRAMMAR admits.
 
-The consequence of building the assignment array first is that the
-completeness invariant is checked, not asserted: any line still carrying the
-sentinel after the walk becomes a finding.
+- The source is read once into memory and split on `"\n"`, with any trailing
+  `"\r"` kept attached to the line, so emitted bytes equal the bytes that
+  came in and a CRLF source's bundles stay diffable against it. A final line
+  without a newline counts as one line.
+- Two boolean arrays (`inFence`, `isFence`) mark fenced content once; nothing
+  inside a fence is ever interpreted as structure, and the `(binds: …)` and
+  `(of: …)` suffixes are recognised only at end of line outside fences.
+- Headings are lines beginning with `#` at column 0 outside a fence. A `## `
+  or `# ` heading closes the section before it; `### ` and deeper never do,
+  so nested `### EXAMPLE` blocks travel inside their behavior block.
+- **The completeness invariant is materialised, not argued**: `Spec.Assign`
+  holds one entry per source line, initialised to the `unassigned` sentinel.
+  The section walk stamps every line; example attribution and invariant
+  binding re-stamp their ranges. The completeness rule is then a slice scan.
+  Outputs are projections of that array — which is what keeps "exactly once"
+  true by construction. The single stated exception, a bound invariant, is
+  assigned once to its first named behavior; the *emitter* replicates the
+  lines into each further named bundle, so the assignment array stays a
+  scan (`TestExampleBoundInvariantReplicatesOncePerBinding`).
+- Whole-word matching for type names and behavior names uses one compiled
+  alternation per set, sorted longest-first with `regexp.QuoteMeta` on each
+  member, so `Plan` never shadows `PlanPath`.
+- Determinism mechanics: behaviors are kept in a slice in source order; no
+  map is ranged over while emitting; closures and manifest lines are sorted
+  with `sort.Strings`; SHA-256 is computed over the raw bytes as read.
 
 ## Signal handling approach
 
 `main()` installs one handler for `SIGTERM` and `SIGINT` before dispatch. On
-either signal it calls `pcdslice.RemovePartialOutput()`, which removes every
-file the current run has already written (tracked under a mutex as each write
-succeeds), and then exits cleanly. `list` and `check` never write, so for
-them the handler is a plain clean exit; for `slice` it guarantees the
-spec's "no partial output" property on interruption, the same cleanup path
-the write-error branch uses. There is no `os.Exit` below `main` in the
-implementation, so no deferred cleanup is ever skipped.
+either signal the handler calls `pcdslice.Abort()`, which removes every file
+the current run has already written (tracked under a mutex as each write is
+attempted) and then exits 0 — a clean exit with no partial output, as
+`SIGNAL-HANDLING` requires. There is exactly one `os.Exit` in the normal
+path, at the top of `main()` after `Run()` returns its exit code, so no
+deferred cleanup is ever skipped. `list` and `check` write nothing, so for
+them the handler is a no-op.
+
+---
+
+## Public API Surface
+
+The exported surface of the implementation module. It must remain stable
+across translations of spec version 0.1.1; a later translation may add to it
+but not remove or rename entries without a spec version increment.
+
+### Module `github.com/mge1512/pcd/tools/pcd-slice/internal/pcdslice`
+
+Constants:
+
+- `const SpecSHA256 = "c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f"`
+- `const ExitOK = 0`
+- `const ExitFindings = 1`
+- `const ExitInvocation = 2`
+- `const PreambleFile = "preamble.md"`
+- `const ManifestFile = "MANIFEST.tsv"`
+- `const Usage string`
+- `const KindUnassigned Kind`, `KindPreamble Kind`, `KindBehavior Kind`, `KindExcluded Kind`
+- `const RoleNone Role`, `RoleBlock Role`, `RoleExample Role`, `RoleInvariant Role`
+
+Types:
+
+- `type Kind int`
+- `type Role int`
+- `type Assignment struct { Kind Kind; Behavior string; Role Role }`
+- `type Finding struct { Rule string; File string; Line int; Message string }`
+- `type Range struct { Start int; End int }`
+- `type Behavior struct { Name string; FileName string; Heading int; Block Range; Closure []string; NestedExamples int }`
+- `type TypeDef struct { Name string; Line int; Body Range; Text string }`
+- `type Invariant struct { Item Range; BindLine int; Binds []string; Owner string }`
+- `type Example struct { Name string; Heading int; Block Range; Target string; Shared bool }`
+- `type HintsBlock struct { Behavior string; Block Range }`
+- `type Hints struct { Path string; SHA256 string; Lines []string; Blocks []HintsBlock; Preamble []Range; Findings []Finding }`
+- `type Spec struct { Path string; SHA256 string; Lines []string; Assign []Assignment; Behaviors []Behavior; Types []TypeDef; Invariants []Invariant; Examples []Example; Findings []Finding; Rewrite map[int]string }`
+- `type Output struct { Provenance string; Names []string; Files map[string][]byte; Manifest []byte; Bundles int }`
+
+Functions:
+
+- `func Run(args []string, version string, stdout, stderr io.Writer) int`
+- `func List(spec *Spec, hints []*Hints, stdout io.Writer) int`
+- `func Check(spec *Spec, hints []*Hints, out string, version string, stdout, stderr io.Writer) int`
+- `func Slice(spec *Spec, hints []*Hints, out, version string, stdout, stderr io.Writer) int`
+- `func CheckFindings(spec *Spec, hints []*Hints) []Finding`
+- `func StaleFindings(out string, o *Output) ([]Finding, error)`
+- `func SortFindings(fs []Finding)`
+- `func BuildOutput(spec *Spec, hints []*Hints, version string) *Output`
+- `func ProvenanceLine(spec *Spec, hints []*Hints, version string) string`
+- `func ParseSpec(path string, data []byte) *Spec`
+- `func ParseHints(path string, data []byte, spec *Spec) *Hints`
+- `func SplitLines(data []byte) []string`
+- `func HashBytes(b []byte) string`
+- `func Abort()`
+
+Methods:
+
+- `func (k Kind) String() string`
+- `func (f Finding) String() string`
+- `func (s *Spec) BehaviorNames() []string`
+- `func (s *Spec) HasBehavior(name string) bool`
+- `func (s *Spec) Line(i int) string`
+- `func (h *Hints) BlocksFor(behavior string) []HintsBlock`
+
+### Module `main` (`cmd/pcd-slice`)
+
+- `var version = "0.1.1"` (overridable via `-ldflags "-X main.version=…"`)
+- `func main()`
+
+---
+
+## Produced artefact set
+
+Every file traces to the template's DELIVERABLES table, the prompt's Reports
+section, or the template's EXECUTION phase list. No unsolicited file was
+written (no `.gitignore`, no `CHANGELOG.md`, no CI config, no lock file, no
+build directory).
+
+| Deliverable row | Files produced |
+|---|---|
+| source (required) | `cmd/pcd-slice/main.go`, `internal/pcdslice/{types,parse,closure,attribute,hints,emit,check,list,slice,run}.go`, `go.mod` |
+| build (required) | `Makefile` (`build`, `test`, `install`, `clean`, `man`, `dist`, plus `vendor`, `all`) |
+| docs (required) | `README.md` |
+| man (required) | `pcd-slice.1.md`, `pcd-slice.1` (generated with `pandoc 2.18`) |
+| license (required) | `LICENSE` (SPDX identifier + authoritative URL; full text not reproduced) |
+| RPM (required) | `pcd-slice.spec` |
+| DEB (required) | `debian/control`, `debian/changelog`, `debian/rules`, `debian/copyright` |
+| public-api (required) | `## Public API Surface` above |
+| report (required) | `TRANSLATION_REPORT.md` |
+| spec-hash (required) | embedded as listed above |
+| Phase 1 (EXECUTION) | `independent_tests/claude-opus-5/pcd_slice_test.go` |
+| Phase 4 (EXECUTION) | `translation_report/translation-workflow.pikchr` |
+| version single source | `VERSION` |
+| OCI / PKG (supported) | **not produced** — not active in the resolved preset |
+
+`go.sum` was not written: the module has no dependencies, so `go mod tidy`
+produces none, and the template does not name a lock file as a deliverable.
+No `vendor/` tree exists for the same reason — `make dist` therefore emits
+the source tarball only and says so; the RPM has no `Source1:`.
 
 ---
 
 ## Phase 6 — Compile gate
 
+All steps executed in `/tmp/pcd-output/` with Go 1.26.6, unprivileged, with
+`GOPATH`/`GOCACHE` under `$HOME`.
+
 | Step | Command | Result |
 |---|---|---|
-| 1 Dependency resolution | `go mod tidy` | **pass** — no dependencies; `go.mod` declares module and Go version only, no `go.sum` is generated because the standard library needs none |
+| 1 Dependency resolution | `go mod tidy` | **pass** — no dependencies added; standard library only |
 | 2 Compilation | `go build ./...` | **pass** |
-| 2 Vet | `go vet ./...` | **pass** (no diagnostics) |
-| 2b Formatting | `gofmt -l cmd internal independent_tests` | **pass** (empty output) |
-| 3 Translator test run | `make test` → `go test ./independent_tests/claude-opus-5/...` | **pass** — 50 tests/subtests, 0 failures, 0 skips |
-| 4 Test-author test run | — | not applicable (single-LLM run) |
-| 5 Record result | this section | done |
+| 2 Vet | `go vet ./...` | **pass** |
+| 2 Format | `gofmt -l .` | **pass** (empty output) |
+| 3 Build target | `make build` | **pass** — `./pcd-slice` at the project root |
+| 3 Static check | `file ./pcd-slice` | **pass** — "ELF 64-bit … statically linked, stripped" |
+| 3 Translator test run | `make test` → `go test ./independent_tests/claude-opus-5/...` | **pass** — ok, 0 failures, 0 skips |
+| 3 Smoke: `./pcd-slice version` | | **pass** — prints `pcd-slice 0.1.1` and `spec:c200af55…` |
+| 3 Smoke: `./pcd-slice help` | | **pass** — usage, exit 0 |
+| 3 Smoke: `./pcd-slice check spec=missing.md` | | **pass** — `error: cannot read missing.md`, exit 2 |
+| 3 Man page | `make man` (pandoc 2.18) | **pass** |
+| 3 Release tarball | `make dist` | **pass** — `pcd-slice-0.1.1.tar.gz` with single top-level dir `pcd-slice-0.1.1/` (removed again afterwards; build output is not a deliverable) |
+| 4 Test-author test run | — | **not applicable** (single-LLM run) |
 
-Additional gate checks from the Go milestones hints:
+**Dogfood check (not a deliverable, run in a scratch directory and removed):**
+`pcd-slice check spec=pcd-slice.spec.md hints=pcd-slice.go.hints.md` on its
+own specification reports `pcd-slice check: clean`, and
+`pcd-slice list` reports `list 3 1 1 0 / check 4 2 3 0 / slice 4 5 12 0 /
+total: 3 behaviors` — 16 attributed examples, matching the 16 EXAMPLE blocks
+in the spec, and bound-invariant counts matching the five INVARIANTS
+bindings. `pcd-slice slice` on its own spec produced a preamble, three
+bundles and a manifest.
 
-```
-file ./pcd-slice            → ELF 64-bit, statically linked
-./pcd-slice version         → pcd-slice 0.1.0 / spec:bb31cb27…  (exit 0)
-./pcd-slice help            → usage                              (exit 0)
-./pcd-slice format=bad_value→ error: unknown command             (exit 2)
-make dist                   → pcd-slice-0.1.0.tar.gz + pcd-slice-0.1.0-vendor.tar.gz
-make clean                  → source tree contains only the intended files
-```
-
-`make dist` was executed and its outputs inspected (single top-level
-`pcd-slice-0.1.0/` directory; the vendor tarball carries `vendor/modules.txt`
-so that an OBS build with `GOFLAGS=-mod=vendor` succeeds for a
-dependency-free module), then removed again by `make clean`. The run leaves
-no scratch files.
-
-### Dogfooding (not a substitute for the tests, but worth recording)
-
-The binary was run against its own specification and Go hints file:
-
-```
-$ pcd-slice list spec=pcd-slice.spec.md hints=pcd-slice.go.hints.md
-list	3	1	1	0
-check	5	2	2	0
-slice	4	5	7	0
-total: 3 behaviors
-
-$ pcd-slice check spec=pcd-slice.spec.md hints=pcd-slice.go.hints.md
-unassignable-example: pcd-slice.spec.md:401: two_runs_are_byte_identical: attributable to no behavior
-pcd-slice check: 1 findings
-```
-
-That single finding is correct behaviour, not a defect: EXAMPLE
-`two_runs_are_byte_identical` has a prose WHEN line ("slice runs twice into
-two fresh directories") with no invoked identifier, and its name contains no
-behavior name as a whole word, so neither attribution rule of the grammar
-applies. It is recorded under *Specification ambiguities* below. With that
-one WHEN line changed locally to `result = slice(spec, out)`, `check` is
-clean, `slice` emits `preamble.md`, `list.md`, `check.md`, `slice.md` and
-`MANIFEST.tsv`, two runs into two directories are byte-identical, changing one
-word in the spec produces one `stale-output` line per emitted file, and a
-line-by-line count over the emitted files confirms the completeness invariant
-(the only lines appearing more than once are the three invariants whose
-`(binds: …)` names more than one behavior — see ambiguity 1).
+**Clean-run status:** the delivered tree contains no scratch files, no
+`build/` directory, no tarball and no compiled binary; `./pcd-slice` is
+rebuilt by `make build` or by the suite's `TestMain`. The test suite creates
+every fixture in a per-test `t.TempDir()` and leaves no residue; a second
+identical run behaves identically.
 
 ---
 
 ## Test results — translator suite
 
-`independent_tests/claude-opus-5/` — 50 tests and subtests, all **pass**, no
-skips, no live external service, no network.
+`independent_tests/claude-opus-5/pcd_slice_test.go` — 39 test functions and
+11 sub-tests. **All pass. 0 fail, 0 skip.** Black-box throughout: every test
+runs `../../pcd-slice` through `exec.Command` with the working directory set
+to the test's own `t.TempDir()` and a sandboxed `HOME`, and asserts on
+stdout, stderr and exit code. No test imports the implementation package.
 
 | Test | Covers | Result |
 |---|---|---|
+| `TestVersionPrintsToolNameAndSpecHash` | DEPLOYMENT version verb, spec-hash embedding | pass |
 | `TestExampleClosureIsTransitive` | EXAMPLE closure_is_transitive | pass |
 | `TestExampleUntaggedInvariantIsGlobal` | EXAMPLE untagged_invariant_is_global | pass |
 | `TestExampleBoundInvariantLandsInNamedBundles` | EXAMPLE bound_invariant_lands_in_named_bundles | pass |
@@ -377,306 +474,183 @@ skips, no live external service, no network.
 | `TestExampleTopLevelExampleAttributedByWhenLine` | EXAMPLE top_level_example_attributed_by_when_line | pass |
 | `TestExampleChangelogIsExcluded` | EXAMPLE changelog_is_excluded | pass |
 | `TestExampleSliceRefusesOnFindingsAndWritesNothing` | EXAMPLE slice_refuses_on_findings_and_writes_nothing | pass |
-| `TestExampleTwoRunsAreByteIdentical` | EXAMPLE two_runs_are_byte_identical | pass |
+| `TestExampleTwoRunsAreByteIdentical` | EXAMPLE two_runs_are_byte_identical, INVARIANT Determinism | pass |
 | `TestExampleStaleOutputIsOneFindingPerFile` | EXAMPLE stale_output_is_one_finding_per_file | pass |
+| `TestCheckWithCurrentOutIsClean` | check step 9 negative case | pass |
+| `TestCheckAbsentOutDirProducesNoStaleFindings` | check step 9 "absent out produces no findings" | pass |
 | `TestExampleForeignFileInOutRefuses` | EXAMPLE foreign_file_in_out_refuses | pass |
-| `TestInvariantSourcesAreReadOnly` | INVARIANT sources are read-only (list, check, slice) | pass |
-| `TestListAndCheckNeverWriteFiles` | POSTCONDITION list/check never write files | pass |
-| `TestInvariantProvenanceHeader` | INVARIANT provenance; hints order in the header | pass |
-| `TestProvenanceWithoutHints` | provenance boundary case: zero hints files | pass |
-| `TestManifestDescribesEveryEmittedFile` | POSTCONDITIONs on out and the manifest; slice summary line | pass |
-| `TestInvariantCompletenessCoversEveryLineExactlyOnce` | INVARIANT completeness | pass |
-| `TestInvariantBehaviorAppearsInExactlyOneBundle` | INVARIANT one behavior, one bundle | pass |
-| `TestListCountsAndOrder` | BEHAVIOR list, steps 2–4, source order | pass |
-| `TestListNeverFailsOnFindings` | BEHAVIOR list, step 5 | pass |
-| `TestCheckCleanSpec` | BEHAVIOR check, clean summary and exit 0 | pass |
-| `TestCheckDuplicateBehavior` | check rule duplicate-behavior | pass |
-| `TestCheckNoBehaviors` | check rule no-behaviors | pass |
-| `TestCheckUndefinedType` | check rule undefined-type | pass |
-| `TestCheckUnassignableExample` | check rule unassignable-example; slice refusal | pass |
-| `TestCheckUnassignableHints` | check rule unassignable-hints | pass |
-| `TestHintsPreambleIsNotAFinding` | check step 5 exemption | pass |
-| `TestFindingsAreSortedByFileThenLine` | check step 10 ordering | pass |
-| `TestHintsBlocksAreAttributed` | hints grammar: attributed block vs hints preamble | pass |
-| `TestSliceIsIdempotent` | IDEMPOTENT; re-slice into the same directory | pass |
-| `TestSliceRemovesItsOwnStaleFiles` | slice step 5 removal rule | pass |
-| `TestSliceCreatesOutDirectory` | slice step 5 creation; summary path | pass |
-| `TestBundleIsSelfLocating` | INVARIANT bundle + preamble suffice; bundle layout | pass |
-| `TestInvocationErrors` (+10 subtests) | ExitCode 2 paths: no args, unknown verb, missing spec, absent spec, non-`.md`, absent hints, slice without out, unknown option, positional argument, empty value | pass |
-| `TestUnreadableSpecExitsTwo` | TYPES predicate "readable" | pass |
-| `TestUnwritableOutDirExitsTwo` | PRECONDITION "out is creatable or writable" | pass |
-| `TestVersionEmbedsSpecHash` | spec hash in binary version output | pass |
-| `TestHelpExitsZero` | bare-word help | pass |
-| `TestRefinementPredicatesAreNotTypeReferences` | undefined-type must not fire on `AND`/`OR` in a predicate | pass |
-| `TestUndefinedTypeIsReportedOncePerLine` | one finding per undefined name per line | pass |
-
-Test discipline: every test drives the real binary through `exec.Command`;
-no test imports the implementation package. Each test runs in its own
-`t.TempDir()` with `HOME` and `TMPDIR` redirected into that sandbox, a
-minimal environment, and the working directory set to the sandbox, so path
-arguments read exactly as in the spec's EXAMPLEs. The fixture writer refuses
-to write outside the sandbox. No test asserts only on the exit code. The
-suite is re-runnable with no residue and passes from any working directory
-and as any unprivileged user; the two permission-based tests skip themselves
-if run as root (they were not skipped in this run).
+| `TestExampleForeignSubdirectoryRefuses` | EXAMPLE foreign_subdirectory_refuses | pass |
+| `TestExampleOfSuffixAttributesAndSharedGoesToPreamble` | EXAMPLE of_suffix_attributes_and_shared_goes_to_preamble | pass |
+| `TestExampleUniqueTextMatchAttributes` | EXAMPLE unique_text_match_attributes | pass |
+| `TestExampleRungFourTieIsAFinding` | EXAMPLE rung_four_tie_is_a_finding | pass |
+| `TestUnplaceableExampleIsAFinding` | check step 4, unplaceable example | pass |
+| `TestExampleBoundInvariantReplicatesOncePerBinding` | EXAMPLE bound_invariant_replicates_once_per_binding, INVARIANT Completeness | pass |
+| `TestNoBehaviorsIsAFinding` | check step 7 | pass |
+| `TestUndefinedTypeIsAFindingInsideDefinitionsOnly` | check step 2 incl. the "behavior text is never scanned" clause | pass |
+| `TestDuplicateBehaviorIsAFinding` | check step 6 | pass |
+| `TestUnassignableHintsHeadingIsAFinding` | check step 5 | pass |
+| `TestHintsPreambleIsNotAFinding` | check step 5 negative case | pass |
+| `TestFindingsAreSortedByFileThenLine` | check step 10 ordering and line format | pass |
+| `TestHintsBlocksTravelWithTheirBehavior` | hints attribution grammar, list hints counts | pass |
+| `TestSliceSummaryAndOutputSet` | slice step 7, POSTCONDITION "out contains exactly the manifest's files plus MANIFEST.tsv" | pass |
+| `TestProvenanceHeaderIsFirstLineOfEveryMarkdownFile` | slice step 3, INVARIANT Provenance | pass |
+| `TestManifestListsEveryFileExceptItselfWithMatchingHashes` | POSTCONDITION "each file's sha256 equals its manifest entry" | pass |
+| `TestReSliceIntoSameDirectoryIsIdempotent` | IDEMPOTENT, slice step 5 | pass |
+| `TestStaleBundleIsRemovedOnReSlice` | slice step 5 removal clause | pass |
+| `TestSourcesAreReadOnly` | INVARIANT "Sources are read-only" | pass |
+| `TestListAndCheckNeverWriteFiles` | POSTCONDITION "list and check never write files" | pass |
+| `TestListExitsZeroEvenWithFindings` | list step 5 | pass |
+| `TestInvocationErrors` (11 sub-tests) | ExitCode 2 paths: no verb, unknown verb, POSIX flags, bare positional, unknown key, missing spec=, slice without out=, missing file, non-.md file, missing hints file | pass |
+| `TestHelpExitsZeroAndPrintsUsage` | bare-word help verb | pass |
+| `TestBundleCarriesItsBehaviorBlockVerbatim` | INVARIANT "a behavior appears in exactly one bundle" | pass |
+| `TestPreambleCarriesSharedContext` | slice OUTPUTS preamble contract | pass |
 
 ## Test results — test-author suite
 
-None present. Single-LLM run.
+Not applicable: no test-author suite was present at input (single-LLM run).
 
 ## Test Refinements
 
-| Test | Result before | Action | Rationale |
-|---|---|---|---|
-| `TestSliceRemovesItsOwnStaleFiles` | failed | test edited | The fixture removed behavior `purge` but kept the invariant `(binds: purge)`. The binary then reported `unknown-binding` and `slice` refused — correct per BEHAVIOR: check step 3 and BEHAVIOR: slice step 1. The tool was right, the fixture was structurally incomplete for the test's intent (which is the removal of a stale bundle file); the fixture edit now drops the bound invariant along with the behavior. No assertion changed. |
-| `TestRefinementPredicatesAreNotTypeReferences` | *(added after the first run)* | code fixed | Dogfooding against `pcd-slice.spec.md` showed `undefined-type` firing on `AND` inside `SpecFile := path where file_exists AND readable AND extension = ".md"`. The type-shape pattern accepted all-capital words. It now requires at least one lower-case character per camel hump, and this test pins the behaviour. The rule is explicitly definition-side only (check step 2), so a narrow shape is the conservative reading. |
-| `TestUndefinedTypeIsReportedOncePerLine` | *(added after the first run)* | code fixed | The same dogfooding run reported the identical finding twice for two occurrences of one undefined name on one line. `Findings()` now drops findings identical in rule, file, line and message; the test pins one finding per undefined name per line. |
-| all other 47 tests/subtests | passed | none | — |
+No test was edited after any test run, and no implementation change was made
+in response to a failing test: the suite passed on its first execution.
 
-No other test was touched after a run. No test was weakened, and no
-assertion was changed to match observed behaviour.
+| Test | Result before | Action | Rationale |
+|------|---------------|--------|-----------|
+| *(all 39 test functions and 11 sub-tests)* | passed | none | — |
 
 ---
 
 ## Per-EXAMPLE confidence
 
+Confidence is **Medium** for every row: Tests-First-Compliance is `yes` and
+each row's named test passes with no live external service, but no
+test-author suite exists, which the prompt's definition makes the deciding
+factor (High requires an independent test-author suite that also passes).
+
 | EXAMPLE | Confidence | Verification method | Unverified claims |
 |---|---|---|---|
-| closure_is_transitive | Medium | `TestExampleClosureIsTransitive`: asserts the list line `record 3 0 0 0`, the total line, `Requires-Types: Item, Path, Plan` verbatim, `Unused` present in `preamble.md` and absent from `record.md`; exit 0 | none |
-| untagged_invariant_is_global | Medium | `TestExampleUntaggedInvariantIsGlobal`: invariant text present in `preamble.md`, absent from both bundles; exit 0 | none |
-| bound_invariant_lands_in_named_bundles | Medium | `TestExampleBoundInvariantLandsInNamedBundles`: present in `reset.md`, absent from `purge.md` and `preamble.md` | none |
-| binding_to_unknown_behavior_is_a_finding | Medium | `TestExampleBindingToUnknownBehaviorIsAFinding`: stderr contains `unknown-binding: spec.md:{line}: renmae` with the line number computed from the fixture, stdout equals `pcd-slice check: 1 findings`, exit 1 | none |
-| nested_example_travels_with_its_behavior | Medium | `TestExampleNestedExampleTravelsWithItsBehavior`: the nested example is inside `verify.md` and positioned before any appended source-naming heading (i.e. inside the verbatim block), absent from the other bundle and the preamble, and `check` is clean — no attribution rule was consulted | none |
-| top_level_example_attributed_by_when_line | Medium | `TestExampleTopLevelExampleAttributedByWhenLine`: the example is in `lint.md` under a heading naming `spec.md`, and in no other file | none |
-| changelog_is_excluded | Medium | `TestExampleChangelogIsExcluded`: no changelog row and no `## Changelog` heading in any emitted file; `check` reports no `unassigned` finding, so the lines counted as excluded | none |
-| slice_refuses_on_findings_and_writes_nothing | Medium | `TestExampleSliceRefusesOnFindingsAndWritesNothing`: stderr contains `duplicate-behavior`, `spec.d` does not exist afterwards, exit 1 | none |
-| two_runs_are_byte_identical | Medium | `TestExampleTwoRunsAreByteIdentical`: SHA-256 of every same-named file compared across two fresh directories, including `MANIFEST.tsv`; no user name or timestamp marker in any output | the *cross-build* case is not tested: two binaries built with different `-ldflags` versions differ in the provenance `version=` field, as the hints file states |
-| stale_output_is_one_finding_per_file | Medium | `TestExampleStaleOutputIsOneFindingPerFile`: clean directory reports `clean`; after one word changes, exactly one `stale-output` line per emitted file (bundles, preamble and manifest), exit 1 | none |
-| foreign_file_in_out_refuses | Medium | `TestExampleForeignFileInOutRefuses`: stderr contains `error: foreign file in out: spec.d/notes.txt`, the file's bytes are unchanged, nothing else was written, exit 2 | none |
+| closure_is_transitive | Medium | `TestExampleClosureIsTransitive` — asserts `record 3 1 1 0`, `Requires-Types: Item, Path, Plan` verbatim, `Unused` present in preamble and absent from the bundle, exit 0 | none |
+| untagged_invariant_is_global | Medium | `TestExampleUntaggedInvariantIsGlobal` — invariant text present in `preamble.md`, absent from both bundles; slice exit 0 | none |
+| bound_invariant_lands_in_named_bundles | Medium | `TestExampleBoundInvariantLandsInNamedBundles` — in `reset.md`, not in `purge.md`, not in `preamble.md` | none |
+| binding_to_unknown_behavior_is_a_finding | Medium | `TestExampleBindingToUnknownBehaviorIsAFinding` — stderr `unknown-binding: spec.md:{computed line}: renmae`, stdout `pcd-slice check: 1 findings`, exit 1 | none |
+| nested_example_travels_with_its_behavior | Medium | `TestExampleNestedExampleTravelsWithItsBehavior` — example inside `verify.md`, no attribution heading emitted, absent from preamble | none |
+| top_level_example_attributed_by_when_line | Medium | `TestExampleTopLevelExampleAttributedByWhenLine` — example under `## Attributed examples from spec.md` in `lint.md` | the spec says "a heading that names its source" without fixing its wording; the wording chosen is asserted, not derived from the spec |
+| changelog_is_excluded | Medium | `TestExampleChangelogIsExcluded` — no changelog row and no `## Changelog` in any emitted file; check clean (lines counted excluded, not unassigned) | none |
+| slice_refuses_on_findings_and_writes_nothing | Medium | `TestExampleSliceRefusesOnFindingsAndWritesNothing` — stderr contains `duplicate-behavior`, stdout empty, `spec.d` does not exist, exit 1 | none |
+| two_runs_are_byte_identical | Medium | `TestExampleTwoRunsAreByteIdentical` — per-file SHA-256 maps of two output trees compared, manifests compared byte-wise | byte-identity across two *builds* is not asserted (the tool version string is a build input; the spec's example compares two runs) |
+| stale_output_is_one_finding_per_file | Medium | `TestExampleStaleOutputIsOneFindingPerFile` — exactly one `stale-output` line per emitted file (4/4), each naming its path, exit 1 | a hand-edited output file whose provenance line is intact is not detected: the spec scopes the comparison to provenance headers plus manifest content |
+| foreign_file_in_out_refuses | Medium | `TestExampleForeignFileInOutRefuses` — stderr `error: foreign file in out: spec.d/notes.txt`, `notes.txt` byte-unchanged, nothing else written, exit 2 | none |
+| of_suffix_attributes_and_shared_goes_to_preamble | Medium | `TestExampleOfSuffixAttributesAndSharedGoesToPreamble` — first example only in `check.md`, second only in `preamble.md` | none |
+| unique_text_match_attributes | Medium | `TestExampleUniqueTextMatchAttributes` — example in `verify.md` only, prose WHEN line falls through rung 3 | none |
+| rung_four_tie_is_a_finding | Medium | `TestExampleRungFourTieIsAFinding` — stderr contains `unassignable-example` and `purge, reset` (alphabetical), exit 1 | none |
+| bound_invariant_replicates_once_per_binding | Medium | `TestExampleBoundInvariantReplicatesOncePerBinding` — exactly one occurrence in `check.md` and in `slice.md`, zero elsewhere, two in total | none |
+| foreign_subdirectory_refuses | Medium | `TestExampleForeignSubdirectoryRefuses` — stderr `error: foreign file in out: spec.d/notes`, exit 2, directory untouched | none |
 
-Confidence is **Medium** throughout for one structural reason only: this is a
-single-LLM run, and the prompt's confidence scale demotes an EXAMPLE to
-Medium when a test-author suite is absent. Every EXAMPLE above is covered by
-a named test function that passes without any live external service, and
-Tests-First-Compliance is `yes`; a dual-LLM re-run with an independent
-test-author suite would lift these rows to High without any code change.
+Additional verified claims beyond the EXAMPLES: all five INVARIANTS
+(read-only sources, determinism, completeness/replication, provenance,
+one-bundle-per-behavior), the PRECONDITIONS (existence, readability, `.md`
+extension), the POSTCONDITIONS of all three behaviors, every `Finding` rule,
+and every `ExitCode` value.
 
 ---
 
-## Specification ambiguities
+## Specification ambiguities and conservative interpretations
 
-1. **A multi-bound invariant versus "exactly once".** `InvariantBinding` says
-   a bound invariant "belongs to exactly the named behaviors' bundles"
-   (plural), while the completeness invariant says every line is "assigned to
-   exactly one output". The spec's own INVARIANTS section contains three
-   invariants binding two or three behaviors. Conservative resolution: the
-   `Assignment` array — the accounting device the completeness rule scans —
-   stamps such a line onto the *first* named behavior, so every line still
-   has exactly one assignment and no line is lost; the bundle projection then
-   appends the invariant to *each* named bundle, because
-   `InvariantBinding` is explicit that it belongs to all of them and because
-   a bundle must be self-locating. The observable consequence is that a
-   multi-bound invariant's text appears in more than one bundle. Recorded
-   rather than silently resolved.
-2. **`two_runs_are_byte_identical` is unattributable under its own grammar.**
-   Its WHEN line is prose, and its name contains no behavior name as a whole
-   word, so `check` on `pcd-slice.spec.md` reports one
-   `unassignable-example`. Implemented exactly as the grammar states (WHEN
-   identifier first, example name second, otherwise a finding) rather than
-   inventing a third rule such as "a behavior name anywhere in the WHEN
-   text". The spec author may wish to reword that WHEN line.
-3. **`undefined-type` detection needs a shape heuristic.** Check step 2 says
-   the rule fires when "a type definition references a TypeName that is
-   defined nowhere", but an undefined name is by definition not in the name
-   table, so some shape test is unavoidable. Conservative choice: an
-   identifier with two or more camel humps, each with at least one lower-case
-   character (`MissingItem`, `OutDir`), outside `//` comments, excluding the
-   definition's own name. This deliberately under-reports (an all-capital
-   name such as `URLPath` is not flagged) rather than firing on prose or on
-   the all-capital connectives of a refinement predicate.
-4. **The `unknown-binding` message.** EXAMPLE 4 requires stderr to contain
-   `unknown-binding: spec.md:{line}: renmae`, which fixes the message to
-   begin with the offending name. The message is exactly the name, nothing
-   appended, so the emitted line matches the EXAMPLE literally.
-5. **Which examples `list` counts.** The list line counts *attributed
-   top-level* examples. Examples nested inside a behavior block are part of
-   the block ("no attribution rule is consulted") and are not counted
-   separately; they still travel in the bundle.
-6. **`slice` output on refusal.** Step 1 says "print its findings, write
-   nothing, exit 1" and does not mention the check summary line. `slice`
-   therefore prints only the finding lines, on stderr, and nothing on stdout.
-7. **`check out=` when the directory does not exist.** Step 9 is scoped to
-   "out= is given and exists", so a missing directory produces no
-   `stale-output` finding at all (rather than one "everything is missing"
-   finding). A directory that exists but lacks `MANIFEST.tsv` is stale in
-   full, per the hints file.
-8. **`MANIFEST.tsv` has no provenance line** — it is not markdown, and the
-   provenance invariant is stated for markdown files. Staleness of the
-   manifest is therefore decided by comparing its full content with the
-   recomputed manifest, and the manifest doubles as the commit marker of a
-   run.
-9. **Where a behavior block ends.** The grammar says "to the next `## `
-   heading". A `# ` (depth 1) heading also ends the block, since a
-   depth-1 heading cannot plausibly be inside a behavior; `### ` and deeper
-   never end it.
-10. **An unattributable example still needs an assignment** so that the
-    completeness scan has no sentinel left. Such lines are assigned to the
-    preamble; the `unassignable-example` finding is what makes the situation
-    visible, and `slice` refuses before any file is written anyway.
-11. **Hints depth-1 headings do not attribute.** The grammar says "a `## ` or
-    deeper heading", so a `# Title` line never opens an attributed block,
-    though it does close one.
-12. **A subdirectory inside `out`** is treated as a foreign entry (exit 2,
-    naming it). The spec only anticipates files; refusing is the conservative
-    choice because pcd-slice would otherwise have to decide whether to remove
-    a directory it did not create.
-13. **Version output format.** The spec says nothing; the template requires
-    `spec:<hash>` in the version output. `pcd-slice version` prints
-    `pcd-slice <version>` and `spec:<hash>` on two lines. `--version` is
-    *not* accepted, because POSIX flag style is forbidden by the template.
+1. **`MANIFEST.tsv` and the foreign-entry rule.** Slice step 5 removes files
+   the manifest would not list *only if* they carry a provenance line, and
+   calls anything else foreign. Read literally, `MANIFEST.tsv` — which
+   carries no provenance line and is not listed in itself — would be foreign,
+   making it impossible to re-slice into a directory pcd-slice itself wrote,
+   which contradicts `IDEMPOTENT: true` and the staleness design of check
+   step 9. Conservative resolution: `MANIFEST.tsv` is recognised as
+   pcd-slice's own file by name and overwritten, never treated as foreign.
+2. **Heading wording for appended material.** Slice's OUTPUTS require
+   attributed material "each under a heading that names its source" but do
+   not fix the text. Chosen, and held stable for determinism:
+   `## Attributed examples from {spec}`, `## Bound invariants from {spec}`,
+   `## Hints from {hints-path}`, `## Hints preamble from {hints-path}`.
+3. **`Requires-Types:` with an empty closure.** The format for a behavior
+   whose closure is empty is unspecified; the label is emitted alone
+   (`Requires-Types:`), keeping the line count of every bundle uniform.
+4. **"Every output line traces to exactly one source line."** Taken to govern
+   *source-derived* content. The provenance line, the `Requires-Types:` line
+   and the four source-naming headings are tool-generated and are required
+   by the same STEPS, so they are necessarily exempt.
+5. **Suffix stripping.** The Go hints file directs stripping the `(of: …)`
+   suffix from an example heading before emitting it. This is the one place
+   where an emitted line is not byte-identical to its source line; it is
+   implemented through an explicit per-line rewrite map so the assignment
+   array (and hence the completeness scan) is untouched.
+6. **`(of: …)` naming an unknown behavior.** The ladder says the first rung
+   that *fires* wins. A suffix naming neither `shared` nor a known behavior
+   is treated as not firing: the ladder continues to rungs 3 and 4, and if
+   they cannot place the example it becomes an `unassignable-example`
+   finding. The alternative — an immediate finding — would swallow specs
+   whose suffix is a typo but whose WHEN line is unambiguous.
+7. **Behavior-name occurrences in a hints heading.** The grammar says a
+   heading "contains a BehaviorName as a whole word"; it does not say what
+   happens when a heading names two. The first occurrence by position wins
+   (deterministic, and no finding rule covers the case).
+8. **Trailing blank lines.** Each emitted chunk has its trailing blank lines
+   trimmed and is separated from the next by exactly one blank line. Within
+   a chunk, projection is pure: blank lines left by removed sections stay
+   where they were.
+9. **Invariant items spanning several lines.** `InvariantBinding` speaks of
+   "an invariant line"; real specs (including this one) wrap invariants over
+   several lines with the suffix on the last. The unit of assignment and
+   replication is therefore the whole list item, which is what "the line
+   appears once per named bundle" means for a wrapped item.
+10. **Section-heading recognition.** `## TYPES`, `## INVARIANTS` and
+    `## EXAMPLES` are recognised by exact heading text (after trimming);
+    anything else is preamble, per the grammar's catch-all. A changelog is
+    any `## ` heading containing the word "Changelog" as a whole word, in
+    any case.
+11. **`help` verb.** The spec's DEPLOYMENT section lists `version`, `list`,
+    `check` and `slice` but not `help`. It is implemented because the
+    milestones hints file makes `<binary> help` part of the compile gate and
+    the template's `CLI-ARG-STYLE: bare-words` permits it; it prints usage
+    to stdout and exits 0, and affects no other behaviour.
 
 ## Rules that could not be implemented exactly as written
 
-None. Every STEPS entry, every finding rule and every postcondition is
-implemented as written, with the interpretations above where the text left a
-choice. Two deliberate deviations in *packaging and layout*, both documented:
+None. Every STEPS entry of every BEHAVIOR is implemented in the order
+written, with the interpretations recorded above where the text underdetermined
+the outcome.
 
-- The implementation package directory is `internal/pcd-slice/` (the
-  template's `internal/<n>/`), while the Go package identifier is
-  `pcdslice`: a Go package name cannot contain a hyphen. The import is
-  aliased in the entry point.
-- `OCI` and `PKG` deliverables were not produced: both are `supported`, not
-  `required`, and no preset activates them in this run.
+## Deviations from the deployment template
 
----
+1. **Implementation package directory is `internal/pcdslice`, not
+   `internal/pcd-slice`.** The per-language source layout table gives
+   `internal/<n>/`, and `<n>` is `pcd-slice`. A Go package identifier cannot
+   contain a hyphen; while the *directory* could keep it, the resulting
+   split between directory name and package name is a known source of import
+   confusion. The hyphen is therefore dropped in the directory as well. The
+   module identity itself is unaffected and remains
+   `github.com/mge1512/pcd/tools/pcd-slice`.
+2. **No vendor tarball from `make dist`, no `Source1:` in the RPM.** The
+   template requires a companion vendor tarball "for languages with
+   dependency vendoring". The spec's DEPENDENCIES section declares no
+   dependency beyond the standard library, so `go mod vendor` produces
+   nothing and a vendor tarball would be empty. `make dist` emits the vendor
+   tarball if and only if a `vendor/` tree exists, and prints why it did not
+   otherwise; a `vendor` target is provided for the day a dependency
+   appears.
+3. **RPM `Version:` is the literal `0.1.1`, not `%(cat %{_sourcedir}/VERSION)`.**
+   The template allows either the `%(cat …)` form or injection at tarball
+   build time. Since `make dist` derives the tarball name and top-level
+   directory from `VERSION`, and `VERSION` ships inside the tarball rather
+   than beside it in `%_sourcedir`, the literal form is the one that
+   actually builds in OBS. The spec file carries a comment stating the
+   invariant.
+4. **No `Containerfile` and no `.pkgbuild`.** `OCI` and `PKG` are `supported`
+   OUTPUT-FORMATs, produced only when active in the resolved preset. No
+   preset is present at any layer and the spec declares Linux only in v1, so
+   neither was produced. This is compliance with, not deviation from, the
+   "No unsolicited deliverables" rule; it is listed here so the absence is
+   explicit.
 
-## Public API Surface
+## Dependency versions
 
-Recorded per `PUBLIC-API-SURFACE: recorded-in-report`. The next translation
-of this spec at Version 0.1.0 must preserve every entry below; it may add.
-
-### Module `github.com/mge1512/pcd/tools/pcd-slice` — package `main` (`cmd/pcd-slice/main.go`)
-
-```
-func main()
-var version string                                   // set via -ldflags -X main.version
-```
-
-No other symbol is exported from the entry point; `dispatch` and
-`parseOptions` are unexported by design (the entry point is CLI dispatch
-only).
-
-### Package `internal/pcd-slice` (`pcdslice`)
-
-Constants and variables:
-
-```
-const SpecSHA256 = "bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04"
-const ToolName   = "pcd-slice"
-var   Version    = "dev"
-const ExitClean, ExitFindings, ExitInvocation ExitCode          // 0, 1, 2
-const AssignUnassigned, AssignPreamble, AssignBehavior, AssignExcluded AssignKind
-```
-
-Types:
-
-```
-type ExitCode int
-type AssignKind uint8
-    func (k AssignKind) String() string
-type Assignment struct { Kind AssignKind; Behavior int }
-type Finding struct { Rule, File string; Line int; Message string }
-    func (f Finding) String() string
-type Options struct { Spec string; Hints []string; Out string; Stdout, Stderr io.Writer }
-type Source struct { Path string; Data []byte; SHA256 string; Lines []string }
-type Sources struct { Spec *Source; Hints []*Source }
-type TypeDef struct { Name string; Line, Start, End int; Text string }
-type Invariant struct { Start, End, BindLine int; Bindings []string; Targets []int }
-    func (i *Invariant) Global() bool
-type Example struct { Name string; Line, Start, End, Behavior int }
-type Behavior struct {
-        Name, FileName string
-        HeadingLine, Start, End int
-        Closure []string
-        Invariants []*Invariant
-        Examples []*Example
-        HintsBlocks []*HintsBlock
-    }
-type Spec struct {
-        Src *Source
-        Assign []Assignment
-        Behaviors []*Behavior
-        TypeDefs []*TypeDef
-        Invariants []*Invariant
-        Examples []*Example
-    }
-type HintsBlock struct { Heading string; Line, Start, End int; Behavior string; Doc *HintsDoc }
-type BadHeading struct { Line int; Text string }
-type HintsDoc struct { Src *Source; Blocks []*HintsBlock; PreambleLines []int; BadHeadings []BadHeading }
-    func (d *HintsDoc) BlockText(b *HintsBlock) []string
-    func (d *HintsDoc) PreambleText() []string
-type OutFile struct { Name string; Data []byte }
-type Outputs struct { Files []OutFile; Manifest OutFile; Provenance string; Bundles int }
-    func (o *Outputs) All() []OutFile
-type Analysis struct { Sources *Sources; Spec *Spec; Hints []*HintsDoc }
-    func (a *Analysis) BuildOutputs() *Outputs
-    func (a *Analysis) Findings() []Finding
-    func (a *Analysis) ProvenanceLine() string
-    func (a *Analysis) StaleFindings(out string) []Finding
-```
-
-Functions:
-
-```
-func Analyze(s *Sources) *Analysis
-func Check(o Options) int
-func List(o Options) int
-func Slice(o Options) int
-func LoadSource(path string) (*Source, error)
-func LoadSources(o Options) (*Sources, error)
-func ParseHints(src *Source, behaviors []string) *HintsDoc
-func ParseSpec(src *Source) *Spec
-func RemovePartialOutput()
-func SortFindings(fs []Finding)
-func SplitLines(data []byte) []string
-```
-
----
-
-## File inventory
-
-```
-VERSION
-go.mod
-Makefile
-LICENSE
-README.md
-pcd-slice.1.md
-pcd-slice.1
-pcd-slice.spec
-cmd/pcd-slice/main.go
-internal/pcd-slice/types.go
-internal/pcd-slice/source.go
-internal/pcd-slice/parse.go
-internal/pcd-slice/closure.go
-internal/pcd-slice/hints.go
-internal/pcd-slice/check.go
-internal/pcd-slice/render.go
-internal/pcd-slice/verbs.go
-internal/pcd-slice/write.go
-debian/control
-debian/changelog
-debian/rules
-debian/copyright
-independent_tests/claude-opus-5/helpers_test.go
-independent_tests/claude-opus-5/fixtures_test.go
-independent_tests/claude-opus-5/pcd_slice_test.go
-translation_report/translation-workflow.pikchr
-TRANSLATION_REPORT.md
-pcd-slice                     (compile-gate build output at BINARY-LOCATION: project-root)
-```
-
-Every source, test and packaging file embeds
-`sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04`
-in the comment syntax of its format. No artefact contains a placeholder
-value.
+No third-party dependency is declared, fabricated or required: `go.mod`
+contains the module line and `go 1.22` only. Nothing needs manual version
+verification before building.

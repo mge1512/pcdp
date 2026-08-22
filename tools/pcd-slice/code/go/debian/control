@@ -3,26 +3,25 @@ Section: devel
 Priority: optional
 Maintainer: Matthias G. Eckermann <pcd@mailbox.org>
 Build-Depends: debhelper-compat (= 13),
-               golang-go (>= 2:1.22),
-               pandoc,
-               make
+               golang-go (>= 2:1.22~),
+               pandoc
 Standards-Version: 4.6.2
-Homepage: https://github.com/mge1512/pcd/tools/pcd-slice
+Homepage: https://github.com/mge1512/pcd
 Rules-Requires-Root: no
+X-PCD-Spec-SHA256: c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f
 
 Package: pcd-slice
 Architecture: any
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: derive per-behavior translation bundles from a PCD specification
  pcd-slice computes the semantic form of a Post-Coding Development
- specification once, deterministically. For each behavior it emits one bundle
- holding that behavior's block, the examples that exercise it, the invariants
- bound to it, the hints written for it, and the names of the types it needs;
- plus one preamble holding what every bundle shares.
+ specification once, deterministically. For each behavior it emits one
+ bundle holding that behavior's block, the examples that exercise it, the
+ invariants bound to it, the hints written for it and the names of the types
+ it needs; plus one preamble holding what every bundle shares.
  .
- The source specification is never modified. Every emitted file carries the
- SHA-256 of the sources it was derived from, so a bundle is verifiable against
- the reproducibility tuple and stale bundles are detectable. The tool makes no
- network calls, reads no configuration file, and honours no environment
- variable.
-X-PCD-Spec-SHA256: bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+ The source specification is never modified. Every emitted markdown file
+ carries a provenance comment naming its sources and their SHA-256
+ checksums, so bundles are verifiable against the reproducibility tuple and
+ stale bundles are detectable. The tool reads no configuration file, honours
+ no environment variable and makes no network calls.

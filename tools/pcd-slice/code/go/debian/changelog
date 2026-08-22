@@ -1,6 +1,6 @@
-pcd-slice (0.1.0-1) unstable; urgency=medium
+pcd-slice (0.1.1-1) unstable; urgency=medium
 
-  * Initial release. Generated from pcd-slice.spec.md
-    sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+  * Initial release. Translated from pcd-slice.spec.md version 0.1.1,
+    spec sha256 c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f.
 
- -- Matthias G. Eckermann <pcd@mailbox.org>  Sat, 22 Aug 2026 10:00:00 +0200
+ -- Matthias G. Eckermann <pcd@mailbox.org>  Sat, 22 Aug 2026 23:40:00 +0000

@@ -1,10 +1,11 @@
 #!/usr/bin/make -f
-# generated from spec: pcd-slice.spec.md sha256:bb31cb27325030a420f0c1ffd8fd2660c9d9ee768f8b50f475360e451b8e6e04
+# generated from spec: pcd-slice.spec.md sha256:c200af55518fdfe36de34be5a2dfdcc822a16e31410c131bbd8390a6d7897c0f
 
 export DH_VERBOSE = 1
 export CGO_ENABLED = 0
-export GOFLAGS = -mod=vendor
 export GOCACHE = $(CURDIR)/.gocache
+export GOPATH = $(CURDIR)/.gopath
+export GOFLAGS = -trimpath
 
 VERSION := $(shell cat VERSION)
 
@@ -12,11 +13,11 @@ VERSION := $(shell cat VERSION)
 	dh $@
 
 override_dh_auto_build:
-	go build -ldflags "-X main.version=$(VERSION)" -o pcd-slice ./cmd/pcd-slice
+	go build -ldflags "-s -w -X main.version=$(VERSION)" -o pcd-slice ./cmd/pcd-slice
 	pandoc pcd-slice.1.md -s -t man -o pcd-slice.1
 
 override_dh_auto_test:
-	./pcd-slice version
+	go test ./independent_tests/claude-opus-5/...
 
 override_dh_auto_install:
 	install -D -m 0755 pcd-slice debian/pcd-slice/usr/bin/pcd-slice
@@ -24,4 +25,4 @@ override_dh_auto_install:
 
 override_dh_auto_clean:
 	rm -f pcd-slice pcd-slice.1
-	rm -rf $(CURDIR)/.gocache
+	rm -rf .gocache .gopath
