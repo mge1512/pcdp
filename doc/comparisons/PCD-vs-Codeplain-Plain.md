@@ -1,9 +1,9 @@
 # PCD vs Codeplain / Plain
 
-Version: 2026.06.26.01
-Date:    2026-06-26
+Version: 2026.09.01.01
+Date:    2026-09-01
 Author:  Matthias G. Eckermann <pcd@mailbox.org>
-Status:  Draft for internal review
+Status:  Draft, intended for public use
 Scope:   doc/comparisons/
 
 ---
@@ -95,8 +95,8 @@ overlap is substantial:
   the bug back to the spec and editing only the spec.)
 - When an external system changes and breaks an integration, the response is
   to regenerate from the same spec - the spec did not break, only the code
-  did. This is exactly the METEORA argument for migration and third-party
-  interfaces.
+  did. This is the same argument PCD makes for migration tooling and for
+  components that sit behind third-party interfaces.
 - The code-generation step does not require a frontier model. Codeplain
   uses Gemini Flash for rendering; PCD emits declarative spec sections
   deterministically and uses the LLM only for procedural BEHAVIOR bodies.
@@ -319,6 +319,11 @@ alone:
 ---
 
 ## Changelog
+
+- 2026.09.01.01 - Prepared for public use. Removed a named reference to a
+  third-party engagement project in section 3 and restated the point in
+  general terms; no argument changed. Status changed from internal review to
+  public. No other content edits.
 
 - 2026.06.26.01 - Initial draft. Based on The New Stack article (2026-06-25),
   plainlang.org, and the plain-forge repository. Differentiators in section

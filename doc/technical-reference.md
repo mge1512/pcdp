@@ -1,9 +1,9 @@
 # PCD Technical Reference
 
 **Status:** Draft
-**Version:** 0.5.0
+**Version:** 0.5.1
 **Author:** Matthias G. Eckermann <pcd@mailbox.org>
-**Date:** 2026-07-07
+**Date:** 2026-09-01
 **License:** CC-BY-4.0
 
 This document explains the architectural and process decisions behind the
@@ -1080,6 +1080,30 @@ are language-neutral by rule. The paradigms are complementary: SPDD
 targets enterprise IT delivery; PCD targets regulated and long-lived
 components.
 
+Spec Kitty (Robert Douglass, 2026) is an open-source workflow and governance
+layer for AI coding agents, originated as a fork of GitHub Spec Kit. It is
+the one entry in this section that rejects PCD's central premise rather than
+converging on it, and its author argues the rejection in print: the code is
+what compiles and what runs, so the code is the source of truth for what the
+software is, and the specification is a change request, a decision ledger and
+a guardrail for where the software is going. Every other difference follows.
+The merged code stays the audited artefact; provenance is the git history and
+the decision ledger rather than an attestation of derivation; the target
+language is a property of the existing repository, so language neutrality
+does not arise. The cross-review instinct is shared but placed differently:
+Spec Kitty's reviewer reads a diff and may patch it, while PCD's second model
+authors an independent test suite from EXAMPLES before the translator writes
+anything and may only propose changes to specification, hints, template or
+prompt. On certification both routes are open and distribute the evidence
+differently - hand-maintained code with an agent in the development
+environment is the provable arrangement whose cost is that every change
+re-enters
+code-level review scope, whereas PCD trades that review effort for provenance
+and pipeline evidence. The paradigms address different starting conditions:
+Spec Kitty answers the brownfield case where behaviour cannot be written down
+in full, which is where PCD has no answer. Full treatment in
+`doc/comparisons/PCD-vs-Spec-Kitty.md`.
+
 What is genuinely novel: natural language as the translator artifact (structured
 Markdown, not a programming language or formal language); deployment templates
 as a first-class concept (target language is not a human decision); formal
@@ -1321,6 +1345,8 @@ ends over the same engine behaviour.
 - Quint2026: Gabriela Moreira et al., Quint — an executable specification
   language for reliable systems. Informal Systems, https://quint.sh/, 2026.
   Open-source language: https://github.com/informalsystems/quint
+- Douglass2026: Robert Douglass, "Why I Built Spec Kitty". Medium,
+  27 April 2026. Project: https://github.com/Priivacy-ai/spec-kitty
 - REUSE: FSFE REUSE Specification v3.3 — standardised method for declaring
   copyright and licensing in software projects using SPDX identifiers.
   https://reuse.software/
