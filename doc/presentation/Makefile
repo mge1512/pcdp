@@ -1,10 +1,10 @@
 default:	pcd-introduction.pdf 
 
-pictures=	pcd-icon-green.png pcd-logo-green.png 								\
-		pcd-workflow-pcd.png pcd-workflow.png pcd-workflow-today.png pcd-resolution.png 			\
+pictures=	pcd-icon-green.png pcd-logo-green.png 									\
+		pcd-workflow-full.png pcd-workflow-pcd.png pcd-workflow.png pcd-workflow-today.png pcd-resolution.png 	\
 		pcd-spec-sections.png pcd-audit-bundle.png pcd-translation-phases.png pcd-mcp-server.png
 
-pcd-introduction.md: pcd-intro-00-header.md pcd-intro-10-overview.md pcd-intro-50-technical.md pcd-intro-90-appendix.md
+pcd-introduction.md: pcd-intro-00-header.md pcd-intro-10-overview.md pcd-intro-50-technical.md pcd-intro-60-update-2026-09.md pcd-intro-90-appendix.md 
 	cat $^ > $@
 
 pcd-introduction.pdf: pcd-introduction.tex $(pictures)

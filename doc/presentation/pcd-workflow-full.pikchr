@@ -1,0 +1,22 @@
+# PCD workflow with the current toolchain - for slides
+# Spec -> pcd-lint -> pcd-slice -> Template -> Translator + Test-Author -> Audit Bundle
+# Feedback: output wrong? fix the spec - never the code.
+
+SP: box "Spec" "+ hints" fit fill 0xe8f7f0 color 0x30ba78
+arrow color 0x30ba78
+LI: box "pcd-lint" fit ht SP.ht fill 0xfff8e8 color 0x30ba78
+arrow "valid" above color 0x30ba78
+SL: box "pcd-slice" fit ht SP.ht fill 0xe8f0fe color 0x30ba78
+arrow "bundles" above color 0x30ba78
+TP: box "Template" fit ht SP.ht fill 0xe8f7f0 color 0x30ba78
+arrow "language" above color 0x30ba78
+LL: box "Translator" "Test-Author" fit fill 0xfce8f4 color 0x30ba78
+arrow color 0x30ba78
+AB: box "Audit" "Bundle" fit fill 0xfce8ec color 0x30ba78
+
+# Feedback loop: regenerate from the spec, never patch the code
+arrow dashed color 0xcc3333 from AB.s down 0.30in \
+      then left until even with SP.s \
+      then up 0.30in
+"output wrong? fix the spec - never the code" small color 0xcc3333 \
+      at (TP.x, AB.y - 0.62in)

@@ -1,0 +1,20 @@
+%% PCD workflow with the current toolchain - same content as pcd-workflow-full.pikchr
+flowchart LR
+    SP["Spec<br/>+ hints"] --> LI["pcd-lint"]
+    LI -- valid --> SL["pcd-slice"]
+    SL -- bundles --> TP["Template"]
+    TP -- language --> TR["Translator<br/>Test-Author"]
+    TR --> AB["Audit<br/>Bundle"]
+    AB -. "output wrong? fix the spec - never the code" .-> SP
+
+    classDef mint fill:#e8f7f0,stroke:#30ba78,color:#30ba78;
+    classDef warm fill:#fff8e8,stroke:#30ba78,color:#30ba78;
+    classDef blue fill:#e8f0fe,stroke:#30ba78,color:#30ba78;
+    classDef pink fill:#fce8f4,stroke:#30ba78,color:#30ba78;
+    classDef rose fill:#fce8ec,stroke:#30ba78,color:#30ba78;
+    class SP,TP mint
+    class LI warm
+    class SL blue
+    class TR pink
+    class AB rose
+    linkStyle 5 stroke:#cc3333,color:#cc3333;
